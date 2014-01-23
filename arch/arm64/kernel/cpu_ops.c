@@ -25,27 +25,20 @@
 #include <asm/cpu_ops.h>
 #include <asm/smp_plat.h>
 
-extern const struct cpu_operations smp_spin_table_ops;
-extern const struct cpu_operations cpu_psci_ops;
+const struct cpu_operations *cpu_ops[NR_CPUS];
+extern struct cpu_operations *__cpu_method_of_table_begin[];
+extern struct cpu_operations *__cpu_method_of_table_end[];
 
-const struct cpu_operations *cpu_ops[NR_CPUS] __ro_after_init;
-
-static const struct cpu_operations *supported_cpu_ops[] __initconst = {
-	&smp_spin_table_ops,
-	&cpu_psci_ops,
-	NULL,
-};
-
-static const struct cpu_operations * __init cpu_get_ops(const char *name)
+const struct cpu_operations * __init cpu_get_ops(const char *name)
 {
-	const struct cpu_operations **ops = supported_cpu_ops;
+	const struct cpu_operations **start = (void *)__cpu_method_of_table_begin;
+	const struct cpu_operations **end = (void *)__cpu_method_of_table_end;
 
-	while (*ops) {
-		if (!strcmp(name, (*ops)->name))
-			return *ops;
-
-		ops++;
-	}
+	while (start < end) {
+		if (!strcmp((*start)->name, name))
+			return *start;
+		start++;
+	};
 
 	return NULL;
 }
