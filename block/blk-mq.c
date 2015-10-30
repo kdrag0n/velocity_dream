@@ -644,29 +644,17 @@ static void blk_mq_check_expired(struct blk_mq_hw_ctx *hctx,
 	}
 }
 
-static void blk_mq_rq_timer(unsigned long priv)
+static void blk_mq_timeout_work(struct work_struct *work)
 {
-	struct request_queue *q = (struct request_queue *)priv;
+	struct request_queue *q =
+		container_of(work, struct request_queue, timeout_work);
 	struct blk_mq_timeout_data data = {
 		.next		= 0,
 		.next_set	= 0,
 	};
 	int i;
 
-	/* A deadlock might occur if a request is stuck requiring a
-	 * timeout at the same time a queue freeze is waiting
-	 * completion, since the timeout code would not be able to
-	 * acquire the queue reference here.
-	 *
-	 * That's why we don't use blk_queue_enter here; instead, we use
-	 * percpu_ref_tryget directly, because we need to be able to
-	 * obtain a reference even in the short window between the queue
-	 * starting to freeze, by dropping the first reference in
-	 * blk_mq_freeze_queue_start, and the moment the last request is
-	 * consumed, marked by the instant q_usage_counter reaches
-	 * zero.
-	 */
-	if (!percpu_ref_tryget(&q->q_usage_counter))
+	if (blk_queue_enter(q, true))
 		return;
 
 	blk_mq_queue_tag_busy_iter(q, blk_mq_check_expired, &data);
@@ -683,6 +671,7 @@ static void blk_mq_rq_timer(unsigned long priv)
 				blk_mq_tag_idle(hctx);
 		}
 	}
+	blk_queue_exit(q);
 }
 
 /*
@@ -2166,7 +2155,7 @@ struct request_queue *blk_mq_init_allocated_queue(struct blk_mq_tag_set *set,
 	if (!q->nr_hw_queues)
 		goto err_hctxs;
 
-	setup_timer(&q->timeout, blk_mq_rq_timer, (unsigned long) q);
+	INIT_WORK(&q->timeout_work, blk_mq_timeout_work);
 	blk_queue_rq_timeout(q, set->timeout ? set->timeout : 30 * HZ);
 
 	q->nr_queues = nr_cpu_ids;
