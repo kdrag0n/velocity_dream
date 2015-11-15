@@ -290,7 +290,9 @@ int stop_two_cpus(unsigned int cpu1, unsigned int cpu2, cpu_stop_fn_t fn, void *
 {
 	struct cpu_stop_done done;
 	struct cpu_stop_work work1, work2;
-	struct multi_stop_data msdata = {
+	struct multi_stop_data msdata;
+
+	msdata = (struct multi_stop_data){
 		.fn = fn,
 		.data = arg,
 		.num_threads = 2,
@@ -308,13 +310,12 @@ int stop_two_cpus(unsigned int cpu1, unsigned int cpu2, cpu_stop_fn_t fn, void *
 
 	if (cpu1 > cpu2)
 		swap(cpu1, cpu2);
-	if (cpu_stop_queue_two_works(cpu1, &work1, cpu2, &work2)) {
-		preempt_enable();
+	if (cpu_stop_queue_two_works(cpu1, &work1, cpu2, &work2))
 		return -ENOENT;
-	}
 
 	wait_for_completion(&done.completion);
-	return done.executed ? done.ret : -ENOENT;
+	WARN_ON(!done.executed);
+	return done.ret;
 }
 
 /**
