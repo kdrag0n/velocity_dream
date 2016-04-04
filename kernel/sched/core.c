@@ -2111,7 +2111,7 @@ try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags)
 	 * This ensures that tasks getting woken will be fully ordered against
 	 * their previous state and preserve Program Order.
 	 */
-	smp_cond_acquire(!p->on_cpu);
+	smp_cond_load_acquire(&p->on_cpu, !VAL);
 
 	p->sched_contributes_to_load = !!task_contributes_to_load(p);
 	p->state = TASK_WAKING;
