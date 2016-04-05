@@ -2782,7 +2782,7 @@ schedtune_margin(unsigned long signal, unsigned long boost)
 	 *   M = B * (SCHED_LOAD_SCALE - S)
 	 * The obtained M could be used by the caller to "boost" S.
 	 */
-	margin  = SCHED_LOAD_SCALE - signal;
+	margin  = scale_load_down(NICE_0_LOAD) - signal;
 	margin *= boost;
 
 	/*
@@ -8670,7 +8670,7 @@ static inline void calculate_imbalance(struct lb_env *env, struct sd_lb_stats *s
 	if (busiest->group_type == group_overloaded &&
 	    local->group_type   == group_overloaded) {
 		load_above_capacity = busiest->sum_nr_running *
-					SCHED_LOAD_SCALE;
+				      scale_load_down(NICE_0_LOAD);
 		if (load_above_capacity > busiest->group_capacity)
 			load_above_capacity -= busiest->group_capacity;
 		else
