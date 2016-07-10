@@ -566,6 +566,9 @@ extern struct cpufreq_governor cpufreq_gov_bioshock;
 #elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_CULTIVATION)
 extern struct cpufreq_governor cpufreq_gov_cultivation;
 #define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_cultivation)
+#elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_CHILL)
+extern struct cpufreq_governor cpufreq_gov_chill;
+#define CPUFREQ_DEFAULT_GOVERNOR (&cpufreq_gov_chill)
 #endif
 
 /*********************************************************************
