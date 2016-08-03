@@ -246,10 +246,6 @@ int scsi_add_host_with_dma(struct Scsi_Host *shost, struct device *dev,
 
 	shost->dma_dev = dma_dev;
 
-	error = device_add(&shost->shost_gendev);
-	if (error)
-		goto out_destroy_freelist;
-
 	/*
 	 * Increase usage count temporarily here so that calling
 	 * scsi_autopm_put_host() will trigger runtime idle if there is
@@ -258,6 +254,10 @@ int scsi_add_host_with_dma(struct Scsi_Host *shost, struct device *dev,
 	pm_runtime_get_noresume(&shost->shost_gendev);
 	pm_runtime_set_active(&shost->shost_gendev);
 	pm_runtime_enable(&shost->shost_gendev);
+
+	error = device_add(&shost->shost_gendev);
+	if (error)
+		goto out_destroy_freelist;
 
 	scsi_host_set_state(shost, SHOST_RUNNING);
 	get_device(shost->shost_gendev.parent);
@@ -306,6 +306,10 @@ int scsi_add_host_with_dma(struct Scsi_Host *shost, struct device *dev,
  out_del_gendev:
 	device_del(&shost->shost_gendev);
  out_destroy_freelist:
+	device_disable_async_suspend(&shost->shost_gendev);
+	pm_runtime_disable(&shost->shost_gendev);
+	pm_runtime_set_suspended(&shost->shost_gendev);
+	pm_runtime_put_noidle(&shost->shost_gendev);
 	scsi_destroy_command_freelist(shost);
  out_destroy_tags:
 	if (shost_use_blk_mq(shost))
