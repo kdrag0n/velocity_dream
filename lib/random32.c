@@ -38,6 +38,7 @@
 #include <linux/random.h>
 #include <linux/sched.h>
 #include <asm/unaligned.h>
+#include <linux/timer.h>
 
 #ifdef CONFIG_RANDOM32_SELFTEST
 static void __init prandom_state_selftest(void);
@@ -233,7 +234,6 @@ static void __prandom_timer(unsigned long dontcare)
 
 static void __init __prandom_start_seed_timer(void)
 {
-	set_timer_slack(&seed_timer, HZ);
 	seed_timer.expires = jiffies + msecs_to_jiffies(40 * MSEC_PER_SEC);
 	add_timer(&seed_timer);
 }
