@@ -23,6 +23,7 @@
 #include <linux/swap.h>
 #include <linux/init.h>
 #include <linux/bootmem.h>
+#include <linux/cache.h>
 #include <linux/mman.h>
 #include <linux/nodemask.h>
 #include <linux/initrd.h>
@@ -45,8 +46,8 @@
 
 #include "mm.h"
 
-phys_addr_t memstart_addr __read_mostly = 0;
-phys_addr_t arm64_dma_phys_limit __read_mostly;
+phys_addr_t memstart_addr __ro_after_init = 0;
+phys_addr_t arm64_dma_phys_limit __ro_after_init;
 
 #ifdef CONFIG_BLK_DEV_INITRD
 static int __init early_initrd(char *p)
