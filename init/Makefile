@@ -2,6 +2,8 @@
 # Makefile for the linux kernel.
 #
 
+ccflags-y := -fno-function-sections -fno-data-sections
+
 obj-y                          := main.o version.o mounts.o
 obj-$(CONFIG_RKP)              += _vmm.o vmm.o ld.o
 obj-$(CONFIG_RKP_CFP_JOPP)     += rkp_cfp.o
