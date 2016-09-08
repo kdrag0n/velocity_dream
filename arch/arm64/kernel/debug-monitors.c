@@ -45,15 +45,13 @@ static void mdscr_write(u32 mdscr)
 {
 	unsigned long flags;
 	local_dbg_save(flags);
-	asm volatile("msr mdscr_el1, %0" :: "r" (mdscr));
+	write_sysreg(mdscr, mdscr_el1);
 	local_dbg_restore(flags);
 }
 
 static u32 mdscr_read(void)
 {
-	u32 mdscr;
-	asm volatile("mrs %0, mdscr_el1" : "=r" (mdscr));
-	return mdscr;
+	return read_sysreg(mdscr_el1);
 }
 
 /*
@@ -151,7 +149,7 @@ void restore_debug_monitors(void)
  */
 static void clear_os_lock(void *unused)
 {
-	asm volatile("msr oslar_el1, %0" : : "r" (0));
+	write_sysreg(0, oslar_el1);
 }
 
 /*
