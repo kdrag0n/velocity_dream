@@ -552,4 +552,7 @@ config ARCH_HAS_PMEM_API
 config ARCH_HAS_MMIO_FLUSH
 	bool
 
+config SBITMAP
+	bool
+
 endmenu
