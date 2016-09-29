@@ -633,12 +633,12 @@ struct devfreq *devfreq_add_device(struct device *dev,
 	return devfreq;
 err_init:
 	list_del(&devfreq->node);
+	mutex_unlock(&devfreq_list_lock);
 #ifdef CONFIG_EXYNOS_DVFS_MANAGER
 	unregister_exynos_dm_freq_scaler(dm_type);
 err_dm_scaler:
 err_dm_type:
 #endif
-	mutex_unlock(&devfreq_list_lock);
 
 	device_unregister(&devfreq->dev);
 	kfree(devfreq);
