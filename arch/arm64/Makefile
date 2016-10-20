@@ -11,7 +11,7 @@
 # Copyright (C) 1995-2001 by Russell King
 
 ifeq ($(CONFIG_RELOCATABLE_KERNEL), y)
-LDFLAGS_vmlinux	:=-p --no-undefined -X -pie -Bsymbolic
+LDFLAGS_vmlinux	:=-p --no-undefined -X -pie -shared -Bsymbolic
 else
 LDFLAGS_vmlinux	:=-p --no-undefined -X
 endif
