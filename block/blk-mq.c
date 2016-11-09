@@ -23,6 +23,7 @@
 #include <linux/delay.h>
 #include <linux/crash_dump.h>
 #include <linux/prefetch.h>
+#include <linux/wbt.h>
 
 #include <trace/events/block.h>
 
@@ -30,6 +31,7 @@
 #include "blk.h"
 #include "blk-mq.h"
 #include "blk-mq-tag.h"
+#include "blk-stat.h"
 
 static DEFINE_MUTEX(all_q_mutex);
 static LIST_HEAD(all_q_list);
@@ -277,6 +279,8 @@ static void __blk_mq_free_request(struct blk_mq_hw_ctx *hctx,
 
 	if (rq->cmd_flags & REQ_MQ_INFLIGHT)
 		atomic_dec(&hctx->nr_active);
+
+	wbt_done(q->rq_wb, &rq->wb_stat);
 	rq->cmd_flags = 0;
 
 	clear_bit(REQ_ATOM_STARTED, &rq->atomic_flags);
@@ -308,6 +312,7 @@ inline void __blk_mq_end_request(struct request *rq, int error)
 	blk_account_io_done(rq);
 
 	if (rq->end_io) {
+		wbt_done(rq->q->rq_wb, &rq->wb_stat);
 		rq->end_io(rq, error);
 	} else {
 		if (unlikely(blk_bidi_rq(rq)))
@@ -375,9 +380,18 @@ static void blk_mq_ipi_complete_request(struct request *rq)
 	put_cpu_light();
 }
 
+static void blk_mq_stat_add(struct request *rq)
+{
+	struct blk_rq_stat *stat = &rq->mq_ctx->stat[rq_data_dir(rq)];
+
+	blk_stat_add(stat, rq);
+}
+
 static void __blk_mq_complete_request(struct request *rq)
 {
 	struct request_queue *q = rq->q;
+
+	blk_mq_stat_add(rq);
 
 	if (!q->softirq_done_fn)
 		blk_mq_end_request(rq, rq->errors);
@@ -422,6 +436,8 @@ void blk_mq_start_request(struct request *rq)
 	if (unlikely(blk_bidi_rq(rq)))
 		rq->next_rq->resid_len = blk_rq_bytes(rq->next_rq);
 
+	wbt_issue(q->rq_wb, &rq->wb_stat);
+
 	blk_add_timer(rq);
 
 	/*
@@ -457,6 +473,7 @@ static void __blk_mq_requeue_request(struct request *rq)
 	struct request_queue *q = rq->q;
 
 	trace_block_rq_requeue(q, rq);
+	wbt_requeue(q->rq_wb, &rq->wb_stat);
 
 	if (test_and_clear_bit(REQ_ATOM_STARTED, &rq->atomic_flags)) {
 		if (q->dma_drain_size && blk_rq_bytes(rq))
@@ -1334,6 +1351,7 @@ static blk_qc_t blk_mq_make_request(struct request_queue *q, struct bio *bio)
 	struct blk_plug *plug;
 	struct request *same_queue_rq = NULL;
 	blk_qc_t cookie;
+	unsigned int wb_acct;
 
 	blk_queue_bounce(q, &bio);
 
@@ -1348,9 +1366,15 @@ static blk_qc_t blk_mq_make_request(struct request_queue *q, struct bio *bio)
 	    blk_attempt_plug_merge(q, bio, &request_count, &same_queue_rq))
 		return BLK_QC_T_NONE;
 
+	wb_acct = wbt_wait(q->rq_wb, bio->bi_rw, NULL);
+
 	rq = blk_mq_map_request(q, bio, &data);
-	if (unlikely(!rq))
+	if (unlikely(!rq)) {
+		__wbt_done(q->rq_wb, wb_acct);
 		return BLK_QC_T_NONE;
+	}
+
+	wbt_track(&rq->wb_stat, wb_acct);
 
 	cookie = request_to_qc_t(data.hctx, rq);
 
@@ -1434,6 +1458,7 @@ static blk_qc_t blk_sq_make_request(struct request_queue *q, struct bio *bio)
 	struct blk_mq_alloc_data data;
 	struct request *rq;
 	blk_qc_t cookie;
+	unsigned int wb_acct;
 
 	blk_queue_bounce(q, &bio);
 
@@ -1450,9 +1475,15 @@ static blk_qc_t blk_sq_make_request(struct request_queue *q, struct bio *bio)
 	} else
 		request_count = blk_plug_queued_count(q);
 
+	wb_acct = wbt_wait(q->rq_wb, bio->bi_rw, NULL);
+
 	rq = blk_mq_map_request(q, bio, &data);
-	if (unlikely(!rq))
+	if (unlikely(!rq)) {
+		__wbt_done(q->rq_wb, wb_acct);
 		return BLK_QC_T_NONE;
+	}
+
+	wbt_track(&rq->wb_stat, wb_acct);
 
 	cookie = request_to_qc_t(data.hctx, rq);
 
@@ -1850,6 +1881,8 @@ static void blk_mq_init_cpu_queues(struct request_queue *q,
 		spin_lock_init(&__ctx->lock);
 		INIT_LIST_HEAD(&__ctx->rq_list);
 		__ctx->queue = q;
+		blk_stat_init(&__ctx->stat[0]);
+		blk_stat_init(&__ctx->stat[1]);
 
 		hctx = q->mq_ops->map_queue(q, i);
 
@@ -2215,6 +2248,9 @@ void blk_mq_free_queue(struct request_queue *q)
 	mutex_lock(&all_q_mutex);
 	list_del_init(&q->all_q_node);
 	mutex_unlock(&all_q_mutex);
+
+	wbt_exit(q->rq_wb);
+	q->rq_wb = NULL;
 
 	blk_mq_del_queue_tag_set(q);
 

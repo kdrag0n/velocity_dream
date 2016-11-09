@@ -556,4 +556,7 @@ config ARCH_HAS_MMIO_FLUSH
 config SBITMAP
 	bool
 
+config WBT
+	bool
+
 endmenu

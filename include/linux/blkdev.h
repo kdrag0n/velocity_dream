@@ -23,6 +23,7 @@
 #include <linux/rcupdate.h>
 #include <linux/percpu-refcount.h>
 #include <linux/scatterlist.h>
+#include <linux/wbt.h>
 
 struct module;
 struct scsi_ioctl_command;
@@ -36,6 +37,7 @@ struct bsg_job;
 struct blkcg_gq;
 struct blk_flush_queue;
 struct pr_ops;
+struct rq_wb;
 
 #define BLKDEV_MIN_RQ	4
 #ifdef CONFIG_ZEN_INTERACTIVE
@@ -160,6 +162,7 @@ struct request {
 	struct gendisk *rq_disk;
 	struct hd_struct *part;
 	unsigned long start_time;
+	struct wb_issue_stat wb_stat;
 #ifdef CONFIG_BLK_CGROUP
 	struct request_list *rl;		/* rl this rq is alloced from */
 	unsigned long long start_time_ns;
@@ -297,6 +300,8 @@ struct request_queue {
 	int			nr_rqs[2];	/* # allocated [a]sync rqs */
 	int			nr_rqs_elvpriv;	/* # allocated rqs w/ elvpriv */
 
+	struct rq_wb		*rq_wb;
+
 	/*
 	 * If blkcg is not used, @q->root_rl serves all requests.  If blkcg
 	 * is used, root blkg allocates from @q->root_rl and all other
@@ -321,6 +326,8 @@ struct request_queue {
 	/* sw queues */
 	struct blk_mq_ctx __percpu	*queue_ctx;
 	unsigned int		nr_queues;
+
+	unsigned int		queue_depth;
 
 	/* hw dispatch queues */
 	struct blk_mq_hw_ctx	**queue_hw_ctx;
@@ -407,6 +414,9 @@ struct request_queue {
 
 	unsigned int		nr_sorted;
 	unsigned int		in_flight[2];
+
+	struct blk_rq_stat	rq_stats[2];
+
 	unsigned long long	in_flight_time;
 	ktime_t			in_flight_stamp;
 	/*
@@ -441,8 +451,6 @@ struct request_queue {
 	/*
 	 * for flush operations
 	 */
-	unsigned int		flush_flags;
-	unsigned int		flush_not_queueable:1;
 	struct blk_flush_queue	*fq;
 	unsigned long		flush_ios;
 
@@ -501,6 +509,9 @@ struct request_queue {
 #define QUEUE_FLAG_NO_SG_MERGE 21	/* don't attempt to merge SG segments*/
 #define QUEUE_FLAG_POLL	       22	/* IO polling enabled if set */
 #define QUEUE_FLAG_FAST        23	/* fast block device (e.g. ram based) */
+#define QUEUE_FLAG_WC	       24	/* Write back caching */
+#define QUEUE_FLAG_FUA	       25	/* device supports FUA writes */
+#define QUEUE_FLAG_FLUSH_NQ    26	/* flush not queueuable */
 #ifdef CONFIG_JOURNAL_DATA_TAG
 #define QUEUE_FLAG_JOURNAL_TAG     31      /* supports JOURNAL_DATA_TAG */
 #endif
@@ -694,6 +705,14 @@ static inline bool blk_write_same_mergeable(struct bio *a, struct bio *b)
 		return true;
 
 	return false;
+}
+
+static inline unsigned int blk_queue_depth(struct request_queue *q)
+{
+	if (q->queue_depth)
+		return q->queue_depth;
+
+	return q->nr_requests;
 }
 
 /*
@@ -1011,6 +1030,7 @@ extern void blk_limits_io_min(struct queue_limits *limits, unsigned int min);
 extern void blk_queue_io_min(struct request_queue *q, unsigned int min);
 extern void blk_limits_io_opt(struct queue_limits *limits, unsigned int opt);
 extern void blk_queue_io_opt(struct request_queue *q, unsigned int opt);
+extern void blk_set_queue_depth(struct request_queue *q, unsigned int depth);
 extern void blk_set_default_limits(struct queue_limits *lim);
 extern void blk_set_stacking_limits(struct queue_limits *lim);
 extern int blk_stack_limits(struct queue_limits *t, struct queue_limits *b,
@@ -1035,8 +1055,8 @@ extern void blk_queue_update_dma_alignment(struct request_queue *, int);
 extern void blk_queue_softirq_done(struct request_queue *, softirq_done_fn *);
 extern void blk_queue_rq_timed_out(struct request_queue *, rq_timed_out_fn *);
 extern void blk_queue_rq_timeout(struct request_queue *, unsigned int);
-extern void blk_queue_flush(struct request_queue *q, unsigned int flush);
 extern void blk_queue_flush_queueable(struct request_queue *q, bool queueable);
+extern void blk_queue_write_cache(struct request_queue *q, bool enabled, bool fua);
 extern struct backing_dev_info *blk_get_backing_dev_info(struct block_device *bdev);
 
 extern int blk_rq_map_sg(struct request_queue *, struct request *, struct scatterlist *);
@@ -1394,7 +1414,7 @@ static inline unsigned int block_size(struct block_device *bdev)
 
 static inline bool queue_flush_queueable(struct request_queue *q)
 {
-	return !q->flush_not_queueable;
+	return !test_bit(QUEUE_FLAG_FLUSH_NQ, &q->queue_flags);
 }
 
 typedef struct {struct page *v;} Sector;
