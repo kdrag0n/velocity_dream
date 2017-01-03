@@ -100,23 +100,19 @@ EXPORT_SYMBOL(scsi_sd_pm_domain);
 
 struct scsi_host_cmd_pool {
 	struct kmem_cache	*cmd_slab;
-	struct kmem_cache	*sense_slab;
 	unsigned int		users;
 	char			*cmd_name;
-	char			*sense_name;
 	unsigned int		slab_flags;
 	gfp_t			gfp_mask;
 };
 
 static struct scsi_host_cmd_pool scsi_cmd_pool = {
 	.cmd_name	= "scsi_cmd_cache",
-	.sense_name	= "scsi_sense_cache",
 	.slab_flags	= SLAB_HWCACHE_ALIGN,
 };
 
 static struct scsi_host_cmd_pool scsi_cmd_dma_pool = {
 	.cmd_name	= "scsi_cmd_cache(DMA)",
-	.sense_name	= "scsi_sense_cache(DMA)",
 	.slab_flags	= SLAB_HWCACHE_ALIGN|SLAB_CACHE_DMA,
 	.gfp_mask	= __GFP_DMA,
 };
@@ -138,7 +134,7 @@ scsi_host_free_command(struct Scsi_Host *shost, struct scsi_cmnd *cmd)
 
 	if (cmd->prot_sdb)
 		kmem_cache_free(scsi_sdb_cache, cmd->prot_sdb);
-	kmem_cache_free(pool->sense_slab, cmd->sense_buffer);
+	scsi_free_sense_buffer(shost, cmd->sense_buffer);
 	kmem_cache_free(pool->cmd_slab, cmd);
 }
 
@@ -174,7 +170,7 @@ scsi_host_alloc_command(struct Scsi_Host *shost, gfp_t gfp_mask)
 	return cmd;
 
 fail_free_sense:
-	kmem_cache_free(pool->sense_slab, cmd->sense_buffer);
+	scsi_free_sense_buffer(shost, cmd->sense_buffer);
 fail_free_cmd:
 	kmem_cache_free(pool->cmd_slab, cmd);
 fail:
@@ -304,7 +300,6 @@ scsi_find_host_cmd_pool(struct Scsi_Host *shost)
 static void
 scsi_free_host_cmd_pool(struct scsi_host_cmd_pool *pool)
 {
-	kfree(pool->sense_name);
 	kfree(pool->cmd_name);
 	kfree(pool);
 }
@@ -320,8 +315,7 @@ scsi_alloc_host_cmd_pool(struct Scsi_Host *shost)
 		return NULL;
 
 	pool->cmd_name = kasprintf(GFP_KERNEL, "%s_cmd", hostt->proc_name);
-	pool->sense_name = kasprintf(GFP_KERNEL, "%s_sense", hostt->proc_name);
-	if (!pool->cmd_name || !pool->sense_name) {
+	if (!pool->cmd_name) {
 		scsi_free_host_cmd_pool(pool);
 		return NULL;
 	}
@@ -362,12 +356,6 @@ scsi_get_host_cmd_pool(struct Scsi_Host *shost)
 						   pool->slab_flags, NULL);
 		if (!pool->cmd_slab)
 			goto out_free_pool;
-
-		pool->sense_slab = kmem_cache_create(pool->sense_name,
-						     SCSI_SENSE_BUFFERSIZE, 0,
-						     pool->slab_flags, NULL);
-		if (!pool->sense_slab)
-			goto out_free_slab;
 	}
 
 	pool->users++;
@@ -376,8 +364,6 @@ out:
 	mutex_unlock(&host_cmd_pool_mutex);
 	return retval;
 
-out_free_slab:
-	kmem_cache_destroy(pool->cmd_slab);
 out_free_pool:
 	if (hostt->cmd_size) {
 		scsi_free_host_cmd_pool(pool);
@@ -403,7 +389,6 @@ static void scsi_put_host_cmd_pool(struct Scsi_Host *shost)
 
 	if (!--pool->users) {
 		kmem_cache_destroy(pool->cmd_slab);
-		kmem_cache_destroy(pool->sense_slab);
 		if (hostt->cmd_size) {
 			scsi_free_host_cmd_pool(pool);
 			hostt->cmd_pool = NULL;
@@ -544,7 +529,7 @@ void scsi_log_completion(struct scsi_cmnd *cmd, int disposition)
 void scsi_cmd_get_serial(struct Scsi_Host *host, struct scsi_cmnd *cmd)
 {
 	cmd->serial_number = host->cmd_serial_number++;
-	if (cmd->serial_number == 0) 
+	if (cmd->serial_number == 0)
 		cmd->serial_number = host->cmd_serial_number++;
 }
 EXPORT_SYMBOL(scsi_cmd_get_serial);

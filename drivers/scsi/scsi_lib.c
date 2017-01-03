@@ -73,6 +73,58 @@ static struct scsi_host_sg_pool scsi_sg_pools[] = {
 #undef SP
 
 struct kmem_cache *scsi_sdb_cache;
+static struct kmem_cache *scsi_sense_cache;
+static struct kmem_cache *scsi_sense_isadma_cache;
+static DEFINE_MUTEX(scsi_sense_cache_mutex);
+
+static inline struct kmem_cache *
+scsi_select_sense_cache(struct Scsi_Host *shost)
+{
+	return shost->unchecked_isa_dma ?
+		scsi_sense_isadma_cache : scsi_sense_cache;
+}
+
+void scsi_free_sense_buffer(struct Scsi_Host *shost,
+		unsigned char *sense_buffer)
+{
+	kmem_cache_free(scsi_select_sense_cache(shost), sense_buffer);
+}
+
+unsigned char *scsi_alloc_sense_buffer(struct Scsi_Host *shost, gfp_t gfp_mask,
+		int numa_node)
+{
+	return kmem_cache_alloc_node(scsi_select_sense_cache(shost), gfp_mask,
+			numa_node);
+}
+
+int scsi_init_sense_cache(struct Scsi_Host *shost)
+{
+	struct kmem_cache *cache;
+	int ret = 0;
+
+	cache = scsi_select_sense_cache(shost);
+	if (cache)
+		return 0;
+
+	mutex_lock(&scsi_sense_cache_mutex);
+	if (shost->unchecked_isa_dma) {
+		scsi_sense_isadma_cache =
+			kmem_cache_create("scsi_sense_cache(DMA)",
+			SCSI_SENSE_BUFFERSIZE, 0,
+			SLAB_HWCACHE_ALIGN | SLAB_CACHE_DMA, NULL);
+		if (!scsi_sense_isadma_cache)
+			ret = -ENOMEM;
+	} else {
+		scsi_sense_cache =
+			kmem_cache_create("scsi_sense_cache",
+			SCSI_SENSE_BUFFERSIZE, 0, SLAB_HWCACHE_ALIGN, NULL);
+		if (!scsi_sense_cache)
+			ret = -ENOMEM;
+	}
+
+	mutex_unlock(&scsi_sense_cache_mutex);
+	return ret;
+}
 
 /*
  * When to reinvoke queueing after a resource shortage. It's 3 msecs to
@@ -270,7 +322,7 @@ int scsi_execute_req_flags(struct scsi_device *sdev, const unsigned char *cmd,
 {
 	char *sense = NULL;
 	int result;
-	
+
 	if (sshdr) {
 		sense = kzalloc(SCSI_SENSE_BUFFERSIZE, GFP_NOIO);
 		if (!sense)
@@ -373,7 +425,7 @@ static void scsi_single_lun_run(struct scsi_device *current_sdev)
 		spin_unlock_irqrestore(shost->host_lock, flags);
 		scsi_kick_queue(sdev->request_queue);
 		spin_lock_irqsave(shost->host_lock, flags);
-	
+
 		scsi_device_put(sdev);
 	}
  out:
@@ -1091,7 +1143,7 @@ static int scsi_init_sgtable(struct request *req, struct scsi_data_buffer *sdb)
 					req->mq_ctx != NULL)))
 		return BLKPREP_DEFER;
 
-	/* 
+	/*
 	 * Next, walk the list, and fill in the addresses and sizes of
 	 * each segment.
 	 */
@@ -1844,7 +1896,7 @@ static void scsi_request_fn(struct request_queue *q)
 			preempt_enable_no_resched();
 			goto host_not_ready;
 		}
-	
+
 		if (sdev->simple_tags)
 			cmd->flags |= SCMD_TAGGED;
 		else
@@ -2068,10 +2120,11 @@ static int scsi_init_request(void *data, struct request *rq,
 		unsigned int hctx_idx, unsigned int request_idx,
 		unsigned int numa_node)
 {
+	struct Scsi_Host *shost = data;
 	struct scsi_cmnd *cmd = blk_mq_rq_to_pdu(rq);
 
-	cmd->sense_buffer = kzalloc_node(SCSI_SENSE_BUFFERSIZE, GFP_KERNEL,
-			numa_node);
+	cmd->sense_buffer =
+		scsi_alloc_sense_buffer(shost, GFP_KERNEL, numa_node);
 	if (!cmd->sense_buffer)
 		return -ENOMEM;
 	return 0;
@@ -2080,9 +2133,10 @@ static int scsi_init_request(void *data, struct request *rq,
 static void scsi_exit_request(void *data, struct request *rq,
 		unsigned int hctx_idx, unsigned int request_idx)
 {
+	struct Scsi_Host *shost = data;
 	struct scsi_cmnd *cmd = blk_mq_rq_to_pdu(rq);
 
-	kfree(cmd->sense_buffer);
+	scsi_free_sense_buffer(shost, cmd->sense_buffer);
 }
 
 static u64 scsi_calculate_bounce_limit(struct Scsi_Host *shost)
@@ -2419,7 +2473,7 @@ scsi_mode_select(struct scsi_device *sdev, int pf, int sp, int modepage,
 		real_buffer[1] = data->medium_type;
 		real_buffer[2] = data->device_specific;
 		real_buffer[3] = data->block_descriptor_length;
-		
+
 
 		cmd[0] = MODE_SELECT;
 		cmd[4] = len;
@@ -2503,7 +2557,7 @@ scsi_mode_sense(struct scsi_device *sdev, int dbd, int modepage,
 		if (scsi_sense_valid(sshdr)) {
 			if ((sshdr->sense_key == ILLEGAL_REQUEST) &&
 			    (sshdr->asc == 0x20) && (sshdr->ascq == 0)) {
-				/* 
+				/*
 				 * Invalid command operation code
 				 */
 				sdev->use_10_for_ms = 0;
@@ -2595,7 +2649,7 @@ EXPORT_SYMBOL(scsi_test_unit_ready);
  *	@sdev:	scsi device to change the state of.
  *	@state:	state to change to.
  *
- *	Returns zero if unsuccessful or an error if the requested 
+ *	Returns zero if unsuccessful or an error if the requested
  *	transition is illegal.
  */
 int
@@ -2615,7 +2669,7 @@ scsi_device_set_state(struct scsi_device *sdev, enum scsi_device_state state)
 			goto illegal;
 		}
 		break;
-			
+
 	case SDEV_RUNNING:
 		switch (oldstate) {
 		case SDEV_CREATED:
@@ -2892,7 +2946,7 @@ EXPORT_SYMBOL_GPL(sdev_evt_send_simple);
  *	(which must be a legal transition).  When the device is in this
  *	state, only special requests will be accepted, all others will
  *	be deferred.  Since special requests may also be requeued requests,
- *	a successful return doesn't guarantee the device will be 
+ *	a successful return doesn't guarantee the device will be
  *	totally quiescent.
  *
  *	Must be called with user context, may sleep.
@@ -2973,7 +3027,7 @@ EXPORT_SYMBOL(scsi_target_resume);
  *
  * Returns zero if successful or error if not
  *
- * Notes:       
+ * Notes:
  *	This routine transitions the device to the SDEV_BLOCK state
  *	(which must be a legal transition).  When the device is in this
  *	state, all commands are deferred until the scsi lld reenables
@@ -2994,10 +3048,10 @@ scsi_internal_device_block(struct scsi_device *sdev)
 			return err;
 	}
 
-	/* 
+	/*
 	 * The device has transitioned to SDEV_BLOCK.  Stop the
 	 * block layer from calling the midlayer with this device's
-	 * request queue. 
+	 * request queue.
 	 */
 	if (q->mq_ops) {
 		blk_mq_stop_hw_queues(q);
@@ -3010,7 +3064,7 @@ scsi_internal_device_block(struct scsi_device *sdev)
 	return 0;
 }
 EXPORT_SYMBOL_GPL(scsi_internal_device_block);
- 
+
 /**
  * scsi_internal_device_unblock - resume a device after a block request
  * @sdev:	device to resume
@@ -3022,7 +3076,7 @@ EXPORT_SYMBOL_GPL(scsi_internal_device_block);
  *
  * Returns zero if successful or error if not.
  *
- * Notes:       
+ * Notes:
  *	This routine transitions the device to the SDEV_RUNNING state
  *	or to one of the offline states (which must be a legal transition)
  *	allowing the midlayer to goose the queue for this device.
@@ -3031,7 +3085,7 @@ int
 scsi_internal_device_unblock(struct scsi_device *sdev,
 			     enum scsi_device_state new_state)
 {
-	struct request_queue *q = sdev->request_queue; 
+	struct request_queue *q = sdev->request_queue;
 	unsigned long flags;
 
 	/*
