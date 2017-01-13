@@ -221,7 +221,7 @@ struct request *__blk_mq_alloc_request(struct blk_mq_alloc_data *data, int rw)
 
 	tag = blk_mq_get_tag(data);
 	if (tag != BLK_MQ_TAG_FAIL) {
-		rq = data->hctx->tags->rqs[tag];
+		rq = data->hctx->tags->static_rqs[tag];
 
 		if (blk_mq_tag_busy(data->hctx)) {
 			rq->cmd_flags = REQ_MQ_INFLIGHT;
@@ -229,6 +229,7 @@ struct request *__blk_mq_alloc_request(struct blk_mq_alloc_data *data, int rw)
 		}
 
 		rq->tag = tag;
+		data->hctx->tags->rqs[tag] = rq;
 		blk_mq_rq_ctx_init(data->q, data->ctx, rq, rw);
 		return rq;
 	}
@@ -1544,11 +1545,13 @@ void blk_mq_free_rqs(struct blk_mq_tag_set *set, struct blk_mq_tags *tags,
 		int i;
 
 		for (i = 0; i < tags->nr_tags; i++) {
-			if (!tags->rqs[i])
+			struct request *rq = tags->static_rqs[i];
+
+			if (!rq)
 				continue;
-			set->ops->exit_request(set->driver_data, tags->rqs[i],
+			set->ops->exit_request(set->driver_data, rq,
 						hctx_idx, i);
-			tags->rqs[i] = NULL;
+			tags->static_rqs[i] = NULL;
 		}
 	}
 
@@ -1568,6 +1571,8 @@ void blk_mq_free_rq_map(struct blk_mq_tags *tags)
 {
 	kfree(tags->rqs);
 	tags->rqs = NULL;
+	kfree(tags->static_rqs);
+	tags->static_rqs = NULL;
 
 	blk_mq_free_tags(tags);
 }
@@ -1589,6 +1594,15 @@ struct blk_mq_tags *blk_mq_alloc_rq_map(struct blk_mq_tag_set *set,
 				 GFP_NOIO | __GFP_NOWARN | __GFP_NORETRY,
 				 set->numa_node);
 	if (!tags->rqs) {
+		blk_mq_free_tags(tags);
+		return NULL;
+	}
+
+	tags->static_rqs = kzalloc_node(nr_tags * sizeof(struct request *),
+				 GFP_NOIO | __GFP_NOWARN | __GFP_NORETRY,
+				 set->numa_node);
+	if (!tags->static_rqs) {
+		kfree(tags->rqs);
 		blk_mq_free_tags(tags);
 		return NULL;
 	}
@@ -1654,12 +1668,14 @@ int blk_mq_alloc_rqs(struct blk_mq_tag_set *set, struct blk_mq_tags *tags,
 		to_do = min(entries_per_page, depth - i);
 		left -= to_do * rq_size;
 		for (j = 0; j < to_do; j++) {
-			tags->rqs[i] = p;
+			struct request *rq = p;
+
+			tags->static_rqs[i] = rq;
 			if (set->ops->init_request) {
 				if (set->ops->init_request(set->driver_data,
-						tags->rqs[i], hctx_idx, i,
+						rq, hctx_idx, i,
 						set->numa_node)) {
-					tags->rqs[i] = NULL;
+					tags->static_rqs[i] = NULL;
 					goto fail;
 				}
 			}
