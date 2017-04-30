@@ -25,6 +25,7 @@
 #include <linux/elevator.h> /* for rq_end_sector() */
 #include <linux/blk-mq.h>
 #include <linux/pr.h>
+#include <linux/iosched_switcher.h>
 
 #include <trace/events/block.h>
 
@@ -620,9 +621,9 @@ static int dm_blk_ioctl(struct block_device *bdev, fmode_t mode,
 		if (r)
 			goto out;
 	}
-	
-	if(!strcmp(tgt->type->name , "dirty") && 
-	          (tgt->type->ioctl         ) && 
+
+	if(!strcmp(tgt->type->name , "dirty") &&
+	          (tgt->type->ioctl         ) &&
 	          (cmd == 1                 )){
 		r = tgt->type->ioctl(tgt, cmd, arg);
 	}else{
@@ -2435,6 +2436,8 @@ static struct mapped_device *alloc_dev(int minor)
 	spin_unlock(&_minor_lock);
 
 	BUG_ON(old_md != MINOR_ALLOCED);
+
+	init_iosched_switcher(md->queue);
 
 	return md;
 
