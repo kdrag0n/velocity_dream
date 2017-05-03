@@ -422,17 +422,8 @@ static void zram_meta_free(struct zram_meta *meta, u64 disksize)
 	size_t index;
 
 	/* Free all pages that are still in this zram device */
-	for (index = 0; index < num_pages; index++) {
-		unsigned long handle = meta->table[index].handle;
-		/*
-		 * No memory is allocated for same element filled pages.
-		 * Simply clear same page flag.
-		 */
-		if (!handle || zram_test_flag(meta, index, ZRAM_SAME))
-			continue;
-
-		zs_free(meta->mem_pool, handle);
-	}
+	for (index = 0; index < num_pages; index++)
+		zram_free_page(zram, index);
 
 	zs_destroy_pool(meta->mem_pool);
 	vfree(meta->table);
@@ -965,9 +956,6 @@ static void zram_reset_device(struct zram *zram)
 	meta = zram->meta;
 	comp = zram->comp;
 	disksize = zram->disksize;
-
-	/* Reset stats */
-	memset(&zram->stats, 0, sizeof(zram->stats));
 	zram->disksize = 0;
 
 	set_capacity(zram->disk, 0);
