@@ -38,11 +38,14 @@ struct blk_flush_queue;
 struct pr_ops;
 
 #define BLKDEV_MIN_RQ	4
-#ifdef CONFIG_LARGE_DIRTY_BUFFER
-#define BLKDEV_MAX_RQ	256
+#ifdef CONFIG_ZEN_INTERACTIVE
+#define BLKDEV_MAX_RQ	512
 #else
-#define BLKDEV_MAX_RQ  128     /* Default maximum */
+#define BLKDEV_MAX_RQ	128	/* Default maximum */
 #endif
+
+/* Must be consistent with blk_mq_poll_stats_bkt() */
+#define BLK_MQ_POLL_STATS_BKTS 16
 
 /*
  * Maximum number of blkcg policies allowed to be registered concurrently.
