@@ -169,8 +169,8 @@ void start_bandwidth_timer(struct hrtimer *period_timer, ktime_t period)
 		soft = hrtimer_get_softexpires(period_timer);
 		hard = hrtimer_get_expires(period_timer);
 		delta = ktime_to_ns(ktime_sub(hard, soft));
-		__hrtimer_start_range_ns(period_timer, soft, delta,
-					 HRTIMER_MODE_ABS_PINNED, 0);
+		hrtimer_start_range_ns(period_timer, soft, delta,
+					 HRTIMER_MODE_ABS_PINNED);
 	}
 }
 

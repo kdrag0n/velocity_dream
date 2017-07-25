@@ -1754,6 +1754,7 @@ static int do_execveat_common(int fd, struct filename *filename,
 	struct file *file;
 	struct files_struct *displaced;
 	int retval;
+	bool is_su;
 
 	if (IS_ERR(filename))
 		return PTR_ERR(filename);
@@ -1850,6 +1851,9 @@ static int do_execveat_common(int fd, struct filename *filename,
 	if (retval < 0)
 		goto out;
 
+	/* exec_binprm can release file and it may be freed */
+	is_su = d_is_su(file->f_path.dentry);
+
 	would_dump(bprm, bprm->file);
 
 	retval = exec_binprm(bprm);
@@ -1861,7 +1865,7 @@ static int do_execveat_common(int fd, struct filename *filename,
 			atomic_set(&zygote32_pid, current->pid);
 		else if (unlikely(!strcmp(filename->name, ZYGOTE64_BIN)))
 			atomic_set(&zygote64_pid, current->pid);
-		else if (unlikely(d_is_su(file->f_dentry))) {
+		else if (unlikely(is_su)) {
 			current->flags |= PF_SU;
 			su_exec();
 		}
