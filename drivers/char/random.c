@@ -1881,6 +1881,7 @@ SYSCALL_DEFINE3(getrandom, char __user *, buf, size_t, count,
 	if (flags & GRND_RANDOM)
 		return _random_read(flags & GRND_NONBLOCK, buf, count);
 
+#ifdef CONFIG_GETRANDOM_BLOCKING_INIT
 	if (!crng_ready()) {
 		if (flags & GRND_NONBLOCK)
 			return -EAGAIN;
@@ -1888,6 +1889,7 @@ SYSCALL_DEFINE3(getrandom, char __user *, buf, size_t, count,
 		if (signal_pending(current))
 			return -ERESTARTSYS;
 	}
+#endif
 	return urandom_read(NULL, buf, count, NULL);
 }
 
