@@ -59,3 +59,6 @@ obj-$(CONFIG_EXYNOS_HDCP2)	+= exynos-hdcp/
 
 # early tmu
 obj-$(CONFIG_EXYNOS_EARLY_TMU)	+= exynos-earlytmu.o
+
+# state notifier
+obj-$(CONFIG_STATE_NOTIFIER)	+= state_notifier.o
