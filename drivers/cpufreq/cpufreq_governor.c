@@ -483,6 +483,8 @@ static int cpufreq_governor_start(struct cpufreq_policy *policy,
 
 	gov_queue_work(dbs_data, policy, delay_for_sampling_rate(sampling_rate),
 		       true);
+
+	cpu_nonscaling(policy->cpu);
 	return 0;
 }
 
@@ -508,6 +510,8 @@ static int cpufreq_governor_stop(struct cpufreq_policy *policy,
 	gov_cancel_work(dbs_data, policy);
 
 	mutex_destroy(&shared->timer_mutex);
+
+	cpu_nonscaling(policy->cpu);
 	return 0;
 }
 
