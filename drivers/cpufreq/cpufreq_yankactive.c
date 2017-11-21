@@ -32,7 +32,7 @@
 #include <linux/kernel_stat.h>
 #include <asm/cputime.h>
 
-#define DEFAULT_HISPEED_FREQ	1728000
+#define DEFAULT_HISPEED_FREQ	1689600
 
 static int active_count;
 
@@ -67,7 +67,7 @@ static spinlock_t speedchange_cpumask_lock;
 static struct mutex gov_lock;
 
 /* Hi speed to bump to from lo speed when load burst (default max) */
-static unsigned int hispeed_freq = 1574400;
+static unsigned int hispeed_freq = 1689600;
 
 /* Go to hi speed when CPU load at or above this value. */
 #define DEFAULT_GO_HISPEED_LOAD 99
@@ -130,8 +130,8 @@ static int timer_slack_val = DEFAULT_TIMER_SLACK;
  * sync_freq
  */
 static unsigned int up_threshold_any_cpu_load = 80;
-static unsigned int sync_freq = 1574400;
-static unsigned int up_threshold_any_cpu_freq = 1574400;
+static unsigned int sync_freq = 1036800;
+static unsigned int up_threshold_any_cpu_freq = 1689600;
 #if 0
 static inline u64 get_cpu_idle_time_jiffy(unsigned int cpu, u64 *wall)
 {
