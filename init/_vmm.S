@@ -20,9 +20,9 @@
 #include <linux/vmm.h>
 
 #ifdef CONFIG_RKP_6G
-#define vmm_ELF_PATH "init/vmm.6g.elf"
+#define vmm_ELF_PATH "../init/vmm.6g.elf"
 #else
-#define vmm_ELF_PATH "init/vmm.elf"
+#define vmm_ELF_PATH "../init/vmm.elf"
 #endif
 
 #define SMC_64BIT_RET_MAGIC 0xC2000401

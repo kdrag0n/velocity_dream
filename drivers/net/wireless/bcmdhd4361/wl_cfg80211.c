@@ -21643,8 +21643,8 @@ wl_update_ap_rps_params(struct net_device *dev, ap_rps_info_t* rps, char *ifname
 	if (rps->quiet_time < RADIO_PWRSAVE_QUIETTIME_MIN)
 		return BCME_BADARG;
 
-	if (rps->sta_assoc_check > RADIO_PWRSAVE_ASSOCCHECK_MAX ||
-		rps->sta_assoc_check < RADIO_PWRSAVE_ASSOCCHECK_MIN)
+	if ((int)rps->sta_assoc_check > RADIO_PWRSAVE_ASSOCCHECK_MAX ||
+		(int)rps->sta_assoc_check < RADIO_PWRSAVE_ASSOCCHECK_MIN)
 		return BCME_BADARG;
 
 	cfg->ap_rps_info.pps = rps->pps;
