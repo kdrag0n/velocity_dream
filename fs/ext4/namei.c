@@ -35,6 +35,7 @@
 #include <linux/bio.h>
 #include <linux/namei.h>
 #include <linux/dcache.h>
+#include <linux/iversion.h>
 #include "ext4.h"
 #include "ext4_jbd2.h"
 
