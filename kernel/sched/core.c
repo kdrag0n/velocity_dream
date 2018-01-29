@@ -345,7 +345,7 @@ late_initcall(sched_init_debug);
  * Limited because this is done with IRQs disabled.
  */
 #ifndef CONFIG_PREEMPT_RT_FULL
-const_debug unsigned int sysctl_sched_nr_migrate = 32;
+const_debug unsigned int sysctl_sched_nr_migrate = 128;
 #else
 const_debug unsigned int sysctl_sched_nr_migrate = 8;
 #endif
@@ -368,9 +368,9 @@ __read_mostly int scheduler_running;
 
 /*
  * part of the period that we allow rt tasks to run in us.
- * default: 0.95s
+ * XanMod default: 0.98s
  */
-int sysctl_sched_rt_runtime = 950000;
+int sysctl_sched_rt_runtime = 980000;
 
 /* cpus with isolated domains */
 cpumask_var_t cpu_isolated_map;
