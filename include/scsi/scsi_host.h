@@ -443,6 +443,9 @@ struct scsi_host_template {
 	/* True if the controller does not support WRITE SAME */
 	unsigned no_write_same:1;
 
+	/* True if the low-level driver supports blk-mq only */
+	unsigned force_blk_mq:1;
+
 	/*
 	 * True if asynchronous aborts are not supported
 	 */
