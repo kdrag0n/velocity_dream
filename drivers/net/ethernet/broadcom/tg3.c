@@ -18262,11 +18262,7 @@ static void tg3_io_resume(struct pci_dev *pdev)
 
 	rtnl_lock();
 
-<<<<<<< HEAD
-	if (!netif_running(netdev))
-=======
 	if (!netdev || !netif_running(netdev))
->>>>>>> eb6234f... LINUX: 4.4.32 Kernel Update
 		goto done;
 
 	tg3_full_lock(tp, 0);

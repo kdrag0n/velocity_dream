@@ -1140,4 +1140,8 @@ source "drivers/input/touchscreen/sec_ts/Kconfig"
 source "drivers/input/touchscreen/sec_ts_a552/Kconfig"
 source "drivers/input/touchscreen/synaptics_dsx2/Kconfig"
 source "drivers/input/touchscreen/sec_ts_y661/Kconfig"
+
+config WAKE_GESTURES
+	bool "Wake gestures"
+
 endif
