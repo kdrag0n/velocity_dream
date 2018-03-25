@@ -8,7 +8,7 @@
  *
  * Maple uses a first come first serve style algorithm with seperated read/write
  * handling to allow for read biases. By prioritizing reads, simple tasks should improve
- * in performance. Maple also uses hooks for the powersuspend driver to increase
+ * in performance. Maple also uses hooks for the state notifier driver to increase
  * expirations when power is suspended to decrease workload.
  */
 #include <linux/blkdev.h>
@@ -78,13 +78,12 @@ maple_add_request(struct request_queue *q, struct request *rq)
 	struct maple_data *mdata = maple_get_data(q);
 	const int sync = rq_is_sync(rq);
 	const int dir = rq_data_dir(rq);
-	
 	/*
 	 * Add request to the proper fifo list and set its
 	 * expire time.
 	 */
 
-   	/* inrease expiration when device is asleep */
+   	/* increase expiration when device is asleep */
    	unsigned int fifo_expire_suspended = mdata->fifo_expire[sync][dir] * sleep_latency_multiple;
    	if (!state_suspended && mdata->fifo_expire[sync][dir]) {
    		rq->fifo_time = jiffies + mdata->fifo_expire[sync][dir];
