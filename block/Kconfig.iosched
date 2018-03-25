@@ -62,6 +62,17 @@ config BFQ_GROUP_IOSCHED
 	---help---
 	  Enable hierarchical scheduling in BFQ, using the blkio controller.
 
+config IOSCHED_ZEN
+	tristate "Zen I/O scheduler"
+	default y
+	---help---
+	  FCFS, dispatches are back-inserted, deadlines ensure fairness.
+	  Should work best with devices where there is no travel delay.
+
+config IOSCHED_MAPLE
+	tristate "Maple I/O scheduler"
+	default y
+
 choice
 	prompt "Default I/O scheduler"
 	default DEFAULT_CFQ
@@ -88,8 +99,6 @@ choice
 	config DEFAULT_NOOP
 		bool "No-op"
 
-<<<<<<< HEAD
-=======
 	config DEFAULT_SIO
 		bool "SIO" if IOSCHED_SIO=y
 
@@ -110,8 +119,6 @@ choice
 
 	config DEFAULT_MAPLE
 		bool "Maple" if IOSCHED_MAPLE=y
-
->>>>>>> a85098031... block: Add Maple I/O Scheduler
 endchoice
 
 config DEFAULT_IOSCHED
@@ -120,8 +127,6 @@ config DEFAULT_IOSCHED
 	default "cfq" if DEFAULT_CFQ
 	default "bfq" if DEFAULT_BFQ
 	default "noop" if DEFAULT_NOOP
-<<<<<<< HEAD
-=======
 	default "sio" if DEFAULT_SIO
 	default "fifo" if DEFAULT_FIFO
 	default "sioplus" if DEFAULT_SIOPLUS
@@ -129,7 +134,6 @@ config DEFAULT_IOSCHED
 	default "vr" if DEFAULT_VR
 	default "zen" if DEFAULT_ZEN
 	default "maple" if DEFAULT_MAPLE
->>>>>>> a85098031... block: Add Maple I/O Scheduler
 
 endmenu
 
