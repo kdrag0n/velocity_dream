@@ -957,3 +957,15 @@ void __init iotable_init_exec(struct map_desc *io_desc, int nr)
 {
 	__iotable_init(io_desc, nr, 1);
 }
+
+#ifdef CONFIG_HAVE_ARCH_HUGE_VMAP
+int pud_free_pmd_page(pud_t *pud)
+{
+	return pud_none(*pud);
+}
+
+int pmd_free_pte_page(pmd_t *pmd)
+{
+	return pmd_none(*pmd);
+}
+#endif
