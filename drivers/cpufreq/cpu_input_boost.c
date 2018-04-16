@@ -45,7 +45,7 @@ static bool freqs_available;
 static unsigned int boost_freq[4];
 static unsigned int boost_ms[4];
 static unsigned int boost_override;
-static unsigned int enabled;
+static unsigned int enabled = 1;
 
 static void cpu_boost_cpu(unsigned int cpu)
 {
