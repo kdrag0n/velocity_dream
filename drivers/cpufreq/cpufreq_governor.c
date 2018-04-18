@@ -44,7 +44,7 @@ void dbs_check_cpu(struct dbs_data *dbs_data, int cpu)
 	struct nm_dbs_tuners *nm_tuners = dbs_data->tuners;
 	struct cpufreq_policy *policy = cdbs->shared->policy;
 	unsigned int sampling_rate;
-	unsigned int max_load = 0;
+	unsigned int max_load = 0, deferred_periods = UINT_MAX;
 	unsigned int ignore_nice;
 	unsigned int j;
 	struct cpufreq_govinfo govinfo;
@@ -154,7 +154,12 @@ void dbs_check_cpu(struct dbs_data *dbs_data, int cpu)
 		 */
 		if (unlikely(wall_time > (2 * sampling_rate) &&
 			     j_cdbs->prev_load)) {
+			unsigned int periods = wall_time / sampling_rate;
+
 			load = j_cdbs->prev_load;
+
+			if (periods < deferred_periods)
+				deferred_periods = periods;
 
 			/*
 			 * Perform a destructive copy, to ensure that we copy
@@ -188,6 +193,7 @@ void dbs_check_cpu(struct dbs_data *dbs_data, int cpu)
 #endif
 	}
 
+	cdbs->deferred_periods = deferred_periods;
 	dbs_data->cdata->gov_check_cpu(cpu, max_load);
 }
 EXPORT_SYMBOL_GPL(dbs_check_cpu);
