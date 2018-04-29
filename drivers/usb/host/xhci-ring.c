@@ -1353,7 +1353,6 @@ void xhci_handle_command_timeout(unsigned long data)
 	int ret;
 	unsigned long flags;
 	u64 hw_ring_state;
-	struct xhci_command *cur_cmd = NULL;
 #if defined(CONFIG_USB_HOST_SAMSUNG_FEATURE)
 	xhci = container_of(to_delayed_work(work), struct xhci_hcd, cmd_timer);
 #else
