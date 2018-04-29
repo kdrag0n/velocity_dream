@@ -11,7 +11,7 @@ mkzip() {
 }
 
 build_dtb() {
-    do_dtb anykernel/dtb exynos8895-dreamlte_eur_open_{00,01,02,03,04,05,06,07,08,09,10}
+    do_dtb anykernel/dtb exynos8895-dreamlte_eur_open_{00,01,02,03,04,05,07,08,09,10}
     do_dtb anykernel/dtb2 exynos8895-dream2lte_eur_open_{03,04,05,06,07,08,09,10}
 }
 
