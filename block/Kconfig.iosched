@@ -45,7 +45,7 @@ config CFQ_GROUP_IOSCHED
 
 config IOSCHED_BFQ
 	tristate "BFQ I/O scheduler"
-	default n
+	default y
 	---help---
 	  The BFQ I/O scheduler tries to distribute bandwidth among
 	  all processes according to their weights.
@@ -71,6 +71,30 @@ config IOSCHED_ZEN
 
 config IOSCHED_MAPLE
 	tristate "Maple I/O scheduler"
+	default y
+
+config IOSCHED_FIOPS
+	tristate "Fiops I/O scheduler"
+	default y
+
+config IOSCHED_SIO
+	tristate "SIO I/O scheduler"
+	default y
+
+config IOSCHED_FIFO
+	tristate "FIFO I/O scheduler"
+	default y
+
+config IOSCHED_SIOPLUS
+	tristate "SIOPlus I/O scheduler"
+	default y
+
+config IOSCHED_TRIPNDROID
+	tristate "Tripndroid I/O scheduler"
+	default y
+
+config IOSCHED_VR
+	tristate "VR I/O scheduler"
 	default y
 
 choice
