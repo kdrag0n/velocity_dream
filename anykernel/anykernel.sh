@@ -57,6 +57,15 @@ else
   patch_cmdline "skip_override" "";
 fi;
 
+# select dtb to use
+cd /tmp/anykernel
+bl=$(getprop ro.boot.bootloader)
+model=${bl:1:3}
+
+if [ $model = 955 ]; then
+    mv dtb2 dtb # replace with dream2 dtb
+fi
+
 # begin ramdisk changes
 
 

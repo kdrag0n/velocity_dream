@@ -1,8 +1,9 @@
 # helpers
 mkzip() {
-    rm anykernel/Image.gz-dtb
+    rm anykernel/Image
     rm velocity_kernel.zip
     build_dtb
+    cp arch/arm64/boot/Image anykernel/
     cd anykernel
     zip -r ../velocity_kernel.zip *
     cd ..
