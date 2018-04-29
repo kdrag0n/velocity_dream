@@ -51,7 +51,7 @@
 #endif
 
 #ifdef CONFIG_RKP
-#include <linux/rkp_entry.h> 
+#include <linux/rkp_entry.h>
 #endif //CONFIG_RKP
 
 u64 idmap_t0sz = TCR_T0SZ(VA_BITS);
@@ -121,7 +121,7 @@ void *rkp_ro_alloc(void)
 	spin_lock_irqsave(&ro_rkp_pages_lock,flags);
 
 	for (i = 0, j = ro_alloc_last; i < (RO_PAGES) ; i++) {
-		j =  (j+i) %(RO_PAGES); 
+		j =  (j+i) %(RO_PAGES);
 		if (!ro_pages_stat[j]) {
 			ro_pages_stat[j] = 1;
 			ro_alloc_last = j+1;
@@ -142,7 +142,7 @@ void rkp_ro_free(void *free_addr)
 	i =  ((u64)free_addr - (u64)RKP_RBUF_VA) >> PAGE_SHIFT;
 	spin_lock_irqsave(&ro_rkp_pages_lock,flags);
 	ro_pages_stat[i] = 0;
-	ro_alloc_last = i; 
+	ro_alloc_last = i;
 	spin_unlock_irqrestore(&ro_rkp_pages_lock,flags);
 }
 
@@ -157,8 +157,8 @@ unsigned int is_rkp_ro_page(u64 addr)
 static inline void __init block_to_pages(pmd_t *pmd, unsigned long addr,
 				  unsigned long end, unsigned long pfn)
 {
-	pte_t *old_pte;  
-	pmd_t new ; 
+	pte_t *old_pte;
+	pmd_t new ;
 	pte_t *pte = NULL;
 	pte = rkp_ro_alloc();
 	if (!pte)
@@ -173,7 +173,7 @@ static inline void __init block_to_pages(pmd_t *pmd, unsigned long addr,
 
 	pte = pte_offset_kernel(&new, addr);
 
-	do {		
+	do {
 		if (iotable_on == 1)
 			set_pte(pte, pfn_pte(pfn, pgprot_iotable_init(PAGE_KERNEL_EXEC)));
 		else
@@ -185,7 +185,7 @@ static inline void __init block_to_pages(pmd_t *pmd, unsigned long addr,
 }
 #endif
 
-static void alloc_init_pte(pmd_t *pmd, unsigned long addr,
+static void __init alloc_init_pte(pmd_t *pmd, unsigned long addr,
 				  unsigned long end, unsigned long pfn,
 				  pgprot_t prot,
 				  void *(*alloc)(unsigned long size))
@@ -209,11 +209,11 @@ static void alloc_init_pte(pmd_t *pmd, unsigned long addr,
 	    rkp_ropage = (pte_t *) rkp_ro_alloc();
 	if (rkp_ropage)
 		pte = rkp_ropage;
-	else 
+	else
 	    pte = alloc(PTRS_PER_PTE * sizeof(pte_t));
-#else	
+#else
 		pte = alloc(PTRS_PER_PTE * sizeof(pte_t));
-#endif		
+#endif
 		if (pmd_sect(*pmd))
 			split_pmd(pmd, pte);
 		__pmd_populate(pmd, __pa(pte), PMD_TYPE_TABLE);
@@ -376,7 +376,7 @@ static void alloc_init_pud(struct mm_struct *mm, pgd_t *pgd,
  * Create the page directory entries and any necessary page tables for the
  * mapping specified by 'md'.
  */
-static void  __create_mapping(struct mm_struct *mm, pgd_t *pgd,
+static void __init __create_mapping(struct mm_struct *mm, pgd_t *pgd,
 				    phys_addr_t phys, unsigned long virt,
 				    phys_addr_t size, pgprot_t prot,
 				    void *(*alloc)(unsigned long size))
