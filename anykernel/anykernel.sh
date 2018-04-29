@@ -11,6 +11,7 @@ ui_print    \_/ \___|_|\___/ \___|_|\__|\__, |
 ui_print                                |___/
 ui_print
 ui_print Galaxy S8/S8+ Exynos (SM-G95xF/FD/N)
+ui_print            Unified Kernel
 ui_print -------------------------------------
 ui_print
 EOF

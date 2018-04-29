@@ -104,4 +104,6 @@ build.log
 out/
 
 # Misc
-Image.gz-dtb
+anykernel/Image.gz-dtb
+anykernel/dtb
+anykernel/dtb2

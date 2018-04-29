@@ -15,13 +15,4 @@ export CXXFLAGS="-Ofast"
 #export CXXFLAGS="-target aarch64-linux-gnu -Ofast"
 #export CC="${CROSS_COMPILE}${C}"
 
-# helpers
-mkzip() {
-    rm anykernel/Image.gz-dtb
-    rm velocity_kernel.zip
-    cp arch/arm64/boot/Image.gz-dtb anykernel/
-    cd anykernel
-    zip -r ../velocity_kernel.zip *
-    cd ..
-    echo 'Done. Output is velocity_kernel.zip'
-}
+source helpers.sh

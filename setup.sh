@@ -46,21 +46,4 @@ export LDFLAGS=""
 
 alias make="make CC=$CLANG_TCHAIN CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=$TOOL_CHAIN_PATH KBUILD_COMPILER_STRING=\"${CLANG_VERSION}\" KBUILD_BUILD_VERSION=1 HOSTCC=$CLANG_TCHAIN"
 
-# helpers
-mkzip() {
-    rm anykernel/Image.gz-dtb
-    rm velocity_kernel.zip
-    cp arch/arm64/boot/Image.gz-dtb anykernel/
-    cd anykernel
-    zip -r ../velocity_kernel.zip *
-    cd ..
-    echo 'Done. Output is velocity_kernel.zip'
-}
-
-cleanbuild() {
-    make clean && make -j$jobs && mkzip
-}
-
-incbuild() {
-    make -j$jobs && mkzip
-}
+source helpers.sh
