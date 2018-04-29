@@ -1,8 +1,10 @@
 #!/bin/sh
 
-MAJOR=$(echo $1 | cut -d '.' -f 1)
-MINOR=$(echo $1 | cut -d '.' -f 2)
-PATCH=$(echo $1 | cut -d '.' -f 3)
+ver="8.0.0"
+
+MAJOR=$(echo $ver | cut -d '.' -f 1)
+MINOR=$(echo $ver | cut -d '.' -f 2)
+PATCH=$(echo $ver | cut -d '.' -f 3)
 if [ "x$PATCH" != "x" ] ; then
   printf "%d%02d%02d\\n" $MAJOR $MINOR $PATCH
 else
