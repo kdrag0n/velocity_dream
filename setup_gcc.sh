@@ -5,6 +5,7 @@ export ARCH=arm64
 export SUBARCH=arm64
 export CFLAGS="-Ofast"
 export CXXFLAGS="-Ofast"
+jobs=10
 #export C="clang"
 #export CXX="clang++"
 #export USE_CCACHE=0
