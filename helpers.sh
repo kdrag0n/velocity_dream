@@ -21,7 +21,7 @@ do_dtb() {
 
     for dt in ${@:2}; do
         echo " => ${dt}"
-        ${CROSS_COMPILE}cpp -nostdinc -undef -x assembler-with-cpp -I include arch/arm64/boot/dts/exynos/${ds}.dts > /tmp/kdts/${dt}.dts
+        ${CROSS_COMPILE}cpp -nostdinc -undef -x assembler-with-cpp -I include arch/arm64/boot/dts/exynos/${dt}.dts > /tmp/kdts/${dt}.dts
         scripts/dtc/dtc -p 0 -i arch/arm64/boot/dts/exynos -O dtb -o /tmp/kdtb/${dt}.dtb /tmp/kdts/${dt}.dts
     done
 
