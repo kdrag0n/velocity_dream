@@ -25,6 +25,10 @@ config IOSCHED_MAPLE
 	tristate "Maple I/O scheduler"
 	default y
 
+config IOSCHED_MARROW
+	tristate "Marrow I/O scheduler"
+	default y
+
 config IOSCHED_CFQ
 	tristate "CFQ I/O scheduler"
 	default y
@@ -143,6 +147,9 @@ choice
 
 	config DEFAULT_MAPLE
 		bool "Maple" if IOSCHED_MAPLE=y
+
+	config DEFAULT_MARROW
+		bool "Marrow" if IOSCHED_MARROW=y
 endchoice
 
 config DEFAULT_IOSCHED
@@ -158,6 +165,7 @@ config DEFAULT_IOSCHED
 	default "vr" if DEFAULT_VR
 	default "zen" if DEFAULT_ZEN
 	default "maple" if DEFAULT_MAPLE
+	default "marrow" if DEFAULT_MARROW
 
 endmenu
 
