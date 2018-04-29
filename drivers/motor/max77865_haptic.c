@@ -523,6 +523,13 @@ static int haptic_get_time(struct timed_output_dev *tout_dev)
 	return 0;
 }
 
+#ifdef CONFIG_WAKE_GESTURES
+void vib_trigger(int value)
+{
+	haptic_enable(g_drvdata->tout_dev, value);
+}
+#endif
+
 static void haptic_enable(struct timed_output_dev *tout_dev, int value)
 {
 	struct max77865_haptic_drvdata *drvdata
