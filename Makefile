@@ -671,11 +671,11 @@ KBUILD_CFLAGS   += -O2
 endif
 endif
 
+# Disallow introduction of unaligned stores
+KBUILD_CFLAGS	+= $(call cc-option,--param=store-merging-allow-unaligned=0)
+
 # Tell gcc to never replace conditional load with a non-conditional one
 KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
-
-# Fix GCC 7.x and newer
-KBUILD_CFLAGS   += $(call cc-option,-fno-store-merging,)
 
 # check for 'asm goto'
 ifeq ($(shell $(CONFIG_SHELL) $(srctree)/scripts/gcc-goto.sh $(CC) $(KBUILD_CFLAGS)), y)
