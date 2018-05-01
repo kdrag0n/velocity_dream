@@ -41,7 +41,7 @@
 #define S2S_DEFAULT		0
 #define WG_PWRKEY_DUR           60
 
-/* Samsung GS9 */
+/* Samsung GS8 */
 #define SWEEP_Y_MAX             4080
 #define SWEEP_X_MAX             4095
 #define SWEEP_EDGE		200
