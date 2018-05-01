@@ -4088,9 +4088,60 @@ _dhd_set_multicast_list(dhd_info_t *dhd, int ifidx)
 	}
 }
 
+static int randomize_mac = 1;
+
+static struct ctl_table randomize_mac_table[] =
+{
+	{
+		.procname		= "randomize_mac",
+		.data			= &randomize_mac,
+		.maxlen			= sizeof(int),
+		.mode			= 0600,
+		.proc_handler	= proc_dointvec
+	},
+	{}
+};
+
+static struct ctl_table cnss_table[] =
+{
+	{
+		.procname		= "cnss",
+		.maxlen			= 0,
+		.mode			= 0555,
+		.child			= randomize_mac_table
+	},
+	{}
+};
+
+static struct ctl_table dev_table[] =
+{
+	{
+		.procname		= "dev",
+		.maxlen			= 0,
+		.mode			= 0555,
+		.child			= cnss_table
+	},
+	{}
+};
+
+static int __init init_randomize_mac(void)
+{
+	register_sysctl_table(dev_table);
+	return 0;
+}
+late_initcall(init_randomize_mac);
+
 int
 _dhd_set_mac_address(dhd_info_t *dhd, int ifidx, uint8 *addr)
 {
+	u8 addr_random[ETHER_ADDR_LEN];
+
+	if (randomize_mac) {
+		memcpy(addr_random, addr, ETHER_ADDR_LEN);
+		get_random_bytes(&addr_random[3], 3);
+		addr = addr_random;
+	}
+
 	int ret;
 
 	ret = dhd_iovar(&dhd->pub, ifidx, "cur_etheraddr", (char *)addr,
