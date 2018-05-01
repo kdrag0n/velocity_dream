@@ -14,7 +14,7 @@
 #include <linux/kernel.h>
 #include <linux/wake_gestures.h>
 static bool is_suspended;
-bool scr_suspended(void)
+bool scr_suspended_sec_ts(void)
 {
 	return is_suspended;
 }

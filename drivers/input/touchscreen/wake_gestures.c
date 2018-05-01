@@ -106,7 +106,7 @@ static struct work_struct dt2w_input_work;
 
 static bool is_suspended(void)
 {
-	return scr_suspended();
+	return scr_suspended_fts() || scr_suspended_sec_ts();
 }
 
 /* Wake Gestures */
@@ -562,7 +562,7 @@ static ssize_t sweep2wake_dump(struct device *dev,
 	if (s2w_switch_temp < 0 || s2w_switch_temp > 15)
 		s2w_switch_temp = 0;
 
-	if (!scr_suspended())
+	if (!is_suspended())
 		s2w_switch = s2w_switch_temp;
 	else
 		s2w_switch_changed = true;
@@ -611,7 +611,7 @@ static ssize_t doubletap2wake_dump(struct device *dev,
 	if (dt2w_switch_temp < 0 || dt2w_switch_temp > 1)
 		dt2w_switch_temp = 0;
 
-	if (!scr_suspended())
+	if (!is_suspended())
 		dt2w_switch = dt2w_switch_temp;
 	else
 		dt2w_switch_changed = true;

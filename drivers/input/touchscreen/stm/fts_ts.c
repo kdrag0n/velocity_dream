@@ -62,6 +62,16 @@ struct fts_ts_info *tui_tsp_info;
 #endif
 #include "fts_ts.h"
 
+#ifdef CONFIG_WAKE_GESTURES
+#include <linux/wake_gestures.h>
+static bool is_suspended;
+bool scr_suspended_fts(void)
+{
+	return is_suspended;
+
+}
+#endif
+
 #if defined(CONFIG_SECURE_TOUCH)
 #include <linux/clk.h>
 #include <linux/pm_runtime.h>
@@ -69,7 +79,6 @@ struct fts_ts_info *tui_tsp_info;
 #include <linux/atomic.h>
 #include <soc/qcom/scm.h>
 /*#include <asm/system.h>*/
-
 enum subsystem {
 	TZ = 1,
 	APSS = 3
@@ -1764,6 +1773,12 @@ static unsigned char fts_event_handler_type_b(struct fts_ts_info *info,
 						   MT_TOOL_FINGER, 1 + (palm << 1));
 
 			input_report_key(info->input_dev, BTN_TOOL_FINGER, 1);
+
+#ifdef CONFIG_WAKE_GESTURES
+			if (is_suspended)
+				x += 5000;
+#endif
+
 			input_report_abs(info->input_dev, ABS_MT_POSITION_X, x);
 			input_report_abs(info->input_dev, ABS_MT_POSITION_Y, y);
 
@@ -3014,6 +3029,17 @@ static int fts_probe(struct i2c_client *client, const struct i2c_device_id *idp)
 	input_err(true, &info->client->dev, "%s: done\n", __func__);
 	input_log_fix();
 
+#ifdef CONFIG_WAKE_GESTURES
+	if (dt2w_switch_changed) {
+		dt2w_switch = dt2w_switch_temp;
+		dt2w_switch_changed = false;
+	}
+	if (s2w_switch_changed) {
+		s2w_switch = s2w_switch_temp;
+		s2w_switch_changed = false;
+	}
+#endif
+
 	return 0;
 
 #ifdef SEC_TSP_FACTORY_TEST
@@ -3624,6 +3650,14 @@ static int fts_stop_device(struct fts_ts_info *info, bool lpmode)
 		goto out;
 	}
 
+#ifdef CONFIG_WAKE_GESTURES
+	is_suspended = true;
+
+	if (s2w_switch || dt2w_switch) {
+		enable_irq_wake(info->irq);
+		fts_release_all_finger(info);
+	} else
+#endif
 	if (lpmode) {
 		input_info(true, &info->client->dev, "%s: lowpower flag:%d\n", __func__, info->lowpower_flag);
 
@@ -3693,6 +3727,13 @@ static int fts_start_device(struct fts_ts_info *info)
 #endif
 	mutex_lock(&info->device_mutex);
 
+#ifdef CONFIG_WAKE_GESTURES
+	is_suspended = false;
+
+	if (s2w_switch || dt2w_switch)
+		disable_irq_wake(info->irq);
+#endif
+
 	if (info->fts_power_state == FTS_POWER_STATE_ACTIVE) {
 		input_err(true, &info->client->dev, "%s: already power on\n", __func__);
 		goto out;
@@ -3734,6 +3775,7 @@ static int fts_start_device(struct fts_ts_info *info)
 		if (device_may_wakeup(&info->client->dev))
 			disable_irq_wake(info->irq);
 	}
+
 	info->fts_power_state = FTS_POWER_STATE_ACTIVE;
 	enable_irq(info->irq);
 
