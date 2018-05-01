@@ -35,3 +35,14 @@ cleanbuild() {
 incbuild() {
     make -j$jobs && mkzip
 }
+
+test() {
+    adb reboot recovery && \
+    sleep 20 && \
+    adb push velocity_kernel.zip /tmp && \
+    adb shell reboot 
+}
+
+inc() {
+    incbuild && test
+}
