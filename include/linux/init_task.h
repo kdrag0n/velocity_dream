@@ -157,11 +157,7 @@ extern struct task_group root_task_group;
 # define INIT_VTIME(tsk)
 #endif
 
-#ifdef CONFIG_SCHED_PDS
-#define INIT_TASK_COMM "PDS"
-#else
 #define INIT_TASK_COMM "swapper"
-#endif /* CONFIG_SCHED_PDS */
 
 #ifdef CONFIG_RT_MUTEXES
 # define INIT_RT_MUTEXES(tsk)						\

@@ -1,7 +1,3 @@
-/* SPDX-License-Identifier: GPL-2.0 */
-#ifdef CONFIG_SCHED_PDS
-#include "pds_sched.h"
-#else
 
 #include <linux/sched.h>
 #include <linux/sched/sysctl.h>
@@ -1883,4 +1879,3 @@ static inline void account_reset_rq(struct rq *rq)
 	rq->prev_steal_time_rq = 0;
 #endif
 }
-#endif /* CONFIG_SCHED_PDS */

@@ -143,12 +143,7 @@ void account_user_time(struct task_struct *p, cputime_t cputime,
 	p->utimescaled += cputime_scaled;
 	account_group_user_time(p, cputime);
 
-#ifdef	CONFIG_SCHED_PDS
-	index = (task_nice(p) > 0 || idleprio_task(p)) ? CPUTIME_NICE :
-		CPUTIME_USER;
-#else
 	index = (task_nice(p) > 0) ? CPUTIME_NICE : CPUTIME_USER;
-#endif
 
 	/* Add user time to cpustat. */
 	task_group_account_field(p, index, (__force u64) cputime);
@@ -178,11 +173,7 @@ static void account_guest_time(struct task_struct *p, cputime_t cputime,
 	p->gtime += cputime;
 
 	/* Add guest time to cpustat. */
-#ifdef	CONFIG_SCHED_PDS
-	if (task_nice(p) > 0 || idleprio_task(p)) {
-#else
 	if (task_nice(p) > 0) {
-#endif
 		cpustat[CPUTIME_NICE] += (__force u64) cputime;
 		cpustat[CPUTIME_GUEST_NICE] += (__force u64) cputime;
 	} else {
@@ -294,61 +285,6 @@ static __always_inline bool steal_account_process_tick(void)
 #endif
 	return false;
 }
-
-/*
- * Account how much elapsed time was spent in steal, irq, or softirq time.
- */
-static inline u64 account_other_time(u64 max)
-{
-	u64 accounted;
-
-	lockdep_assert_irqs_disabled();
-
-	accounted = steal_account_process_time(max);
-
-	if (accounted < max)
-		accounted += irqtime_tick_accounted(max - accounted);
-
-	return accounted;
-}
-
-#ifdef CONFIG_64BIT
-static inline u64 read_sum_exec_runtime(struct task_struct *t)
-{
-	return tsk_seruntime(t);
-}
-#else
-
-#ifdef	CONFIG_SCHED_PDS
-static u64 read_sum_exec_runtime(struct task_struct *t)
-{
-	u64 ns;
-	struct rq *rq;
-	raw_spinlock_t *lock;
-	unsigned long flags;
-
-	rq = task_access_lock_irqsave(t, &lock, &flags);
-	ns = tsk_seruntime(t);
-	task_access_unlock_irqrestore(t, lock, &flags);
-
-	return ns;
-}
-#else
-static u64 read_sum_exec_runtime(struct task_struct *t)
-{
-	u64 ns;
-	struct rq_flags rf;
-	struct rq *rq;
-
-	rq = task_rq_lock(t, &rf);
-	ns = tsk_seruntime(t);
-	task_rq_unlock(rq, t, &rf);
-
-	return ns;
-}
-#endif
-
-#endif
 
 /*
  * Accumulate raw cputime values of dead tasks (sig->[us]time) and live
@@ -527,7 +463,6 @@ void thread_group_cputime_adjusted(struct task_struct *p, cputime_t *ut, cputime
 	*st = cputime.stime;
 }
 #else /* !CONFIG_VIRT_CPU_ACCOUNTING_NATIVE */
-
 /*
  * Account a single tick of cpu time.
  * @p: the process that the cpu time gets accounted to
@@ -724,7 +659,7 @@ out:
 void task_cputime_adjusted(struct task_struct *p, cputime_t *ut, cputime_t *st)
 {
 	struct task_cputime cputime = {
-		.sum_exec_runtime = tsk_seruntime(p),
+		.sum_exec_runtime = p->se.sum_exec_runtime,
 	};
 
 	task_cputime(p, &cputime.utime, &cputime.stime);

@@ -60,21 +60,6 @@ config ZEN_INTERACTIVE
 	    Ondemand coarse upscaling limit:  80 %  ->  45 %
 	    Ondemand fine upscaling limit..:  95 %  ->  45 %
 
-config SCHED_PDS
-	bool "PDS-mq cpu scheduler"
-	help
-	  The Priority and Deadline based Skip list multiple queue CPU
-	  Scheduler for excellent interactivity and responsiveness on the
-	  desktop and solid scalability on normal hardware and commodity
-	  servers.
-
-	  Currently incompatible with the Group CPU scheduler, and RCU TORTURE
-          TEST so these options are disabled.
-
-          Say Y here.
-	default y
-
-
 config BROKEN
 	bool
 
@@ -956,7 +941,6 @@ config NUMA_BALANCING
 	depends on ARCH_SUPPORTS_NUMA_BALANCING
 	depends on !ARCH_WANT_NUMA_VARIABLE_LOCALITY
 	depends on SMP && NUMA && MIGRATION
-	depends on !SCHED_PDS
 	help
 	  This option adds support for automatic NUMA aware memory/task placement.
 	  The mechanism is quite primitive and is based on migrating memory when
@@ -1144,8 +1128,7 @@ config CGROUP_PERF
 	  Say N if unsure.
 
 menuconfig CGROUP_SCHED
-	bool "CPU controller"
-	depends on !SCHED_PDS
+	bool "Group CPU scheduler"
 	default n
 	help
 	  This feature lets CPU scheduler recognize task groups and control CPU
@@ -1293,7 +1276,6 @@ endif # NAMESPACES
 
 config SCHED_AUTOGROUP
 	bool "Automatic process group scheduling"
-	depends on !SCHED_PDS
 	select CGROUPS
 	select CGROUP_SCHED
 	select FAIR_GROUP_SCHED
