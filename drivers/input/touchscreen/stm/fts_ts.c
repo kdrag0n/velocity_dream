@@ -884,7 +884,6 @@ static void fts_wirelesscharger_mode(struct fts_ts_info *info)
 	else
 		regAdd[0] = 0xC1;
 
-	input_info(true, &info->client->dev, "%s: Set W-Charger Status CMD[%2X]\n", __func__, regAdd[0]);
 	ret = fts_write_reg(info, regAdd, 2);
 	if (ret < 0)
 		input_err(true, &info->client->dev, "%s: failed. ret: %d\n", __func__, ret);
@@ -2108,54 +2107,7 @@ static unsigned char fts_event_handler_type_b(struct fts_ts_info *info,
 			continue;
 		}
 
-#if !defined(CONFIG_SAMSUNG_PRODUCT_SHIP)
-		if (EventID == EVENTID_ENTER_POINTER)
-			input_info(true, &info->client->dev,
-				"%s[P] tID:%d x:%d y:%d w:%d h:%d z:%d p:%d tc:%d tm:%d\n",
-				info->dex_name,
-				TouchID, x, y, bw, bh, z, palm, info->touch_count, info->touch_mode);
-
-#ifdef FTS_SUPPORT_HOVER
-		else if (EventID == EVENTID_HOVER_ENTER_POINTER)
-			input_dbg(true, &info->client->dev,
-				"[HP] tID:%d x:%d y:%d z:%d\n",
-				TouchID, x, y, z);
-#endif
-#else
-		if (EventID == EVENTID_ENTER_POINTER)
-			input_info(true, &info->client->dev,
-				"%s[P] tID:%d tc:%d tm:%d\n",
-				info->dex_name,
-				TouchID, info->touch_count, info->touch_mode);
-#ifdef FTS_SUPPORT_HOVER
-		else if (EventID == EVENTID_HOVER_ENTER_POINTER)
-			input_dbg(true, &info->client->dev,
-				"[HP] tID:%d\n", TouchID);
-#endif
-#endif
-		else if (EventID == EVENTID_LEAVE_POINTER) {
-#if !defined(CONFIG_SAMSUNG_PRODUCT_SHIP)
-			input_info(true, &info->client->dev,
-				"%s[R] tID:%d mc:%d tc:%d lx:%d ly:%d f:%d lp:(%x/%d) Ver[%02X%04X|%01X] P%02XT%04X[%02X] F%02X%02X C%02X\n",
-				info->dex_name, TouchID, info->finger[TouchID].mcount,
-				info->touch_count, info->finger[TouchID].lx,
-				info->finger[TouchID].ly, info->pressure_max,
-				info->lowpower_flag, info->pressure_caller_id,
-				info->panel_revision, info->fw_main_version_of_ic,
-				info->flip_enable, info->cal_count, info->tune_fix_ver,
-				info->test_result.data[0], info->pressure_cal_base,
-				info->pressure_cal_delta, info->nv_crc_fail_count);
-#else
-			input_info(true, &info->client->dev,
-				"%s[R] tID:%d mc:%d tc:%d f:%d lp:(%x/%d) Ver[%02X%04X|%01X] P%02XT%04X[%02X] F%02X%02X, C%02X\n",
-				info->dex_name, TouchID, info->finger[TouchID].mcount,
-				info->touch_count, info->pressure_max,
-				info->lowpower_flag, info->pressure_caller_id,
-				info->panel_revision, info->fw_main_version_of_ic,
-				info->flip_enable, info->cal_count, info->tune_fix_ver,
-				info->test_result.data[0], info->pressure_cal_base,
-				info->pressure_cal_delta, info->nv_crc_fail_count);
-#endif
+		if (EventID == EVENTID_LEAVE_POINTER) {
 			info->finger[TouchID].mcount = 0;
 		}
 #ifdef FTS_SUPPORT_HOVER
@@ -3719,8 +3671,6 @@ static int fts_stop_device(struct fts_ts_info *info, bool lpmode)
 
 static int fts_start_device(struct fts_ts_info *info)
 {
-	input_info(true, &info->client->dev, "%s%s\n",
-			__func__, info->fts_power_state ? ": exit low power mode TP" : "");
 
 #if defined(CONFIG_SECURE_TOUCH)
 	fts_secure_touch_stop(info, 1);
@@ -3735,7 +3685,6 @@ static int fts_start_device(struct fts_ts_info *info)
 #endif
 
 	if (info->fts_power_state == FTS_POWER_STATE_ACTIVE) {
-		input_err(true, &info->client->dev, "%s: already power on\n", __func__);
 		goto out;
 	}
 

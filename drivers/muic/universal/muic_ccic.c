@@ -369,9 +369,6 @@ int muic_get_current_legacy_dev(muic_data_t *pmuic)
 {
 	struct mdev_desc_t *pdesc = &mdev_desc;
 
-	pr_info("%s: mdev:%d legacy_dev:%d cable_type:%d\n",
-			__func__, pdesc->mdev, pmuic->legacy_dev, pmuic->is_ccic_afc_enable);
-
 	if (pdesc->mdev)
 		return pdesc->mdev;
 	else if (pmuic->legacy_dev)

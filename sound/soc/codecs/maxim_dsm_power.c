@@ -73,11 +73,6 @@ static void maxdsm_power_work(struct work_struct *work)
 	diff = jiffies - mdp->info.previous_jiffies;
 	mdp->info.remaining -= jiffies_to_msecs(diff);
 
-	dbg_maxdsm("power=0x%08x remaining=%d duration=%d",
-			power,
-			mdp->info.remaining,
-			mdp->info.duration);
-
 	if (mdp->info.remaining > 0
 			&& mdp->values.status) {
 		mdp->info.previous_jiffies = jiffies;
@@ -88,7 +83,6 @@ static void maxdsm_power_work(struct work_struct *work)
 		mdp->values.count > 0 ?
 			do_div(mdp->values.avg, mdp->values.count) : 0;
 		mdp->values.power = mdp->values.avg;
-		dbg_maxdsm("power=0x%08x", mdp->values.power);
 #ifdef MAXIM_DSM_POWER_MEASUREMENT
 		if (g_mdp->values.status) {
 			if (maxdsm_power_check(g_mdp, g_mdp->values.status, MAXDSM_POWER_START_DELAY*10)) {

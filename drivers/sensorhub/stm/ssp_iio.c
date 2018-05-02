@@ -106,11 +106,7 @@ static void report_prox_raw_data(struct ssp_data *data, int sensor,
 void report_sensordata(struct ssp_data *data, int sensor,
 			struct sensor_value *sensordata)
 {
-	if (sensor == PROXIMITY_SENSOR) {
-		ssp_info("Proximity Sensor Detect : %u, raw : %u",
-			sensordata->prox, sensordata->prox_ex);
-
-	} else if (sensor == PROXIMITY_RAW) {
+	if (sensor == PROXIMITY_RAW) {
 		report_prox_raw_data(data, sensor, sensordata);
 		return;
 

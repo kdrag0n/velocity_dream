@@ -1249,17 +1249,13 @@ static ssize_t copr_show(struct device *dev,
 	int copr_avg, brt_avg, ret;
 
 	if (!copr_is_enabled(copr)) {
-		panel_err("%s copr is off state\n", __func__);
 		return -EIO;
 	}
 
 	ret = copr_get_average(copr, &copr_avg, &brt_avg);
 	if (ret < 0) {
-		panel_err("%s failed to get average\n", __func__);
 		return ret;
 	}
-
-	sprintf(buf, "%d %d\n", copr_avg, brt_avg);
 
 	return strlen(buf);
 }

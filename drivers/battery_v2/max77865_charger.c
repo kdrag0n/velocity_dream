@@ -103,7 +103,6 @@ static void max77865_test_read(struct max77865_charger_data *charger)
 		max77865_read_reg(charger->i2c, addr, &data);
 		sprintf(str + strlen(str), "[0x%02x]0x%02x, ", addr, data);
 	}
-	pr_info("max77865 : %s\n", str);
 }
 
 static int max77865_get_vbus_state(struct max77865_charger_data *charger)
@@ -151,8 +150,6 @@ static int max77865_get_charger_state(struct max77865_charger_data *charger)
 	max77865_read_reg(charger->i2c,
 			  MAX77865_CHG_REG_DETAILS_01, &reg_data);
 
-	pr_info("%s : charger status (0x%02x)\n", __func__, reg_data);
-
 	reg_data &= 0x0f;
 
 	switch (reg_data)
@@ -190,7 +187,6 @@ static bool max77865_is_constant_current(struct max77865_charger_data *charger)
 
 	max77865_read_reg(charger->i2c,
 			  MAX77865_CHG_REG_DETAILS_01, &reg_data);
-	pr_info("%s : charger status (0x%02x)\n", __func__, reg_data);
 	reg_data &= 0x0f;
 
 	if (reg_data == 0x01)
@@ -211,7 +207,6 @@ static void max77865_set_float_voltage(struct max77865_charger_data *charger, in
 	        CHG_CNFG_04_CHG_CV_PRM_MASK);
 
 	max77865_read_reg(charger->i2c, MAX77865_CHG_REG_CNFG_04, &reg_data);
-	pr_info("%s: battery cv voltage 0x%x\n", __func__, reg_data);
 }
 
 static int max77865_get_float_voltage(struct max77865_charger_data *charger)
@@ -222,8 +217,6 @@ static int max77865_get_float_voltage(struct max77865_charger_data *charger)
 	max77865_read_reg(charger->i2c, MAX77865_CHG_REG_CNFG_04, &reg_data);
 	reg_data &= 0x3F;
 	float_voltage = reg_data * 125 + 40500;
-	pr_debug("%s: battery cv reg : 0x%x, float voltage val : %d\n",
-		__func__, reg_data, float_voltage);
 
 	return float_voltage;
 }
@@ -243,33 +236,6 @@ static int max77865_get_charging_health(struct max77865_charger_data *charger)
 	max77865_read_reg(charger->i2c,
 			  MAX77865_CHG_REG_DETAILS_01, &reg_data);
 	reg_data = ((reg_data & MAX77865_BAT_DTLS) >> MAX77865_BAT_DTLS_SHIFT);
-
-	pr_info("%s: reg_data(0x%x)\n", __func__, reg_data);
-	switch (reg_data) {
-	case 0x00:
-		pr_info("%s: No battery and the charger is suspended\n",
-			__func__);
-		break;
-	case 0x01:
-		pr_info("%s: battery is okay "
-			"but its voltage is low(~VPQLB)\n", __func__);
-		break;
-	case 0x02:
-		pr_info("%s: battery dead\n", __func__);
-		break;
-	case 0x03:
-		break;
-	case 0x04:
-		pr_info("%s: battery is okay" \
-			"but its voltage is low\n", __func__);
-		break;
-	case 0x05:
-		pr_info("%s: battery ovp\n", __func__);
-		break;
-	default:
-		pr_info("%s: battery unknown\n", __func__);
-		break;
-	}
 
 	psy_do_property("battery", get,
 			POWER_SUPPLY_PROP_HEALTH, value);
@@ -291,7 +257,6 @@ static int max77865_get_charging_health(struct max77865_charger_data *charger)
 		max77865_set_charger_state(charger, ENABLE);
 	}
 
-	pr_info("%s: vbus_state : 0x%x, chg_dtls : 0x%x\n", __func__, vbus_state, chg_dtls);
 	/*  OVP is higher priority */
 	if (vbus_state == 0x02) { /*  CHGIN_OVLO */
 		pr_info("%s: vbus ovp\n", __func__);

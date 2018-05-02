@@ -1057,8 +1057,6 @@ int getidx_mdnie_hdr_maptbl(struct maptbl *tbl)
 int getidx_mdnie_trans_mode_maptbl(struct maptbl *tbl)
 {
 	struct mdnie_info *mdnie = (struct mdnie_info *)tbl->pdata;
-	if (mdnie->props.trans_mode == TRANS_OFF)
-		panel_dbg("%s mdnie trans_mode off\n", __func__);
 	return tbl->ncol * (mdnie->props.trans_mode);
 }
 

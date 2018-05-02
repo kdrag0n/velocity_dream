@@ -55,8 +55,6 @@ static void enable_sensor(struct ssp_data *data,
 
 	switch (data->aiCheckStatus[iSensorType]) {
 	case ADD_SENSOR_STATE:
-		ssp_infof("add %u, New = %lldns", 1 << iSensorType, dNewDelay);
-
 		if (iSensorType == PROXIMITY_SENSOR) {
 			get_proximity_threshold(data);
 			proximity_open_calibration(data);
@@ -99,9 +97,6 @@ static void enable_sensor(struct ssp_data *data,
 		if (get_msdelay(dTempDelay)
 			== get_msdelay(data->adDelayBuf[iSensorType]))
 			break;
-
-		ssp_infof("Change %u, New = %lldns",
-			1 << iSensorType, dNewDelay);
 
 		memcpy(&uBuf[0], &dMsDelay, 4);
 		memcpy(&uBuf[4], &maxBatchReportLatency, 4);
@@ -252,8 +247,6 @@ static ssize_t set_sensors_enable(struct device *dev,
 		return -EINVAL;
 
 	uNewEnable = (unsigned int)dTemp;
-	ssp_infof("new_enable = %u, old_enable = %u",
-		 uNewEnable, atomic_read(&data->aSensorEnable));
 
 	if ((uNewEnable != atomic_read(&data->aSensorEnable)) &&
 		!(data->uSensorState

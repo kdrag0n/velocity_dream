@@ -48,9 +48,6 @@ static void enable_sensor(struct ssp_data *data,
 
 	switch (data->aiCheckStatus[iSensorType]) {
 	case ADD_SENSOR_STATE:
-		ssp_dbg("[SSP]: %s - add %u, New = %lldns\n",
-			 __func__, 1 << iSensorType, dNewDelay);
-
 		memcpy(&uBuf[0], &dMsDelay, 4);
 		memcpy(&uBuf[4], &maxBatchReportLatency, 4);
 		uBuf[8] = batchOptions;
@@ -88,9 +85,6 @@ static void enable_sensor(struct ssp_data *data,
 		if (get_msdelay(dTempDelay)
 			== get_msdelay(data->adDelayBuf[iSensorType]))
 			break;
-
-		ssp_dbg("[SSP]: %s - Change %u, New = %lldns\n",
-			__func__, 1 << iSensorType, dNewDelay);
 
 		memcpy(&uBuf[0], &dMsDelay, 4);
 		memcpy(&uBuf[4], &maxBatchReportLatency, 4);
@@ -224,9 +218,6 @@ static ssize_t show_sensors_enable(struct device *dev,
 {
 	struct ssp_data *data = dev_get_drvdata(dev);
 
-	ssp_dbg("[SSP]: %s - cur_enable = %d\n", __func__,
-		 atomic_read(&data->aSensorEnable));
-
 	return sprintf(buf, "%9u\n", atomic_read(&data->aSensorEnable));
 }
 
@@ -242,8 +233,6 @@ static ssize_t set_sensors_enable(struct device *dev,
 		return -EINVAL;
 
 	uNewEnable = (unsigned int)dTemp;
-	ssp_dbg("[SSP]: %s - new_enable = %u, old_enable = %u\n", __func__,
-		 uNewEnable, atomic_read(&data->aSensorEnable));
 
 	if ((uNewEnable != atomic_read(&data->aSensorEnable)) &&
 		!(data->uSensorState & (uNewEnable - atomic_read(&data->aSensorEnable)))) {

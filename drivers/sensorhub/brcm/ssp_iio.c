@@ -304,9 +304,6 @@ void report_prox_data(struct ssp_data *data, struct sensor_value *proxdata)
 
         ts_high = (u32)((proxdata->timestamp)>>32);
         ts_low = (u32)((proxdata->timestamp)&0x00000000ffffffff);
-
-        ssp_dbg("[SSP] Proximity Sensor Detect : %u, raw : %u ts : %llu %d %d\n",
-		proxdata->prox_detect, proxdata->prox_adc, proxdata->timestamp, ts_high, ts_low);
 }
 
 void report_prox_raw_data(struct ssp_data *data,

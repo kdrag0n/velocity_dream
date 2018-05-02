@@ -365,8 +365,6 @@ static int set_spi_gpios(struct panel_device *panel, int en)
 	int err_num = 0;
 	struct copr_spi_gpios *gpio_info = &panel->spi_gpio;
 
-	panel_info("%s en : %d\n", __func__, en);
-
 	if (en) {
 		if (gpio_direction_output(gpio_info->gpio_sck, 0))
 			goto set_exit;
@@ -476,7 +474,6 @@ int copr_enable(struct copr_info *copr)
 	}
 	mutex_unlock(&copr->lock);
 	copr_update(copr);
-	panel_dbg("%s\n", __func__);
 
 	return 0;
 }

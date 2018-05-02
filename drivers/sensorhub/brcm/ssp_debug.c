@@ -228,12 +228,9 @@ int print_mcu_debug(char *pchRcvDataFrame, int *pDataIdx,
 	*pDataIdx += sizeof(u16);
 
 	if (iLength > iRcvDataFrameLength - *pDataIdx || iLength <= 0) {
-		ssp_dbg("[SSP]: MSG From MCU - invalid debug length(%d/%d/%d)\n",
-			iLength, iRcvDataFrameLength, cur);
 		return iLength ? iLength : ERROR;
 	}
 
-	ssp_dbg("[SSP]: MSG From MCU - %s\n", &pchRcvDataFrame[*pDataIdx]);
 	*pDataIdx += iLength;
 	return 0;
 }
@@ -492,10 +489,6 @@ static void debug_work_func(struct work_struct *work)
 {
 	unsigned int uSensorCnt;
 	struct ssp_data *data = container_of(work, struct ssp_data, work_debug);
-
-	ssp_dbg("[SSP]: %s(%u) - Sensor state: 0x%llx, RC: %u(%u, %u), CC: %u, TC: %u NSC: %u EC: %u\n",
-		__func__, data->uIrqCnt, data->uSensorState, data->uResetCnt, data->mcuCrashedCnt,
-		data->resetCntGPSisOn, data->uComFailCnt, data->uTimeOutCnt, data->uNoRespSensorCnt, data->errorCount);
 
 	for (uSensorCnt = 0; uSensorCnt < SENSOR_MAX; uSensorCnt++) {
 		if ((atomic64_read(&data->aSensorEnable) & (1ULL << uSensorCnt))

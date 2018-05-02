@@ -77,9 +77,6 @@ static void enable_sensor(struct ssp_data *data,
 
 	switch (data->aiCheckStatus[iSensorType]) {
 	case ADD_SENSOR_STATE:
-		ssp_dbg("[SSP]: %s - add %llu, New = %lldns\n",
-			 __func__, 1ULL << iSensorType, dNewDelay);
-
 		if (iSensorType == PROXIMITY_SENSOR) {
 #ifdef CONFIG_SENSORS_SSP_PROX_FACTORYCAL
 			get_proximity_threshold(data);
@@ -138,9 +135,6 @@ static void enable_sensor(struct ssp_data *data,
 		if (get_msdelay(dTempDelay)
 			== get_msdelay(data->adDelayBuf[iSensorType]))
 			break;
-
-		ssp_dbg("[SSP]: %s - Change %llu, New = %lldns\n",
-			__func__, 1ULL << iSensorType, dNewDelay);
 
 		memcpy(&uBuf[0], &dMsDelay, 4);
 		memcpy(&uBuf[4], &maxBatchReportLatency, 4);
@@ -306,9 +300,6 @@ static ssize_t show_sensors_enable(struct device *dev,
 {
 	struct ssp_data *data = dev_get_drvdata(dev);
 
-	ssp_dbg("[SSP]: %s - cur_enable = %llu\n", __func__,
-		 (u64)(atomic64_read(&data->aSensorEnable)));
-
 	return sprintf(buf, "%llu\n", (u64)(atomic64_read(&data->aSensorEnable)));
 }
 
@@ -325,8 +316,6 @@ static ssize_t set_sensors_enable(struct device *dev,
 		return -EINVAL;
 
 	uNewEnable = (u64)dTemp;
-	ssp_dbg("[SSP]: %s - new_enable = %llu, old_enable = %llu\n", __func__,
-		 uNewEnable, (u64)atomic64_read(&data->aSensorEnable));
 
 	if ((uNewEnable != atomic64_read(&data->aSensorEnable)) &&
 		!(data->uSensorState & (uNewEnable - atomic64_read(&data->aSensorEnable)))) {

@@ -396,8 +396,6 @@ static int panel_set_mdnie(struct panel_device *panel)
 	if (!IS_PANEL_ACTIVE(panel))
 		return 0;
 
-	pr_info("%s, do mdnie-seq\n", __func__);
-
 	ret = 0;
 	mutex_lock(&panel->op_lock);
 	ret = panel_do_seqtbl(panel, &mdnie->seqtbl[MDNIE_SET_SEQ]);

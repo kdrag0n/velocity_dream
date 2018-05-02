@@ -497,9 +497,6 @@ void report_prox_data(struct ssp_data *data, struct sensor_value *proxdata)
 
 	usleep_range(500, 1000);
 
-	ssp_dbg("[SSP] Proximity Sensor Detect : %u, raw : %u ts : %llu %d %d\n",
-		proxdata->prox_detect, proxdata->prox_adc, proxdata->timestamp, ts_high, ts_low);
-
 	data->buf[PROXIMITY_SENSOR].prox_detect = proxdata->prox_detect;
 	data->buf[PROXIMITY_SENSOR].prox_adc = proxdata->prox_adc;
 

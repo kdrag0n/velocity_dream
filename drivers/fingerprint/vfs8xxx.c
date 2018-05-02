@@ -1462,14 +1462,8 @@ static struct device_attribute *fp_attrs[] = {
 	NULL,
 };
 
-static void vfsspi_work_func_debug(struct work_struct *work)
+static inline void vfsspi_work_func_debug(struct work_struct *work)
 {
-	pr_info("%s power:%d, irq:%d, tz:%d, type:%s, cnt_irq:%d\n",
-		__func__,
-		g_data->ldo_onoff,
-		gpio_get_value(g_data->drdy_pin),
-		g_data->tz_mode,
-		sensor_status[g_data->sensortype + 2], g_data->cnt_irq);
 }
 
 static void vfsspi_enable_debug_timer(void)

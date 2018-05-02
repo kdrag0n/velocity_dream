@@ -182,7 +182,6 @@ static int max77865_rgb_number(struct led_classdev *led_cdev,
 
 	for (i = 0; i < 4; i++) {
 		if (led_cdev == &max77865_rgb->led[i]) {
-			pr_info("leds-max77865-rgb: %s, %d\n", __func__, i);
 			return i;
 		}
 	}
@@ -237,8 +236,6 @@ static void max77865_rgb_set_state(struct led_classdev *led_cdev,
 	int n;
 	int ret;
 
-	pr_info("leds-max77865-rgb: %s\n", __func__);
-
 	ret = max77865_rgb_number(led_cdev, &max77865_rgb);
 
 	if (IS_ERR_VALUE(ret)) {
@@ -284,8 +281,6 @@ static void max77865_rgb_set_state(struct led_classdev *led_cdev,
 			brightness = 1;
 	}
 	max77865_rgb_set(led_cdev, brightness);
-
-	pr_info("leds-max77865-rgb: %s, led_num = %d, brightness = %d\n", __func__, ret, brightness);
 
 	ret = max77865_update_reg(max77865_rgb->i2c,
 			MAX77865_RGBLED_REG_LEDEN, led_state << (2*n), 0x3 << 2*n);

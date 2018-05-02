@@ -5053,11 +5053,8 @@ dhd_bus_hostready(struct  dhd_bus *bus)
 		return;
 	}
 
-	DHD_INFO_HW4(("%s : Read PCICMD Reg: 0x%08X\n", __FUNCTION__,
-		dhd_pcie_config_read(bus->osh, PCI_CFG_CMD, sizeof(uint32))));
 	si_corereg(bus->sih, bus->sih->buscoreidx, PCIH2D_DB1, ~0, 0x12345678);
 	bus->hostready_count ++;
-	DHD_INFO_HW4(("%s: Ring Hostready:%d\n", __FUNCTION__, bus->hostready_count));
 }
 
 /* Clear INTSTATUS */
@@ -5138,8 +5135,6 @@ dhdpcie_bus_suspend(struct dhd_bus *bus, bool state)
 		}
 
 		/* Suspend */
-		DHD_ERROR(("%s: Entering suspend state\n", __FUNCTION__));
-
 		DHD_GENERAL_LOCK(bus->dhd, flags);
 		if (DHD_BUS_BUSY_CHECK_IN_TX(bus->dhd)) {
 			DHD_ERROR(("Tx Request is not ended\n"));
@@ -5233,8 +5228,6 @@ dhdpcie_bus_suspend(struct dhd_bus *bus, bool state)
 		}
 
 		if (bus->wait_for_d3_ack) {
-			DHD_ERROR(("%s: Got D3 Ack \n", __FUNCTION__));
-
 			/* Got D3 Ack. Suspend the bus */
 			if (active) {
 				DHD_ERROR(("%s():Suspend failed because of wakelock"
@@ -6628,8 +6621,6 @@ dhdpcie_send_mb_data(dhd_bus_t *bus, uint32 h2d_mb_data)
 	uint32 cur_h2d_mb_data = 0;
 	unsigned long flags;
 
-	DHD_INFO_HW4(("%s: H2D_MB_DATA: 0x%08X\n", __FUNCTION__, h2d_mb_data));
-
 	if (bus->is_linkdown) {
 		DHD_ERROR(("%s: PCIe link was down\n", __FUNCTION__));
 		return BCME_ERROR;
@@ -6676,7 +6667,6 @@ dhdpcie_send_mb_data(dhd_bus_t *bus, uint32 h2d_mb_data)
 
 done:
 	if (h2d_mb_data == H2D_HOST_D3_INFORM) {
-		DHD_INFO_HW4(("%s: send H2D_HOST_D3_INFORM to dongle\n", __FUNCTION__));
 		/* Mark D3_INFORM in the atomic context to
 		 * skip ringing H2D DB after D3_INFORM
 		 */
@@ -6798,7 +6788,6 @@ dhd_bus_handle_mb_data(dhd_bus_t *bus, uint32 d2h_mb_data)
 	}
 	if (d2h_mb_data & D2H_DEV_D3_ACK)  {
 		/* what should we do */
-		DHD_INFO_HW4(("D2H_MB_DATA: D3 ACK\n"));
 		if (!bus->wait_for_d3_ack) {
 			/* Disable dongle Interrupts Immediately after D3 */
 			bus->suspend_intr_disable_count++;
@@ -6855,7 +6844,6 @@ dhdpcie_handle_mb_data(dhd_bus_t *bus)
 	}
 	if (d2h_mb_data & D2H_DEV_D3_ACK)  {
 		/* what should we do */
-		DHD_INFO_HW4(("D2H_MB_DATA: D3 ACK\n"));
 		if (!bus->wait_for_d3_ack) {
 #if defined(DHD_HANG_SEND_UP_TEST)
 			if (bus->dhd->req_hang_type == HANG_REASON_D3_ACK_TIMEOUT) {
@@ -6906,8 +6894,6 @@ dhdpcie_bus_process_mailbox_intr(dhd_bus_t *bus, uint32 intstatus)
 
 		if ((bus->dhd->busstate == DHD_BUS_SUSPEND) ||
 			(bus->use_mailbox && bus->d3_suspend_pending)) {
-			DHD_ERROR(("%s: Bus is in power save state. "
-				"Skip processing rest of ring buffers.\n", __FUNCTION__));
 			goto exit;
 		}
 
@@ -6941,8 +6927,6 @@ dhdpci_bus_read_frames(dhd_bus_t *bus)
 
 	/* Do not process rest of ring buf once bus enters low power state */
 	if (!bus->use_mailbox && bus->d3_suspend_pending) {
-		DHD_ERROR(("%s: Bus is in power save state. "
-			"Skip processing rest of ring buffers.\n", __FUNCTION__));
 		return FALSE;
 	}
 

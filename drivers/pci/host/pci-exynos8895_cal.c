@@ -249,34 +249,25 @@ static void quirk_brcm_enable(struct pci_dev *dev)
 	int count = 0;
 	u32 reg;
 
-	pr_info("Before changing BAR0\n");
 	pci_read_config_dword(dev, PCI_COMMAND, &reg);
-	pr_info("CMD Register = 0x%x, ", reg);
 	pci_read_config_dword(dev, PCI_BASE_ADDRESS_0, &reg);
-	pr_info("BAR0 = 0x%x\n", reg);
 
-	pr_info("Change BAR0 to fit 0x11C00000\n");
 	pci_write_config_dword(dev, PCI_BASE_ADDRESS_0, 0x11C00000);
 
 	/* retry writing of base address */
-	pr_info("BAR0 retry code added.\n");
 	while (1) {
 
 		pci_read_config_dword(dev, PCI_BASE_ADDRESS_0, &reg);
 		reg &= 0xfffffff0;
 		if (reg == 0x11C00000)
 			break;
-		pr_info("BAR0 resizing retry - %d %x\n", ++count, reg);
 		pci_write_config_dword(dev, PCI_BASE_ADDRESS_0, 0x11C00000);
 		if (count > 100)
 			break;
 	}
 
-	pr_info("After changing BAR0\n");
 	pci_read_config_dword(dev, PCI_COMMAND, &reg);
-	pr_info("CMD Register = 0x%x, ", reg);
 	pci_read_config_dword(dev, PCI_BASE_ADDRESS_0, &reg);
-	pr_info("BAR0 = 0x%x\n", reg);
 }
 DECLARE_PCI_FIXUP_ENABLE(PCI_VENDOR_ID_BROADCOM, PCI_ANY_ID, quirk_brcm_enable);
 
