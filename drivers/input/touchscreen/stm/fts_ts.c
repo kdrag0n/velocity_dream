@@ -691,9 +691,6 @@ static int fts_write_to_string(struct fts_ts_info *info,
 
 	ret = i2c_transfer(info->client->adapter, xfer_msg, 2);
 	if (ret == 2) {
-		input_dbg(true, &info->client->dev,
-				"%s: string command is OK.\n", __func__);
-
 		regAdd[0] = FTS_CMD_NOTIFY;
 		regAdd[1] = *reg & 0xFF;
 		regAdd[2] = (*reg >> 8) & 0xFF;
@@ -703,13 +700,7 @@ static int fts_write_to_string(struct fts_ts_info *info,
 		xfer_msg[0].flags = 0;
 		xfer_msg[0].buf = regAdd;
 
-		ret = i2c_transfer(info->client->adapter, xfer_msg, 1);
-		if (ret != 1)
-			input_err(true, &info->client->dev,
-					"%s: string notify is failed.\n", __func__);
-		else
-			input_info(true, &info->client->dev,
-					"%s: string notify is OK[0x%02X].\n", __func__, *data);
+		i2c_transfer(info->client->adapter, xfer_msg, 1);
 
 	} else {
 		input_err(true, &info->client->dev,
@@ -786,7 +777,6 @@ void fts_command(struct fts_ts_info *info, unsigned char cmd)
 
 	regAdd = cmd;
 	ret = fts_write_reg(info, &regAdd, 1);
-	input_info(true, &info->client->dev, "%s: (%02X), ret = %d\n", __func__, cmd, ret);
 }
 
 void fts_enable_feature(struct fts_ts_info *info, unsigned char cmd, int enable)
@@ -799,8 +789,6 @@ void fts_enable_feature(struct fts_ts_info *info, unsigned char cmd, int enable)
 	regAdd[1] = cmd;
 
 	ret = fts_write_reg(info, &regAdd[0], 2);
-	input_info(true, &info->client->dev, "%s: %s (%02X %02X), ret = %d\n", __func__,
-		(enable) ? "Enable":"Disable", regAdd[0], regAdd[1], ret);
 }
 
 static void fts_set_cover_type(struct fts_ts_info *info, bool enable)
@@ -871,7 +859,6 @@ void fts_set_grip_type(struct fts_ts_info *info, u8 set_type)
 
 	if (mode)
 		fts_set_grip_data_to_ic(info, mode);
-
 }
 
 static void fts_wirelesscharger_mode(struct fts_ts_info *info)
@@ -3590,8 +3577,6 @@ err_no_mem:
 
 static int fts_stop_device(struct fts_ts_info *info, bool lpmode)
 {
-	input_info(true, &info->client->dev, "%s\n", __func__);
-
 #if defined(CONFIG_SECURE_TOUCH)
 	fts_secure_touch_stop(info, 1);
 #endif
@@ -3611,8 +3596,6 @@ static int fts_stop_device(struct fts_ts_info *info, bool lpmode)
 	} else
 #endif
 	if (lpmode) {
-		input_info(true, &info->client->dev, "%s: lowpower flag:%d\n", __func__, info->lowpower_flag);
-
 		if (info->board->support_sidegesture) {
 			fts_enable_feature(info, FTS_FEATURE_SIDE_GUSTURE, true);
 			fts_delay(20);

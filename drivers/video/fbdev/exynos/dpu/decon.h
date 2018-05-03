@@ -138,11 +138,7 @@ void dpu_debug_printk(const char *function_name, const char *format, ...);
 		}								\
 	} while (0)
 
-#define decon_info(fmt, ...)							\
-	do {									\
-		if (decon_log_level >= 6)					\
-			pr_info(pr_fmt(fmt), ##__VA_ARGS__);			\
-	} while (0)
+#define decon_info(fmt, ...)
 
 #define decon_dbg(fmt, ...)							\
 	do {									\

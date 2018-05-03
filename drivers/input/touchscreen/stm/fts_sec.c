@@ -5148,8 +5148,6 @@ void fts_set_grip_data_to_ic(struct fts_ts_info *info, u8 flag){
 	u8 data[4] = { 0 };
 	u8 regAdd[6] = {0xC6, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-	input_info(true, &info->client->dev, "%s: flag: %02X (clr,lan,nor,edg,han)\n", __func__, flag);
-
 	if (flag & G_SET_EDGE_HANDLER) {
 		if (info->grip_edgehandler_direction == 0) {
 			data[0] = 0x0;
@@ -5170,8 +5168,6 @@ void fts_set_grip_data_to_ic(struct fts_ts_info *info, u8 flag){
 		regAdd[5] = data[3];
 
 		fts_write_reg(info, regAdd, 6);
-		input_info(true, &info->client->dev, "%s: 0x%02X %02X,%02X,%02X,%02X\n",
-			__func__, FTS_CMD_EDGE_HANDLER, data[0], data[1], data[2], data[3]);
 	}
 
 	if (flag & G_SET_EDGE_ZONE) {
@@ -5183,8 +5179,6 @@ void fts_set_grip_data_to_ic(struct fts_ts_info *info, u8 flag){
 		regAdd[3] = data[1];
 
 		fts_write_reg(info, regAdd, 4);
-		input_info(true, &info->client->dev, "%s: 0x%02X %02X,%02X\n",
-			__func__, FTS_CMD_EDGE_AREA, data[0], data[1]);
 	}
 
 	if (flag & G_SET_NORMAL_MODE) {
@@ -5200,8 +5194,6 @@ void fts_set_grip_data_to_ic(struct fts_ts_info *info, u8 flag){
 		regAdd[5] = data[3];
 
 		fts_write_reg(info, regAdd, 6);
-		input_info(true, &info->client->dev, "%s: 0x%02X %02X,%02X,%02X,%02X\n",
-			__func__, FTS_CMD_DEAD_ZONE, data[0], data[1], data[2], data[3]);
 	}
 
 	if (flag & G_SET_LANDSCAPE_MODE) {
@@ -5217,8 +5209,6 @@ void fts_set_grip_data_to_ic(struct fts_ts_info *info, u8 flag){
 		regAdd[5] = data[3];
 
 		fts_write_reg(info, regAdd, 6);
-		input_info(true, &info->client->dev, "%s: 0x%02X %02X,%02X,%02X,%02X\n",
-			__func__, FTS_CMD_LANDSCAPE_MODE, data[0], data[1], data[2], data[3]);
 	}
 
 	if (flag & G_CLR_LANDSCAPE_MODE) {
@@ -5228,8 +5218,6 @@ void fts_set_grip_data_to_ic(struct fts_ts_info *info, u8 flag){
 		regAdd[2] = data[0];
 
 		fts_write_reg(info, regAdd, 3);
-		input_info(true, &info->client->dev, "%s: 0x%02X %02X\n",
-			__func__, FTS_CMD_LANDSCAPE_MODE, data[0]);
 	}
 }
 

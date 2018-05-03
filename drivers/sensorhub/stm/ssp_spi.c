@@ -277,8 +277,6 @@ int ssp_send_cmd(struct ssp_data *data, char command, int arg)
 		return ERROR;
 	}
 
-	ssp_infof("command 0x%x %d", command, arg);
-
 	return SUCCESS;
 }
 
@@ -575,7 +573,6 @@ void set_proximity_threshold(struct ssp_data *data,
 	msg->buffer = kzalloc(4, GFP_KERNEL);
 	msg->free_buffer = 1;
 
-	ssp_errf("SENSOR_PROXTHRESHOL");
 #if defined(CONFIG_SENSORS_SSP_TMG399X)
 	msg->buffer[0] = (char)uData1;
 	msg->buffer[1] = (char)uData2;

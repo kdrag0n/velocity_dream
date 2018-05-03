@@ -318,7 +318,6 @@ int copr_get_average(struct copr_info *copr, int *c_avg, int *b_avg)
 
 	mutex_lock(&copr->lock);
 	if (!copr_is_enabled(copr)) {
-		panel_dbg("%s copr disabled\n", __func__);
 		mutex_unlock(&copr->lock);
 		return -EIO;
 	}
@@ -327,18 +326,6 @@ int copr_get_average(struct copr_info *copr, int *c_avg, int *b_avg)
 	copr_sum_update(copr, props->last_copr, props->last_brt, cur_ts);
 	copr_avg = props->copr_avg;
 	brt_avg = props->brt_avg;
-
-	panel_dbg("%s copr %d avg %lld, brt %d avg %lld (sum %llu %llu, %llu.%03llu sec) "
-			"total avg %llu %llu (%llu %llu, %llu.%03lld sec)\n", __func__,
-			props->last_copr, props->copr_avg,
-			props->last_brt, props->brt_avg,
-			props->copr_sum, props->brt_sum,
-			props->elapsed_msec / 1000,
-			props->elapsed_msec % 1000,
-			props->total_copr_avg, props->total_brt_avg,
-			props->total_copr_sum, props->total_brt_sum,
-			props->total_elapsed_msec / 1000,
-			props->total_elapsed_msec % 1000);
 
 	props->elapsed_msec = 0;
 	props->copr_sum = 0;

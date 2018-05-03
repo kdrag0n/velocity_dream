@@ -590,7 +590,6 @@ static void haptic_enable(struct timed_output_dev *tout_dev, int value)
 #if defined(CONFIG_SSP_MOTOR_CALLBACK)
 		setSensorCallback(false, 0);
 #endif
-		pr_debug("off\n");
 
 		mutex_unlock(&drvdata->mutex);
 	}

@@ -1652,10 +1652,6 @@ static void decon_set_aclk_base_timeout(struct decon_device *decon, unsigned lon
 	/* aclk_khz = 1ms*/
 	decon_reg_set_timeout_value(decon->id, aclk_khz * timeout);
 
-	if (decon->prev_aclk_khz != aclk_khz) {
-		decon_info("[decon%d] DPU_ACLK(%ld khz), TO(%ld)\n",
-				decon->id, aclk_khz, aclk_khz * timeout);
-	}
 	decon->prev_aclk_khz = aclk_khz;
 }
 

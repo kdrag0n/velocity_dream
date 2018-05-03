@@ -265,8 +265,6 @@ int ssp_send_cmd(struct ssp_data *data, char command, int arg)
 		return ERROR;
 	}
 
-	ssp_dbg("[SSP]: %s - command 0x%x %d\n", __func__, command, arg);
-
 	return SUCCESS;
 }
 
@@ -327,9 +325,6 @@ int send_instruction(struct ssp_data *data, u8 uInst,
 
 	msg->buffer[0] = uSensorType;
 	memcpy(&msg->buffer[1], uSendBuf, uLength);
-
-	ssp_dbg("[SSP]: %s - Inst = 0x%x, Sensor Type = 0x%x, data = %u\n",
-			__func__, command, uSensorType, msg->buffer[1]);
 
 	iRet = ssp_spi_async(data, msg);
 

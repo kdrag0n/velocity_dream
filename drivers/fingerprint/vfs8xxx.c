@@ -631,9 +631,6 @@ static int vfsspi_set_clk(struct vfsspi_device_data *vfsspi_device,
 				if (ret_val < 0)
 					pr_err("%s: Unable to enable spi clk\n",
 							__func__);
-				else
-					pr_info("%s ENABLE_SPI_CLOCK %ld\n",
-							__func__, spi_info->speed);
 #if !defined(CONFIG_SOC_EXYNOS8890) && !defined(CONFIG_SOC_EXYNOS8895)
 				ret_val = vfsspi_sec_dma_prepare(spi_info);
 				if (ret_val < 0)
@@ -713,7 +710,6 @@ static int vfsspi_register_drdy_signal(struct vfsspi_device_data *vfsspi_device,
 
 static int vfsspi_enableIrq(struct vfsspi_device_data *vfsspi_device)
 {
-	pr_info("%s\n", __func__);
 	spin_lock_irq(&vfsspi_device->irq_lock);
 	if (atomic_read(&vfsspi_device->irq_enabled)
 	    == DRDY_IRQ_ENABLE) {
@@ -733,7 +729,6 @@ static int vfsspi_enableIrq(struct vfsspi_device_data *vfsspi_device)
 
 static int vfsspi_disableIrq(struct vfsspi_device_data *vfsspi_device)
 {
-	pr_info("%s\n", __func__);
 	spin_lock_irq(&vfsspi_device->irq_lock);
 	if (atomic_read(&vfsspi_device->irq_enabled) == DRDY_IRQ_DISABLE) {
 		spin_unlock_irq(&vfsspi_device->irq_lock);
@@ -930,7 +925,6 @@ static long vfsspi_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		break;
 #ifndef ENABLE_SENSORS_FPRINT_SECURE
 	case VFSSPI_IOCTL_RW_SPI_MESSAGE:
-		pr_debug("%s RW_SPI_MESSAGE\n", __func__);
 		ret_val = vfsspi_rw_spi_message(vfsspi_device, arg);
 		if (ret_val) {
 			pr_err("%s : RW_SPI_MESSAGE error %d\n",
@@ -939,15 +933,12 @@ static long vfsspi_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		break;
 #endif
 	case VFSSPI_IOCTL_SET_CLK:
-		pr_info("%s SET_CLK\n", __func__);
 		ret_val = vfsspi_set_clk(vfsspi_device, arg);
 		break;
 	case VFSSPI_IOCTL_REGISTER_DRDY_SIGNAL:
-		pr_info("%s REGISTER_DRDY_SIGNAL\n", __func__);
 		ret_val = vfsspi_register_drdy_signal(vfsspi_device, arg);
 		break;
 	case VFSSPI_IOCTL_SET_DRDY_INT:
-		pr_info("%s SET_DRDY_INT\n", __func__);
 		ret_val = vfsspi_set_drdy_int(vfsspi_device, arg);
 		break;
 	case VFSSPI_IOCTL_POWER_ON:
@@ -959,7 +950,6 @@ static long vfsspi_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		vfsspi_ioctl_power_off(vfsspi_device);
 		break;
 	case VFSSPI_IOCTL_POWER_CONTROL:
-		pr_info("%s POWER_CONTROL\n", __func__);
 		if (copy_from_user(&onoff, (void *)arg,
 				sizeof(unsigned int)) != 0) {
 			pr_err("%s Failed copy from user.(POWER_CONTROL)\n", __func__);
@@ -970,7 +960,6 @@ static long vfsspi_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		break;
 #ifdef ENABLE_SENSORS_FPRINT_SECURE
 	case VFSSPI_IOCTL_DISABLE_SPI_CLOCK:
-		pr_info("%s DISABLE_SPI_CLOCK\n", __func__);
 		ret_val = vfsspi_ioctl_disable_spi_clock(vfsspi_device);
 		break;
 
@@ -991,9 +980,6 @@ static long vfsspi_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 		if (onoff) {
 			u8 retry_cnt = 0;
 
-			pr_info
-			    ("%s CPU_SPEEDUP ON:%d, retry: %d\n",
-			     __func__, onoff, retry_cnt);
 #if defined(CONFIG_SECURE_OS_BOOSTER_API)
 			do {
 				ret_val = secos_booster_start(onoff - 1);
@@ -1008,7 +994,6 @@ static long vfsspi_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 			} while (ret_val && retry_cnt < 7);
 #endif
 		} else {
-			pr_info("%s CPU_SPEEDUP OFF\n", __func__);
 #if defined(CONFIG_SECURE_OS_BOOSTER_API)
 			ret_val = secos_booster_stop();
 			if (ret_val)

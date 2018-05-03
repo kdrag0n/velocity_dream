@@ -138,9 +138,6 @@ static int ssp_remove_sensor(struct ssp_data *data,
 	u8 uBuf[4];
 	int64_t dSensorDelay = data->adDelayBuf[uChangedSensor];
 
-	ssp_dbg("[SSP]: %s - remove sensor = %d, current state = %d\n",
-		__func__, (1 << uChangedSensor), uNewEnable);
-
 	data->adDelayBuf[uChangedSensor] = DEFUALT_POLLING_DELAY;
 	data->batchLatencyBuf[uChangedSensor] = 0;
 	data->batchOptBuf[uChangedSensor] = 0;

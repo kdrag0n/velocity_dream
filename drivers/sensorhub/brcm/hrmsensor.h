@@ -48,18 +48,14 @@
 #define HRM_dbg(format, arg...)		\
 				printk(KERN_DEBUG "HRM_dbg : "format, ##arg);
 #else
-#define HRM_dbg(format, arg...)		{if (hrm_debug)\
-				printk(KERN_DEBUG "HRM_dbg : "format, ##arg);\
-					}
+#define HRM_dbg(format, arg...)
 #endif
 
 #ifdef HRM_INFO
 #define HRM_info(format, arg...)	\
 				printk(KERN_INFO "HRM_info : "format, ##arg);
 #else
-#define HRM_info(format, arg...)	{if (hrm_info)\
-				printk(KERN_INFO "HRM_info : "format, ##arg);\
-					}
+#define HRM_info(format, arg...)
 #endif
 
 enum hrm_mode {
