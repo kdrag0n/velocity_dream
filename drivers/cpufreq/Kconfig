@@ -370,12 +370,6 @@ config FINGERPRINT_BOOST
 	help
 	  Boosts available CPUs to max frequency on fingerprint sensor input.
 
-config CPU_INPUT_BOOST
-	bool "CPU Input Boost"
-	help
-	  Boosts the CPU on touchscreen input. Boost frequencies and
-	  durations are calculated automatically.
-
 if X86
 source "drivers/cpufreq/Kconfig.x86"
 endif
