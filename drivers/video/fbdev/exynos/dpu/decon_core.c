@@ -4195,9 +4195,11 @@ static int decon_probe(struct platform_device *pdev)
 	if (ret)
 		goto err_pinctrl;
 
+#ifdef CONFIG_DECON_EVENT_LOG
 	ret = decon_create_debugfs(decon);
 	if (ret)
 		goto err_pinctrl;
+#endif
 
 #ifdef CONFIG_DECON_HIBER
 	ret = decon_register_hiber_work(decon);

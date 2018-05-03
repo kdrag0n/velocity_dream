@@ -503,9 +503,6 @@ int ssp_send_instruction(struct ssp_data *data, u8 inst, u8 sensor_type,
 	ssp_fill_buffer(msg, 0, &sensor_type, 1);
 	ssp_fill_buffer(msg, 1, send_buf, length);
 
-	ssp_dbg("%s - Inst = 0x%x, Sensor Type = 0x%x, data = %u\n",
-		__func__, inst, sensor_type, send_buf[1]);
-
 	ret = ssp_spi_sync(data, msg, 1000);
 	ssp_clean_msg(msg);
 

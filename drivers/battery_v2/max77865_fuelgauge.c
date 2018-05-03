@@ -90,8 +90,6 @@ static int max77865_fg_read_vcell(struct max77865_fuelgauge_data *fuelgauge)
 
 	if (!(fuelgauge->info.pr_cnt++ % PRINT_COUNT)) {
 		fuelgauge->info.pr_cnt = 1;
-		pr_info("%s: VCELL(%d), data(0x%04x)\n",
-			__func__, vcell, (data[1]<<8) | data[0]);
 	}
 
 	if ((fuelgauge->vempty_mode == VEMPTY_MODE_SW_VALERT) && 
@@ -1137,7 +1135,7 @@ static void max77865_fg_get_scaled_capacity(
 #if defined(CONFIG_BATTERY_SWELLING)
 	union power_supply_propval swelling_val;
 #endif
-	int current_standard, raw_capacity = val->intval;
+	int current_standard = val->intval;
 	struct power_supply *psy = get_power_supply_by_name("battery");
 
 	if(!psy) {

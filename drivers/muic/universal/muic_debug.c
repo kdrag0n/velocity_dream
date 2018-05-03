@@ -59,38 +59,14 @@ void muic_reg_log(u8 reg, u8 value, u8 rw)
 	muic_log_cnt++;
 	if(muic_log_cnt >= MAX_LOG) muic_log_cnt = 0;
 }
-void muic_print_reg_log(void)
-{
-	int i;
-	u8 reg, value, rw;
-	char mesg[256]="";
-
-	for( i = 0 ; i < MAX_LOG ; i++ )
-	{
-		reg = muic_log[muic_log_cnt][0];
-		value = muic_log[muic_log_cnt][1];
-		rw = muic_log[muic_log_cnt][2];
-		muic_log_cnt++;
-
-		if(muic_log_cnt >= MAX_LOG) muic_log_cnt = 0;
-		sprintf(mesg+strlen(mesg),"%x(%x)%x ", reg, value, rw);
-	}
-	pr_info("%s:%s\n", __func__, mesg);
-}
+inline void muic_print_reg_log(void) {}
 void muic_read_reg_dump(muic_data_t *pmuic, char *mesg)
 {
 	struct regmap_ops *pops = pmuic->regmapdesc->regmapops;
 
 	pops->get_formatted_dump(pmuic->regmapdesc, mesg);
 }
-void muic_print_reg_dump(muic_data_t *pmuic)
-{
-	char mesg[256]="";
-
-	muic_read_reg_dump(pmuic, mesg);
-
-	pr_info("%s:%s\n", __func__, mesg);
-}
+inline void muic_print_reg_dump(muic_data_t *pmuic) {}
 
 
 void muic_show_debug_info(struct work_struct *work)

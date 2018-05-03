@@ -296,14 +296,11 @@ static void sx9320_send_event(struct sx9320_p *data, u8 state)
 {
 	if (state == ACTIVE) {
 		data->state = ACTIVE;
-		pr_info("[SX9320]: %s - button touched\n", __func__);
 	} else {
 		data->state = IDLE;
-		pr_info("[SX9320]: %s - button released\n", __func__);
 	}
 
 	if (data->skip_data == true) {
-		pr_info("[SX9320]: %s - skip grip event\n", __func__);
 		return;
 	}
 
@@ -388,10 +385,6 @@ static void sx9320_get_data(struct sx9320_p *data)
 	data->diff = useful - avg;
 
 	mutex_unlock(&data->read_mutex);
-
-	pr_info("[SX9320]: %s - Capmain: %d, Useful: %d, avg: %d, diff: %d, Offset: %u\n",
-		__func__, data->capmain, data->useful, data->avg,
-		data->diff, data->offset);
 }
 
 static int sx9320_set_mode(struct sx9320_p *data, unsigned char mode)
@@ -448,13 +441,7 @@ static void sx9320_set_enable(struct sx9320_p *data, int enable)
 {
 	u8 status = 0;
 
-	pr_info("[SX9320]: %s\n", __func__);
-
 	if (enable == ON) {
-
-		pr_info("[SX9320]: %s - enable(status : 0x%x)\n",
-			__func__, status);
-
 		data->diff_avg = 0;
 		data->diff_cnt = 0;
 		data->useful_avg = 0;
@@ -475,8 +462,6 @@ static void sx9320_set_enable(struct sx9320_p *data, int enable)
 		enable_irq(data->irq);
 		enable_irq_wake(data->irq);
 	} else {
-		pr_info("[SX9320]: %s - disable\n", __func__);
-
 		/*
 		 * disable interrupt
 		 */
@@ -1218,9 +1203,6 @@ static ssize_t sx9320_enable_store(struct device *dev,
 		pr_err("[SX9320]: %s - Invalid Argument\n", __func__);
 		return ret;
 	}
-
-	pr_info("[SX9320]: %s - new_value = %u old_value = %d\n",
-		__func__, enable, pre_enable);
 
 	if (pre_enable == enable)
 		return size;

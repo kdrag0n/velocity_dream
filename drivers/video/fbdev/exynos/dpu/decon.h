@@ -944,14 +944,15 @@ void DPU_EVENT_SHOW(struct seq_file *s, struct decon_device *decon);
 int decon_create_debugfs(struct decon_device *decon);
 void decon_destroy_debugfs(struct decon_device *decon);
 #else /*!*/
-#define DPU_EVENT_START(...) do { } while(0)
-#define DPU_EVENT_LOG(...) do { } while(0)
-#define DPU_EVENT_LOG_WINCON(...) do { } while(0)
-#define DPU_EVENT_LOG_FENCE(...) do { } while (0)
-#define DPU_EVENT_LOG_CMD(...) do { } while(0)
-#define DPU_EVENT_SHOW(...) do { } while(0)
-#define decon_create_debugfs(...) do { } while(0)
-#define decon_destroy_debugfs(..) do { } while(0)
+#define ACQUIRE_FENCE_LEN 40
+#define DPU_EVENT_START(...)
+#define DPU_EVENT_LOG(...)
+#define DPU_EVENT_LOG_WINCON(...)
+#define DPU_EVENT_LOG_FENCE(...)
+#define DPU_EVENT_LOG_CMD(...)
+#define DPU_EVENT_SHOW(...)
+#define decon_create_debugfs(...) 0
+#define decon_destroy_debugfs(...)
 #endif
 
 struct decon_resources {

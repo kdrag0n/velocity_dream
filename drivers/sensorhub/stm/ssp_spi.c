@@ -576,7 +576,6 @@ void set_proximity_threshold(struct ssp_data *data,
 	msg->free_buffer = 1;
 
 	ssp_errf("SENSOR_PROXTHRESHOL");
-
 #if defined(CONFIG_SENSORS_SSP_TMG399X)
 	msg->buffer[0] = (char)uData1;
 	msg->buffer[1] = (char)uData2;
@@ -593,8 +592,6 @@ void set_proximity_threshold(struct ssp_data *data,
 		ssp_err("SENSOR_PROXTHRESHOLD CMD fail %d", iRet);
 		return;
 	}
-
-	ssp_info("Proximity Threshold - %u, %u", uData1, uData2);
 }
 
 #ifdef CONFIG_SENSORS_MULTIPLE_GLASS_TYPE

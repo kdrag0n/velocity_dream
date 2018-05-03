@@ -119,26 +119,6 @@ static int max77865_get_vbus_state(struct max77865_charger_data *charger)
 		reg_data = ((reg_data & MAX77865_CHGIN_DTLS) >>
 			    MAX77865_CHGIN_DTLS_SHIFT);
 
-	switch (reg_data) {
-	case 0x00:
-		pr_info("%s: VBUS is invalid. CHGIN < CHGIN_UVLO\n",
-			__func__);
-		break;
-	case 0x01:
-		pr_info("%s: VBUS is invalid. CHGIN < MBAT+CHGIN2SYS" \
-			"and CHGIN > CHGIN_UVLO\n", __func__);
-		break;
-	case 0x02:
-		pr_info("%s: VBUS is invalid. CHGIN > CHGIN_OVLO",
-			__func__);
-		break;
-	case 0x03:
-		pr_info("%s: VBUS is valid. CHGIN < CHGIN_OVLO", __func__);
-		break;
-	default:
-		break;
-	}
-
 	return reg_data;
 }
 

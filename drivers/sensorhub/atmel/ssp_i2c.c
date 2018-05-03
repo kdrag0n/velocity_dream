@@ -590,8 +590,6 @@ void set_proximity_threshold(struct ssp_data *data,
 	msg->buffer = (char*) kzalloc(4, GFP_KERNEL);
 	msg->free_buffer = 1;
 
-	pr_err("[SSP]: %s - SENSOR_PROXTHRESHOL",__func__);
-
 	msg->buffer[0] = (char) uData1;
 	msg->buffer[1] = (char) uData2;
 
@@ -602,8 +600,6 @@ void set_proximity_threshold(struct ssp_data *data,
 			__func__, iRet);
 		return;
 	}
-
-	pr_info("[SSP]: Proximity Threshold - %u, %u\n", uData1, uData2);
 }
 
 void set_proximity_barcode_enable(struct ssp_data *data, bool bEnable)

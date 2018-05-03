@@ -241,9 +241,11 @@ static struct notifier_block nb_gpio_keys = {
 
 int __init sec_upload_init(void)
 {
+#ifdef sec_debug_get_debug_level
 	/* only work for debug level is low */
 	if ((sec_debug_get_debug_level() & 0x1) != 0x1)
 		register_gpio_keys_notifier(&nb_gpio_keys);
+#endif
 	return 0;
 }
 
