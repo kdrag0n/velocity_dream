@@ -40,7 +40,8 @@ test() {
     adb reboot recovery && \
     sleep 20 && \
     adb push velocity_kernel.zip /tmp && \
-    adb shell reboot 
+    adb shell twrp install /tmp/velocity_kernel.zip && \
+    adb shell reboot
 }
 
 inc() {
