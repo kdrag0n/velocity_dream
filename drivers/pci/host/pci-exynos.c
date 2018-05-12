@@ -1478,14 +1478,12 @@ void exynos_pcie_config_l1ss(struct pcie_port *pp)
 			writel(val, ep_dbi_base + 0xBC);
 			val = readl(ep_dbi_base + 0x248);
 			writel(val | 0xa0f, ep_dbi_base + 0x248);
-			dev_err(pp->dev, "l1ss enabled(0x%x)\n", exynos_pcie->l1ss_ctrl_id_state);
 		} else {
 			/* disable L1SS on Root Complex */
 			val = readl(ep_dbi_base + 0xbc);
 			writel(val & ~0x3, ep_dbi_base + 0xBC);
 			val = readl(ep_dbi_base + 0x248);
 			writel(val & ~0xf, ep_dbi_base + 0x248);
-			dev_err(pp->dev, "l1ss disabled(0x%x)\n", exynos_pcie->l1ss_ctrl_id_state);
 		}
 		spin_unlock_irqrestore(&exynos_pcie->conf_lock, flags);
 
@@ -1701,9 +1699,6 @@ void exynos_pcie_poweroff(int ch_num)
 			WAKEUP_MASK,
 			(0x1 << (WAKEUP_MASK_PCIE_WIFI + exynos_pcie->ch_num)),
 			(0x1 << (WAKEUP_MASK_PCIE_WIFI + exynos_pcie->ch_num)));
-
-	dev_info(pp->dev, "%s, end of poweroff, pcie state: %d\n",  __func__,
-		 exynos_pcie->state);
 }
 EXPORT_SYMBOL(exynos_pcie_poweroff);
 

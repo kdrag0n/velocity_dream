@@ -240,16 +240,6 @@ void report_light_data(struct ssp_data *data, struct sensor_value *lightdata)
 	report_iio_data(data, LIGHT_SENSOR, lightdata);
 
 	if (data->light_log_cnt < 3) {
-#ifdef CONFIG_SENSORS_SSP_LIGHT_REPORT_LUX
-		ssp_dbg("[SSP] #>L lux=%u cct=%d r=%d g=%d b=%d c=%d atime=%d again=%d",
-			data->buf[LIGHT_SENSOR].lux, data->buf[LIGHT_SENSOR].cct,
-			data->buf[LIGHT_SENSOR].r, data->buf[LIGHT_SENSOR].g, data->buf[LIGHT_SENSOR].b,
-			data->buf[LIGHT_SENSOR].w, data->buf[LIGHT_SENSOR].a_time, data->buf[LIGHT_SENSOR].a_gain);
-#else
-		ssp_dbg("[SSP] #>L r=%d g=%d b=%d c=%d atime=%d again=%d",
-			data->buf[LIGHT_SENSOR].r, data->buf[LIGHT_SENSOR].g, data->buf[LIGHT_SENSOR].b,
-			data->buf[LIGHT_SENSOR].w, data->buf[LIGHT_SENSOR].a_time, data->buf[LIGHT_SENSOR].a_gain);
-#endif
 		data->light_log_cnt++;
 	}
 }
@@ -274,16 +264,6 @@ void report_light_cct_data(struct ssp_data *data, struct sensor_value *lightdata
 	report_iio_data(data, LIGHT_CCT_SENSOR, lightdata);
 
 	if (data->light_log_cnt < 3) {
-#ifdef CONFIG_SENSORS_SSP_LIGHT_REPORT_LUX
-		ssp_dbg("[SSP] #>L lux=%u cct=%d r=%d g=%d b=%d c=%d atime=%d again=%d",
-			data->buf[LIGHT_CCT_SENSOR].lux, data->buf[LIGHT_CCT_SENSOR].cct,
-			data->buf[LIGHT_CCT_SENSOR].r, data->buf[LIGHT_CCT_SENSOR].g, data->buf[LIGHT_CCT_SENSOR].b,
-			data->buf[LIGHT_CCT_SENSOR].w, data->buf[LIGHT_CCT_SENSOR].a_time, data->buf[LIGHT_CCT_SENSOR].a_gain);
-#else
-		ssp_dbg("[SSP] #>L r=%d g=%d b=%d c=%d atime=%d again=%d",
-			data->buf[LIGHT_CCT_SENSOR].r, data->buf[LIGHT_CCT_SENSOR].g, data->buf[LIGHT_CCT_SENSOR].b,
-			data->buf[LIGHT_CCT_SENSOR].w, data->buf[LIGHT_CCT_SENSOR].a_time, data->buf[LIGHT_CCT_SENSOR].a_gain);
-#endif
 		data->light_log_cnt++;
 	}
 }

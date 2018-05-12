@@ -1378,7 +1378,6 @@ int check_panel_active(struct panel_device *panel, const char *caller)
 
 	if ((mipi_drv->get_state) &&
 		(mipi_drv->get_state(panel->dsi_id) == DSIM_STATE_OFF)) {
-		panel_err("PANEL:ERR:%s:dsim off\n", caller);
 		return 0;
 	}
 

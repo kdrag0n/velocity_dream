@@ -4905,8 +4905,6 @@ dhd_start_xmit(struct sk_buff *skb, struct net_device *net)
 	unsigned long flags;
 	uint8 htsfdlystat_sz = 0;
 
-	DHD_TRACE(("%s: Enter\n", __FUNCTION__));
-
 	if (dhd_query_bus_erros(&dhd->pub)) {
 		return -ENODEV;
 	}
@@ -6224,7 +6222,6 @@ void dhd_runtime_pm_enable(dhd_pub_t *dhdp)
 {
 	if (dhd_get_idletime(dhdp)) {
 		dhd_os_runtimepm_timer(dhdp, dhd_runtimepm_ms);
-		DHD_ERROR(("DHD Runtime PM Enabled \n"));
 	}
 }
 

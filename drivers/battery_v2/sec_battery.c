@@ -1623,9 +1623,6 @@ static bool sec_bat_check_recharge(struct sec_battery_info *battery)
 		 SEC_BATTERY_FULL_CONDITION_NOTIMEFULL) &&
 		(battery->charging_mode == SEC_BATTERY_CHARGING_NONE))
 	{
-		dev_info(battery->dev,
-				 "%s: Re-charging by NOTIMEFULL (%d)\n",
-				 __func__, battery->capacity);
 		goto check_recharge_check_count;
 	}
 
@@ -1640,11 +1637,7 @@ static bool sec_bat_check_recharge(struct sec_battery_info *battery)
 				(battery->pdata->chg_float_voltage /
 				 battery->pdata->chg_float_voltage_conv) -
 				150;
-			dev_info(battery->dev, "%s: recharging voltage changed by low temp(%d)\n",
-					 __func__, recharging_voltage);
 		}
-		dev_info(battery->dev, "%s: recharging voltage (%d)\n",
-				 __func__, recharging_voltage);
 
 		if ((battery->pdata->recharge_condition_type &
 			 SEC_BATTERY_RECHARGE_CONDITION_SOC) &&
@@ -1653,9 +1646,6 @@ static bool sec_bat_check_recharge(struct sec_battery_info *battery)
 		{
 			battery->expired_time = battery->pdata->recharging_expired_time;
 			battery->prev_safety_time = 0;
-			dev_info(battery->dev,
-					 "%s: Re-charging by SOC (%d)\n",
-					 __func__, battery->capacity);
 			goto check_recharge_check_count;
 		}
 
@@ -1665,9 +1655,6 @@ static bool sec_bat_check_recharge(struct sec_battery_info *battery)
 		{
 			battery->expired_time = battery->pdata->recharging_expired_time;
 			battery->prev_safety_time = 0;
-			dev_info(battery->dev,
-					 "%s: Re-charging by average VCELL (%d)\n",
-					 __func__, battery->voltage_avg);
 			goto check_recharge_check_count;
 		}
 
@@ -1677,9 +1664,6 @@ static bool sec_bat_check_recharge(struct sec_battery_info *battery)
 		{
 			battery->expired_time = battery->pdata->recharging_expired_time;
 			battery->prev_safety_time = 0;
-			dev_info(battery->dev,
-					 "%s: Re-charging by VCELL (%d)\n",
-					 __func__, battery->voltage_now);
 			goto check_recharge_check_count;
 		}
 	}

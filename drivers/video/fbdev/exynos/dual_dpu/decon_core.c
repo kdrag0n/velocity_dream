@@ -858,7 +858,6 @@ static int decon_disable(struct decon_device *decon)
 
 	if (decon->dt.out_type == DECON_OUT_DSI) {
 		pm_relax(decon->dev);
-		dev_warn(decon->dev, "pm_relax");
 	}
 
 	if (decon->dt.psr_mode != DECON_VIDEO_MODE) {
@@ -2396,7 +2395,6 @@ int decon_set_doze_suspend(struct decon_device *decon)
 	}
 
 	pm_relax(decon->dev);
-	dev_warn(decon->dev, "pm_relax");
 
 	if (decon->dt.psr_mode != DECON_VIDEO_MODE) {
 		if (decon->res.pinctrl && decon->res.hw_te_off) {

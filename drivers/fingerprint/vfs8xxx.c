@@ -732,7 +732,6 @@ static int vfsspi_disableIrq(struct vfsspi_device_data *vfsspi_device)
 	spin_lock_irq(&vfsspi_device->irq_lock);
 	if (atomic_read(&vfsspi_device->irq_enabled) == DRDY_IRQ_DISABLE) {
 		spin_unlock_irq(&vfsspi_device->irq_lock);
-		pr_info("%s DRDY irq already disabled\n", __func__);
 		return -EINVAL;
 	}
 	disable_irq_nosync(gpio_irq);
@@ -771,10 +770,8 @@ static irqreturn_t vfsspi_irq(int irq, void *context)
 			spin_unlock(&vfsspi_device->irq_lock);
 			vfsspi_send_drdy_signal(vfsspi_device);
 			wake_lock_timeout(&vfsspi_device->fp_signal_lock, 3 * HZ);
-			pr_info("%s disableIrq\n", __func__);
 		} else {
 			spin_unlock(&vfsspi_device->irq_lock);
-			pr_info("%s irq already diabled\n", __func__);
 		}
 	}
 	return IRQ_HANDLED;

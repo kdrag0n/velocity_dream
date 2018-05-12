@@ -1220,7 +1220,6 @@ static long panel_core_ioctl(struct v4l2_subdev *sd, unsigned int cmd, void *arg
 			break;
 
 		case PANEL_IOC_DECON_PROBE:
-			panel_info("PANEL:INFO:%s:PANEL_IOC_DECON_PROBE\n", __func__);
 			v4l2_set_subdev_hostdata(sd, &panel->lcd_info);
 			break;
 
@@ -1229,42 +1228,34 @@ static long panel_core_ioctl(struct v4l2_subdev *sd, unsigned int cmd, void *arg
 			break;
 
 		case PANEL_IOC_REG_RESET_CB:
-			panel_info("PANEL:INFO:%s:PANEL_IOC_REG_PANEL_RESET\n", __func__);
 			ret = panel_set_reset_cb(sd);
 			break;
 
 		case PANEL_IOC_GET_PANEL_STATE:
-			panel_info("PANEL:INFO:%s:PANEL_IOC_GET_PANEL_STATE\n", __func__);
 			v4l2_set_subdev_hostdata(sd, &panel->state);
 			break;
 
 		case PANEL_IOC_PANEL_PROBE:
-			panel_info("PANEL:INFO:%s:PANEL_IOC_PANEL_PROBE\n", __func__);
 			ret = panel_probe(panel);
 			break;
 
 		case PANEL_IOC_SLEEP_IN:
-			panel_info("PANEL:INFO:%s:PANEL_IOC_SLEEP_IN\n", __func__);
 			ret = panel_sleep_in(panel);
 			break;
 
 		case PANEL_IOC_SLEEP_OUT:
-			panel_info("PANEL:INFO:%s:PANEL_IOC_SLEEP_OUT\n", __func__);
 			ret = panel_sleep_out(panel);
 			break;
 
 		case PANEL_IOC_SET_POWER:
-			panel_info("PANEL:INFO:%s:PANEL_IOC_SET_POWER\n", __func__);
 			ret = panel_ioctl_set_power(panel, arg);
 			break;
 
 		case PANEL_IOC_PANEL_DUMP :
-			panel_info("PANEL:INFO:%s:PANEL_IOC_PANEL_DUMP\n", __func__);
 			ret = panel_debug_dump(panel);
 			break;
 #ifdef CONFIG_SUPPORT_DOZE
 		case PANEL_IOC_DOZE:
-			panel_info("PANEL:INFO:%s:PANEL_IOC_DOZE\n", __func__);
 			ret = panel_doze(panel);
 			mdnie_update(&panel->mdnie);
 			break;
@@ -1275,16 +1266,13 @@ static long panel_core_ioctl(struct v4l2_subdev *sd, unsigned int cmd, void *arg
 			break;
 #endif
 		case PANEL_IOC_DISP_ON:
-			panel_info("PANEL:INFO:%s:PANEL_IOC_DISP_ON\n", __func__);
 			ret = panel_ioctl_display_on(panel, arg);
 			break;
 
 		case PANEL_IOC_EVT_FRAME_DONE:
-			//panel_info("PANEL:INFO:%s:PANEL_IOC_EVT_FRAME_DONE\n", __func__);
 			copr_update_start(&panel->copr, 3);
 			break;
 		case PANEL_IOC_EVT_VSYNC:
-			//panel_dbg("PANEL:INFO:%s:PANEL_IOC_EVT_VSYNC\n", __func__);
 			break;
 #ifdef CONFIG_SUPPORT_INDISPLAY
 		case PANEL_IOC_SET_FINGER_SET:
@@ -1931,7 +1919,6 @@ static int panel_fb_notifier(struct notifier_block *self,
 		case FB_EVENT_BLANK:
 			break;
 		case FB_EVENT_FB_REGISTERED:
-			panel_dbg("PANEL:INFO:%s:FB Registeted\n", __func__);
 			return 0;
 		default:
 			return 0;
@@ -1941,25 +1928,9 @@ static int panel_fb_notifier(struct notifier_block *self,
 	panel = container_of(self, struct panel_device, fb_notif);
 	blank = fb_event->data;
 	if (!blank || !panel) {
-		panel_err("PANEL:ERR:%s:blank is null\n", __func__);
 		return 0;
 	}
 
-	switch (*blank) {
-		case FB_BLANK_POWERDOWN:
-		case FB_BLANK_NORMAL:
-			if (event == FB_EARLY_EVENT_BLANK)
-				panel_dbg("PANEL:INFO:%s:EARLY BLANK POWER DOWN\n", __func__);
-			else
-				panel_dbg("PANEL:INFO:%s:BLANK POWER DOWN\n", __func__);
-			break;
-		case FB_BLANK_UNBLANK:
-			if (event == FB_EARLY_EVENT_BLANK)
-				panel_dbg("PANEL:INFO:%s:EARLY UNBLANK\n", __func__);
-			else
-				panel_dbg("PANEL:INFO:%s:UNBLANK\n", __func__);
-			break;
-	}
 	return 0;
 }
 

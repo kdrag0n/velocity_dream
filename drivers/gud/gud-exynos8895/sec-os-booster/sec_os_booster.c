@@ -93,7 +93,6 @@ int secos_booster_request_pm_qos(struct pm_qos_request *req, s32 freq)
 	ns = ktime_to_ns(ktime_sub(current_time, recent_qos_req_time));
 
 	if (ns > 0 && WAIT_TIME > ns) {
-		pr_info("%s: recalling time is too short. wait %lldms\n", __func__, (WAIT_TIME - ns) / NS_DIV_MS + 1);
 		msleep((WAIT_TIME - ns) / NS_DIV_MS + 1);
 	}
 

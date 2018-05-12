@@ -1873,10 +1873,6 @@ static unsigned char fts_event_handler_type_b(struct fts_ts_info *info,
 
 				input_report_switch(info->input_dev, SW_GLOVE, info->touch_mode);
 #endif
-			} else if (status == STATUS_EVENT_FORCE_CAL_TRIGGER) {
-				input_info(true, &info->client->dev, "%s: Received Force Calibration trigger Event\n", __func__);
-			} else if (status == STATUS_EVENT_FORCE_CAL_DONE_D3) {
-				input_info(true, &info->client->dev, "%s: Received Force Calibration finished Event\n", __func__);
 			} else if (status == STATUS_EVENT_WETMODE) {
 				if (data[2 + EventNum * FTS_EVENT_SIZE] == 0x01) {
 					input_info(true, &info->client->dev, "%s: Received Wet Mode On Event\n", __func__);

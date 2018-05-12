@@ -489,7 +489,6 @@ int copr_disable(struct copr_info *copr)
 	mutex_unlock(&copr->lock);
 	if (set_spi_gpios(panel, 0))
 		panel_err("%s:failed to set spio gpio\n", __func__);
-	panel_dbg("%s\n", __func__);
 
 	return 0;
 }

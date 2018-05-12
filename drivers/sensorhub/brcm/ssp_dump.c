@@ -53,8 +53,6 @@ int store_sensor_dump(struct ssp_data *data, int sensor_type, u16 length, u8 *bu
 	int tmp_len = sensor_dump_length(length);
 	char tmp_ch;
 
-	pr_info("[SSP] %s - type %d, length %d\n", __func__, sensor_type, length);
-
 	/*make file contents*/
 	contents = (char *)kzalloc(sensor_dump_length(length), GFP_KERNEL);
 
@@ -137,8 +135,6 @@ int send_sensor_dump_command(struct ssp_data *data, u8 sensor_type)
 	msg->free_buffer = 0;
 
 	ret = ssp_spi_sync(data, msg, 1000);
-
-	pr_info("[SSP] %s - (%u)\n", __func__, sensor_type);
 
 	if (ret != SUCCESS) {
 		pr_err("[SSP] MSG2SSP_AP_REGISTER_DUMP CMD Fail %d", ret);

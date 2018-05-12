@@ -611,7 +611,6 @@ static int dhdpcie_resume_dev(struct pci_dev *dev)
 	dhdpcie_info_t *pch = pci_get_drvdata(dev);
 	pci_load_and_free_saved_state(dev, &pch->state);
 #endif /* OEM_ANDROID && LINUX_VERSION_CODE >= KERNEL_VERSION(3, 0, 0) */
-	DHD_TRACE_HW4(("%s: Enter\n", __FUNCTION__));
 	dev->state_saved = TRUE;
 	pci_restore_state(dev);
 	err = pci_enable_device(dev);
@@ -2178,7 +2177,6 @@ bool dhd_runtime_bus_wake(dhd_bus_t *bus, bool wait, void *func_addr)
 
 			DHD_GENERAL_UNLOCK(bus->dhd, flags);
 
-			DHD_ERROR(("Runtime Resume is called in %pf\n", func_addr));
 			smp_wmb();
 			wake_up_interruptible(&bus->rpm_queue);
 		/* No need to wake up the RPM state thread */

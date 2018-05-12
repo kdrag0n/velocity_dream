@@ -15442,9 +15442,6 @@ static s32 wl_escan_handler(struct bcm_cfg80211 *cfg, bcm_struct_cfgdev *cfgdev,
 	u32 i;
 #endif /* WL_DRV_AVOID_SCANCACHE */
 
-	WL_DBG((" enter event type : %d, status : %d \n",
-		ntoh32(e->event_type), ntoh32(e->status)));
-
 	ndev = cfgdev_to_wlc_ndev(cfgdev, cfg);
 
 	mutex_lock(&cfg->usr_sync);
@@ -15466,7 +15463,6 @@ static s32 wl_escan_handler(struct bcm_cfg80211 *cfg, bcm_struct_cfgdev *cfgdev,
 
 #ifndef WL_DRV_AVOID_SCANCACHE
 	if (status == WLC_E_STATUS_PARTIAL) {
-		WL_INFORM(("WLC_E_STATUS_PARTIAL \n"));
 		DBG_EVENT_LOG((dhd_pub_t *)cfg->pub, WIFI_EVENT_DRIVER_SCAN_RESULT_FOUND);
 		if (!escan_result) {
 			WL_ERR(("Invalid escan result (NULL pointer)\n"));
@@ -15696,19 +15692,13 @@ static s32 wl_escan_handler(struct bcm_cfg80211 *cfg, bcm_struct_cfgdev *cfgdev,
 			escan_result->sync_id);
 
 		if (wl_get_drv_status_all(cfg, FINDING_COMMON_CHANNEL)) {
-			WL_INFORM(("ACTION FRAME SCAN DONE\n"));
 			wl_clr_p2p_status(cfg, SCANNING);
 			wl_clr_drv_status(cfg, SCANNING, cfg->afx_hdl->dev);
 			if (cfg->afx_hdl->peer_chan == WL_INVALID)
 				complete(&cfg->act_frm_scan);
 		} else if ((likely(cfg->scan_request)) || (cfg->sched_scan_running)) {
-			WL_INFORM(("ESCAN COMPLETED\n"));
 			DBG_EVENT_LOG((dhd_pub_t *)cfg->pub, WIFI_EVENT_DRIVER_SCAN_COMPLETE);
 			cfg->bss_list = wl_escan_get_buf(cfg, FALSE);
-			if (!scan_req_match(cfg)) {
-				WL_TRACE_HW4(("SCAN COMPLETED: scanned AP count=%d\n",
-					cfg->bss_list->count));
-			}
 			wl_inform_bss(cfg);
 			wl_notify_escan_complete(cfg, ndev, false, false);
 		}
@@ -15780,18 +15770,12 @@ static s32 wl_escan_handler(struct bcm_cfg80211 *cfg, bcm_struct_cfgdev *cfgdev,
 		wl_escan_print_sync_id(status, escan_result->sync_id,
 			cfg->escan_info.cur_sync_id);
 		if (wl_get_drv_status_all(cfg, FINDING_COMMON_CHANNEL)) {
-			WL_INFORM(("ACTION FRAME SCAN DONE\n"));
 			wl_clr_p2p_status(cfg, SCANNING);
 			wl_clr_drv_status(cfg, SCANNING, cfg->afx_hdl->dev);
 			if (cfg->afx_hdl->peer_chan == WL_INVALID)
 				complete(&cfg->act_frm_scan);
 		} else if ((likely(cfg->scan_request)) || (cfg->sched_scan_running)) {
 			cfg->bss_list = wl_escan_get_buf(cfg, TRUE);
-			if (!scan_req_match(cfg)) {
-				WL_TRACE_HW4(("SCAN ABORTED(UNEXPECTED): "
-					"scanned AP count=%d\n",
-					cfg->bss_list->count));
-			}
 			wl_inform_bss(cfg);
 			wl_notify_escan_complete(cfg, ndev, true, false);
 		}

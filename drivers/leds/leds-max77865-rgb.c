@@ -338,8 +338,6 @@ static int max77865_rgb_ramp(struct device *dev, int ramp_up, int ramp_down)
 	int value;
 	int ret;
 
-	pr_info("leds-max77865-rgb: %s\n", __func__);
-
 	if (ramp_up <= led_fade_time_up) {
 		ramp_up /= 100;
 	} else {
@@ -679,7 +677,6 @@ static ssize_t store_max77865_rgb_pattern(struct device *dev,
 		dev_err(dev, "fail to get led_pattern mode.\n");
 		return count;
 	}
-	pr_info("leds-max77865-rgb: %s pattern=%d lowpower=%i\n", __func__, mode, led_lowpower_mode);
 
 	GBLdev = dev;
 
