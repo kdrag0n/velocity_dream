@@ -473,8 +473,6 @@ static int abox_uaif_control_bclk_polarity(struct snd_soc_dai *dai, bool set)
 	if (dai->active)
 		return 0;
 
-	dev_info(dev, "%s(%s, %d)\n", __func__, dai->name, set);
-
 	ctrl1 = snd_soc_read(codec, ABOX_UAIF_CTRL1(id));
 
 	if (set) {
@@ -509,8 +507,6 @@ static int abox_uaif_set_fmt(struct snd_soc_dai *dai, unsigned int fmt)
 	enum abox_dai id = dai->id;
 	unsigned int ctrl0, ctrl1;
 	int result = 0;
-
-	dev_info(dev, "%s[%d](0x%08x)\n", __func__, dai->id, fmt);
 
 	data->uaif_fmt[id] = fmt;
 
@@ -587,10 +583,6 @@ static int abox_uaif_startup(struct snd_pcm_substream *substream,
 	enum abox_dai id = dai->id;
 	int result;
 
-	dev_info(dev, "%s[%d:%c]\n", __func__, id,
-			(substream->stream == SNDRV_PCM_STREAM_CAPTURE) ?
-			'C' : 'P');
-
 	pm_runtime_get_sync(dev);
 	abox_uaif_control_bclk_polarity(dai, true);
 	abox_request_cpu_gear_sync(dev, data, dai, 3);
@@ -615,10 +607,6 @@ static void abox_uaif_shutdown(struct snd_pcm_substream *substream,
 	struct abox_data *data = platform_get_drvdata(to_platform_device(dev));
 	enum abox_dai id = dai->id;
 	struct snd_soc_codec *codec = dai->codec;
-
-	dev_info(dev, "%s[%d:%c]\n", __func__, id,
-			(substream->stream == SNDRV_PCM_STREAM_CAPTURE) ?
-			'C' : 'P');
 
 	if (substream->stream == SNDRV_PCM_STREAM_PLAYBACK) {
 		snd_soc_update_bits(codec, ABOX_UAIF_CTRL0(id),
@@ -646,10 +634,6 @@ static int abox_uaif_hw_params(struct snd_pcm_substream *substream,
 	unsigned long target_pll;
 	int result;
 
-	dev_info(dev, "%s[%d:%c]\n", __func__, dai->id,
-			(substream->stream == SNDRV_PCM_STREAM_CAPTURE) ?
-			'C' : 'P');
-
 	ctrl1 = snd_soc_read(codec, ABOX_UAIF_CTRL1(id));
 
 	channels = params_channels(hw_params);
@@ -659,8 +643,6 @@ static int abox_uaif_hw_params(struct snd_pcm_substream *substream,
 	target_pll = ((rate % 44100) == 0) ? AUD_PLL_RATE_HZ_FOR_44100 :
 			AUD_PLL_RATE_HZ_FOR_48000;
 	if (target_pll != clk_get_rate(data->clk_pll)) {
-		dev_info(dev, "Set AUD_PLL rate: %lu -> %lu\n",
-			clk_get_rate(data->clk_pll), target_pll);
 		result = clk_set_rate(data->clk_pll, target_pll);
 		if (IS_ERR_VALUE(result)) {
 			dev_err(dev, "AUD_PLL set error=%d\n", result);
@@ -682,19 +664,12 @@ static int abox_uaif_hw_params(struct snd_pcm_substream *substream,
 		dev_err(dev, "Failed to set audif clock: %d\n", result);
 		return result;
 	}
-	dev_info(dev, "audif clock: %lu\n", clk_get_rate(data->clk_audif));
 
 	result = clk_set_rate(data->clk_bclk[id], rate * channels * width);
 	if (IS_ERR_VALUE(result)) {
 		dev_err(dev, "bclk set error=%d\n", result);
 		return result;
 	}
-
-	dev_info(dev, "rate=%u, width=%d, channel=%u, bclk=%lu\n",
-			rate,
-			width,
-			channels,
-			clk_get_rate(data->clk_bclk[id]));
 
 	switch (params_format(hw_params)) {
 	case SNDRV_PCM_FORMAT_S16:
@@ -740,10 +715,6 @@ static int abox_uaif_trigger(struct snd_pcm_substream *substream,
 	struct device *dev = dai->dev;
 	struct snd_soc_codec *codec = dai->codec;
 	enum abox_dai id = dai->id;
-
-	dev_info(dev, "%s[%d:%c] trigger=%d\n", __func__, dai->id,
-			(substream->stream == SNDRV_PCM_STREAM_CAPTURE) ?
-			'C' : 'P', trigger);
 
 	switch (trigger) {
 	case SNDRV_PCM_TRIGGER_START:
@@ -972,12 +943,6 @@ static int abox_dsif_hw_params(struct snd_pcm_substream *substream,
 	channels = params_channels(hw_params);
 	rate = params_rate(hw_params);
 	width = params_width(hw_params);
-
-	dev_info(dev, "rate=%u, width=%d, channel=%u, bclk=%lu\n",
-			rate,
-			width,
-			channels,
-			clk_get_rate(data->clk_bclk[id]));
 
 	switch (params_format(hw_params)) {
 	case SNDRV_PCM_FORMAT_S32:
@@ -2070,9 +2035,6 @@ static int abox_flush_mixp(struct snd_soc_dapm_widget *w,
 {
 	struct snd_soc_codec *codec = snd_soc_dapm_to_codec(w->dapm);
 
-	dev_dbg(codec->dev, "%s\n", __func__);
-
-	dev_info(codec->dev, "%s: flush\n", __func__);
 	snd_soc_update_bits(codec, ABOX_SPUS_CTRL2,
 			ABOX_SPUS_MIXP_FLUSH_MASK,
 			1 << ABOX_SPUS_MIXP_FLUSH_L);
@@ -2102,10 +2064,7 @@ static int abox_flush_sifs1(struct snd_soc_dapm_widget *w,
 {
 	struct snd_soc_codec *codec = snd_soc_dapm_to_codec(w->dapm);
 
-	dev_dbg(codec->dev, "%s\n", __func__);
-
 	if (!snd_soc_dapm_connected_input_ep(w, NULL)) {
-		dev_info(codec->dev, "%s: flush\n", __func__);
 		snd_soc_update_bits(codec, ABOX_SPUS_CTRL3,
 				ABOX_SPUS_SIFS1_FLUSH_MASK,
 				1 << ABOX_SPUS_SIFS1_FLUSH_L);
@@ -2119,10 +2078,7 @@ static int abox_flush_sifs2(struct snd_soc_dapm_widget *w,
 {
 	struct snd_soc_codec *codec = snd_soc_dapm_to_codec(w->dapm);
 
-	dev_dbg(codec->dev, "%s\n", __func__);
-
 	if (!snd_soc_dapm_connected_input_ep(w, NULL)) {
-		dev_info(codec->dev, "%s: flush\n", __func__);
 		snd_soc_update_bits(codec, ABOX_SPUS_CTRL3,
 				ABOX_SPUS_SIFS2_FLUSH_MASK,
 				1 << ABOX_SPUS_SIFS2_FLUSH_L);
@@ -2136,10 +2092,7 @@ static int abox_flush_recp(struct snd_soc_dapm_widget *w,
 {
 	struct snd_soc_codec *codec = snd_soc_dapm_to_codec(w->dapm);
 
-	dev_dbg(codec->dev, "%s\n", __func__);
-
 	if (!snd_soc_dapm_connected_output_ep(w, NULL)) {
-		dev_info(codec->dev, "%s: flush\n", __func__);
 		snd_soc_update_bits(codec, ABOX_SPUM_CTRL2,
 				ABOX_SPUM_RECP_FLUSH_MASK,
 				1 << ABOX_SPUM_RECP_FLUSH_L);
@@ -2153,10 +2106,7 @@ static int abox_flush_sifm0(struct snd_soc_dapm_widget *w,
 {
 	struct snd_soc_codec *codec = snd_soc_dapm_to_codec(w->dapm);
 
-	dev_dbg(codec->dev, "%s\n", __func__);
-
 	if (!snd_soc_dapm_connected_output_ep(w, NULL)) {
-		dev_info(codec->dev, "%s: flush\n", __func__);
 		snd_soc_update_bits(codec, ABOX_SPUM_CTRL3,
 				ABOX_SPUM_SIFM0_FLUSH_MASK,
 				1 << ABOX_SPUM_SIFM0_FLUSH_L);
@@ -2170,10 +2120,7 @@ static int abox_flush_sifm1(struct snd_soc_dapm_widget *w,
 {
 	struct snd_soc_codec *codec = snd_soc_dapm_to_codec(w->dapm);
 
-	dev_dbg(codec->dev, "%s\n", __func__);
-
 	if (!snd_soc_dapm_connected_output_ep(w, NULL)) {
-		dev_info(codec->dev, "%s: flush\n", __func__);
 		snd_soc_update_bits(codec, ABOX_SPUM_CTRL3,
 				ABOX_SPUM_SIFM1_FLUSH_MASK,
 				1 << ABOX_SPUM_SIFM1_FLUSH_L);
@@ -2187,10 +2134,7 @@ static int abox_flush_sifm2(struct snd_soc_dapm_widget *w,
 {
 	struct snd_soc_codec *codec = snd_soc_dapm_to_codec(w->dapm);
 
-	dev_dbg(codec->dev, "%s\n", __func__);
-
 	if (!snd_soc_dapm_connected_output_ep(w, NULL)) {
-		dev_info(codec->dev, "%s: flush\n", __func__);
 		snd_soc_update_bits(codec, ABOX_SPUM_CTRL3,
 				ABOX_SPUM_SIFM2_FLUSH_MASK,
 				1 << ABOX_SPUM_SIFM2_FLUSH_L);
@@ -2204,10 +2148,7 @@ static int abox_flush_sifm3(struct snd_soc_dapm_widget *w,
 {
 	struct snd_soc_codec *codec = snd_soc_dapm_to_codec(w->dapm);
 
-	dev_dbg(codec->dev, "%s\n", __func__);
-
 	if (!snd_soc_dapm_connected_output_ep(w, NULL)) {
-		dev_info(codec->dev, "%s: flush\n", __func__);
 		snd_soc_update_bits(codec, ABOX_SPUM_CTRL3,
 				ABOX_SPUM_SIFM3_FLUSH_MASK,
 				1 << ABOX_SPUM_SIFM3_FLUSH_L);
@@ -3014,8 +2955,6 @@ int abox_hw_params_fixup_helper(struct snd_soc_pcm_runtime *rtd,
 	int stream;
 	enum ABOX_CONFIGMSG rate, format;
 
-	dev_dbg(dev, "%s[%s]\n", __func__, dai->name);
-
 	switch (rtd->dpcm[SNDRV_PCM_STREAM_PLAYBACK].state) {
 	case SND_SOC_DPCM_STATE_OPEN:
 	case SND_SOC_DPCM_STATE_HW_PARAMS:
@@ -3080,9 +3019,6 @@ int abox_hw_params_fixup_helper(struct snd_soc_pcm_runtime *rtd,
 				params_channels(params));
 		hw_param_interval(params, SNDRV_PCM_HW_PARAM_RATE)->min =
 				abox_get_out_rate(data, rate);
-		dev_info(dev, "%s: %d bit, %u channel, %uHz\n", __func__,
-				params_width(params), params_channels(params),
-				abox_get_out_rate(data, rate));
 	}
 	snd_soc_dapm_mutex_unlock(snd_soc_component_get_dapm(cmpnt));
 
@@ -3232,7 +3168,7 @@ static void abox_change_cpu_gear(struct device *dev, struct abox_data *data)
 			dev_warn(dev, "setting pll clock to %d is failed: %d\n",
 					0, result);
 		}
-		dev_info(dev, "pll clock: %lu\n", clk_get_rate(data->clk_pll));
+
 		result = clk_set_rate(data->clk_ca7, AUD_PLL_RATE_KHZ);
 		if (IS_ERR_VALUE(result)) {
 			dev_warn(dev, "setting cpu clock gear to %d is failed: %d\n",
@@ -3253,11 +3189,8 @@ static void abox_change_cpu_gear(struct device *dev, struct abox_data *data)
 						AUD_PLL_RATE_HZ_FOR_48000,
 						result);
 			}
-			dev_info(dev, "pll clock: %lu\n",
-					clk_get_rate(data->clk_pll));
 		}
 	}
-	dev_info(dev, "cpu clock: %lukHz\n", clk_get_rate(data->clk_ca7));
 
 	if (!increasing) {
 		if (gear <= ARRAY_SIZE(data->pm_qos_int)) {
@@ -3284,8 +3217,6 @@ int abox_request_cpu_gear(struct device *dev, struct abox_data *data, void *id,
 {
 	struct abox_qos_request *request;
 	size_t len = ARRAY_SIZE(data->ca7_gear_requests);
-
-	dev_info(dev, "%s(%p, %u)\n", __func__, id, gear);
 
 	for (request = data->ca7_gear_requests;
 			request - data->ca7_gear_requests < len
@@ -3342,16 +3273,12 @@ static void abox_change_mif_freq_work_func(struct work_struct *work)
 	struct abox_data *data = container_of(work, struct abox_data,
 			change_mif_freq_work);
 
-	dev_info(&data->pdev->dev, "%s(%u)\n", __func__, data->mif_freq);
-
 	pm_qos_update_request(&abox_pm_qos_mif, data->mif_freq);
 }
 
 static void abox_request_mif_freq(struct device *dev, unsigned int mif_freq)
 {
 	struct abox_data *data = dev_get_drvdata(dev);
-
-	dev_info(dev, "%s(%u)\n", __func__, mif_freq);
 
 	data->mif_freq = mif_freq;
 	schedule_work(&data->change_mif_freq_work);
@@ -3373,16 +3300,10 @@ static void abox_change_lit_freq_work_func(struct work_struct *work)
 			request->id; request++) {
 		if (freq < request->value)
 			freq = request->value;
-
-		dev_dbg(dev, "id=%p, value=%u, freq=%u\n", request->id,
-				request->value, freq);
 	}
 
 	data->lit_freq = freq;
 	pm_qos_update_request(&abox_pm_qos_lit, data->lit_freq);
-
-	dev_info(dev, "pm qos request little: %dkHz\n",
-			pm_qos_request(abox_pm_qos_lit.pm_qos_class));
 }
 
 int abox_request_lit_freq(struct device *dev, struct abox_data *data,
@@ -3405,8 +3326,6 @@ int abox_request_lit_freq(struct device *dev, struct abox_data *data,
 	request->value = freq;
 	wmb(); /* value is read only when id is valid */
 	request->id = id;
-
-	dev_info(dev, "%s(%p, %u)\n", __func__, id, freq);
 
 	if (request - data->lit_requests >= ARRAY_SIZE(data->lit_requests)) {
 		dev_err(dev, "%s: out of index. id=%p, freq=%u\n",
@@ -3442,9 +3361,6 @@ static void abox_change_big_freq_work_func(struct work_struct *work)
 
 	data->big_freq = freq;
 	pm_qos_update_request(&abox_pm_qos_big, data->big_freq);
-
-	dev_info(dev, "pm qos request big: %dkHz\n",
-			pm_qos_request(abox_pm_qos_big.pm_qos_class));
 }
 
 int abox_request_big_freq(struct device *dev, struct abox_data *data,
@@ -3463,8 +3379,6 @@ int abox_request_big_freq(struct device *dev, struct abox_data *data,
 
 	if ((request->id == id) && (request->value == freq))
 		return 0;
-
-	dev_info(dev, "%s(%p, %u)\n", __func__, id, freq);
 
 	request->value = freq;
 	wmb(); /* value is read only when id is valid */
@@ -3526,8 +3440,6 @@ int abox_request_hmp_boost(struct device *dev, struct abox_data *data,
 
 	if ((request->id == id) && (request->value == on))
 		return 0;
-
-	dev_info(dev, "%s(%p, %u)\n", __func__, id, on);
 
 	request->value = on;
 	wmb(); /* value is read only when id is valid */
@@ -5018,7 +4930,6 @@ static int abox_enable(struct device *dev)
 		dev_err(dev, "Failed to set audif clock: %d\n", result);
 		goto error;
 	}
-	dev_info(dev, "audif clock: %lu\n", clk_get_rate(data->clk_audif));
 
 	result = clk_enable(data->clk_audif);
 	if (IS_ERR_VALUE(result)) {

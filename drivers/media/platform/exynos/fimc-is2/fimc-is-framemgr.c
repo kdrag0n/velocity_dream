@@ -170,9 +170,6 @@ void print_frame_queue(struct fimc_is_framemgr *this,
 	if (!(TRACE_ID & this->id))
 			return;
 
-	pr_info("[FRM] %s(0x%08x, %d) :", frame_state_name[state],
-					this->id, this->queued_count[state]);
-
 	list_for_each_entry_safe(frame, temp, &this->queued_list[state], list)
 		pr_cont("%d[%d]->", frame->index, frame->fcount);
 

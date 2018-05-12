@@ -103,8 +103,6 @@ static int exynos_pcie_set_l1ss(int enable, struct pcie_port *pp, int id)
 	unsigned long flags;
 	void __iomem *ep_dbi_base = pp->va_cfg0_base;
 
-	dev_info(pp->dev, "%s: START (state = 0x%x, id = 0x%x, enable = %d)\n",
-			__func__, exynos_pcie->l1ss_ctrl_id_state, id, enable);
 	spin_lock_irqsave(&exynos_pcie->conf_lock, flags);
 	if (exynos_pcie->state != STATE_LINK_UP || exynos_pcie->atu_ok == 0) {
 		if (enable)
@@ -112,8 +110,6 @@ static int exynos_pcie_set_l1ss(int enable, struct pcie_port *pp, int id)
 		else
 			exynos_pcie->l1ss_ctrl_id_state |= id;
 		spin_unlock_irqrestore(&exynos_pcie->conf_lock, flags);
-		dev_info(pp->dev, "%s: Link is not up. This will be set later. (state = 0x%x, id = 0x%x)\n",
-				__func__, exynos_pcie->l1ss_ctrl_id_state, id);
 		return -1;
 	}
 
@@ -126,30 +122,19 @@ static int exynos_pcie_set_l1ss(int enable, struct pcie_port *pp, int id)
 			writel(val, ep_dbi_base + 0xBC);
 			val = readl(ep_dbi_base + 0x248);
 			writel(val | 0xa0f, ep_dbi_base + 0x248);
-			dev_info(pp->dev, "%s: L1ss enabled. (state = 0x%x, id = 0x%x)\n",
-					__func__, exynos_pcie->l1ss_ctrl_id_state, id);
-		} else {
-			dev_info(pp->dev, "%s: Can't enable L1ss. (state = 0x%x, id = 0x%x)\n",
-					__func__, exynos_pcie->l1ss_ctrl_id_state, id);
 		}
 	} else if (enable == 0) {
 		if (exynos_pcie->l1ss_ctrl_id_state) {
 			exynos_pcie->l1ss_ctrl_id_state |= id;
-			dev_info(pp->dev, "%s: L1ss is already disabled. (state = 0x%x, id = 0x%x)\n",
-					__func__, exynos_pcie->l1ss_ctrl_id_state, id);
 		} else {
 			exynos_pcie->l1ss_ctrl_id_state |= id;
 			val = readl(ep_dbi_base + 0xbc);
 			writel(val & ~0x3, ep_dbi_base + 0xBC);
 			val = readl(ep_dbi_base + 0x248);
 			writel(val & ~0xf, ep_dbi_base + 0x248);
-			dev_info(pp->dev, "%s: L1ss disabled. (state = 0x%x, id = 0x%x)\n",
-					__func__, exynos_pcie->l1ss_ctrl_id_state, id);
 		}
 	}
 	spin_unlock_irqrestore(&exynos_pcie->conf_lock, flags);
-	dev_info(pp->dev, "%s: END (state = 0x%x, id = 0x%x, enable = %d)\n",
-			__func__, exynos_pcie->l1ss_ctrl_id_state, id, enable);
 	return 0;
 }
 int exynos_pcie_l1ss_ctrl(int enable, int id)
@@ -711,11 +696,9 @@ void exynos_pcie_work_l1ss(struct work_struct *work)
 	struct pcie_port *pp = &exynos_pcie->pp;
 	struct device *dev = pp->dev;
 	if (exynos_pcie->work_l1ss_cnt == 0) {
-		dev_info(dev, "[%s]boot_cnt: %d, work_l1ss_cnt: %d\n", __func__, exynos_pcie->boot_cnt, exynos_pcie->work_l1ss_cnt);
 		exynos_pcie_set_l1ss(1, pp, PCIE_L1SS_CTRL_BOOT);
 		exynos_pcie->work_l1ss_cnt++;
 	} else {
-		dev_info(dev, "[%s]boot_cnt: %d, work_l1ss_cnt: %d\n", __func__, exynos_pcie->boot_cnt, exynos_pcie->work_l1ss_cnt);
 		return;
 	}
 }

@@ -88,58 +88,18 @@ extern char *dhd_log_dump_get_timestamp(void);
 
 #if defined(DHD_DEBUG)
 #ifdef DHD_LOG_DUMP
-#define	WL_ERR(args)	\
-do {	\
-	if (wl_dbg_level & WL_DBG_ERR) {	\
-		printk(KERN_INFO CFG80211_ERROR_TEXT "%s : ", __func__);	\
-		printk args;	\
-		DHD_LOG_DUMP_WRITE("[%s] %s: ", dhd_log_dump_get_timestamp(), __func__);	\
-		DHD_LOG_DUMP_WRITE args;	\
-	}	\
-} while (0)
-#define WL_ERR_KERN(args)	\
-do {	\
-	if (wl_dbg_level & WL_DBG_ERR) {	\
-		printk(KERN_INFO CFG80211_ERROR_TEXT "%s : ", __func__);	\
-		printk args;	\
-	}	\
-} while (0)
-#define	WL_ERR_MEM(args)	\
-do {	\
-	if (wl_dbg_level & WL_DBG_ERR) {	\
-		DHD_LOG_DUMP_WRITE("[%s] %s: ", dhd_log_dump_get_timestamp(), __func__);	\
-		DHD_LOG_DUMP_WRITE args;	\
-	}	\
-} while (0)
-#define	WL_ERR_EX(args)	\
-do {	\
-	if (wl_dbg_level & WL_DBG_ERR) {	\
-		printk(KERN_INFO CFG80211_ERROR_TEXT "%s : ", __func__);	\
-		printk args;	\
-		DHD_LOG_DUMP_WRITE_EX("[%s] %s: ", dhd_log_dump_get_timestamp(), __func__);	\
-		DHD_LOG_DUMP_WRITE_EX args;	\
-	}	\
-} while (0)
+#define	WL_ERR(args)
+#define WL_ERR_KERN(args)
+#define	WL_ERR_MEM(args)
+#define	WL_ERR_EX(args)
 #else
-#define	WL_ERR(args)									\
-do {										\
-	if (wl_dbg_level & WL_DBG_ERR) {				\
-			printk(KERN_INFO CFG80211_ERROR_TEXT "%s : ", __func__);	\
-			printk args;						\
-		}								\
-} while (0)
+#define	WL_ERR(args)
 #define WL_ERR_KERN(args) WL_ERR(args)
 #define WL_ERR_MEM(args) WL_ERR(args)
 #define WL_ERR_EX(args) WL_ERR(args)
 #endif /* DHD_LOG_DUMP */
 #else /* defined(DHD_DEBUG) */
-#define	WL_ERR(args)									\
-do {										\
-	if ((wl_dbg_level & WL_DBG_ERR) && net_ratelimit()) {				\
-			printk(KERN_INFO CFG80211_ERROR_TEXT "%s : ", __func__);	\
-			printk args;						\
-		}								\
-} while (0)
+#define	WL_ERR(args)
 #define WL_ERR_KERN(args) WL_ERR(args)
 #define WL_ERR_MEM(args) WL_ERR(args)
 #define WL_ERR_EX(args) WL_ERR(args)
@@ -149,57 +109,26 @@ do {										\
 #undef WL_INFORM
 #endif
 
-#define	WL_INFORM(args)									\
-do {										\
-	if (wl_dbg_level & WL_DBG_INFO) {				\
-			printk(KERN_INFO "CFG80211-INFO) %s : ", __func__);	\
-			printk args;						\
-		}								\
-} while (0)
-
+#define	WL_INFORM(args)
 
 #ifdef WL_SCAN
 #undef WL_SCAN
 #endif
-#define	WL_SCAN(args)								\
-do {									\
-	if (wl_dbg_level & WL_DBG_SCAN) {			\
-		printk(KERN_INFO "CFG80211-SCAN) %s :", __func__);	\
-		printk args;							\
-	}									\
-} while (0)
+#define	WL_SCAN(args)
 #ifdef WL_TRACE
 #undef WL_TRACE
 #endif
-#define	WL_TRACE(args)								\
-do {									\
-	if (wl_dbg_level & WL_DBG_TRACE) {			\
-		printk(KERN_INFO "CFG80211-TRACE) %s :", __func__);	\
-		printk args;							\
-	}									\
-} while (0)
+#define	WL_TRACE(args)
 #ifdef WL_TRACE_HW4
 #undef WL_TRACE_HW4
 #endif
 #ifdef CUSTOMER_HW4_DEBUG
-#define	WL_TRACE_HW4(args)					\
-do {										\
-	if (wl_dbg_level & WL_DBG_ERR) {				\
-			printk(KERN_INFO "CFG80211-TRACE) %s : ", __func__);	\
-			printk args;						\
-		} 								\
-} while (0)
+#define	WL_TRACE_HW4(args)
 #else
 #define	WL_TRACE_HW4			WL_TRACE
 #endif /* CUSTOMER_HW4_DEBUG */
 #if (WL_DBG_LEVEL > 0)
-#define	WL_DBG(args)								\
-do {									\
-	if (wl_dbg_level & WL_DBG_DBG) {			\
-		printk(KERN_DEBUG "CFG80211-DEBUG) %s :", __func__);	\
-		printk args;							\
-	}									\
-} while (0)
+#define	WL_DBG(args)
 #else				/* !(WL_DBG_LEVEL > 0) */
 #define	WL_DBG(args)
 #endif				/* (WL_DBG_LEVEL > 0) */

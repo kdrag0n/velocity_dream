@@ -80,7 +80,6 @@
 #undef OVERFLOW_PANIC_ENABLE_CSIS
 /* #define ENABLE_DIRECT_CLOCK_GATE */
 #define ENABLE_HMP_BOOST
-#define DEBUG_REPROCESSING_NDONE
 
 /*
  * =================================================================================================

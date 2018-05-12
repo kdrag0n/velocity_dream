@@ -2191,14 +2191,10 @@ static int dpcm_fe_dai_prepare(struct snd_pcm_substream *substream)
 
 	mutex_lock_nested(&fe->card->mutex, SND_SOC_CARD_CLASS_RUNTIME);
 
-	dev_dbg(fe->dev, "ASoC: prepare FE %s\n", fe->dai_link->name);
-
 	dpcm_set_fe_update_state(fe, stream, SND_SOC_DPCM_UPDATE_FE);
 
 	/* there is no point preparing this FE if there are no BEs */
 	if (list_empty(&fe->dpcm[stream].be_clients)) {
-		dev_err(fe->dev, "ASoC: no backend DAIs enabled for %s\n",
-				fe->dai_link->name);
 		ret = -EINVAL;
 		goto out;
 	}

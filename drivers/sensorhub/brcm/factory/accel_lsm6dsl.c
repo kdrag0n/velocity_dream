@@ -123,7 +123,6 @@ int set_accel_cal(struct ssp_data *data)
 		iRet = ERROR;
 	}
 
-	pr_info("[SSP] Set accel cal data %d, %d, %d\n", accel_cal[0], accel_cal[1], accel_cal[2]);
 	return iRet;
 }
 
@@ -369,10 +368,6 @@ static ssize_t accel_hw_selftest_show(struct device *dev,
 	shift_ratio_N[1] = (s16)((chTempBuf[10] << 8) + chTempBuf[9]);
 	shift_ratio_N[2] = (s16)((chTempBuf[12] << 8) + chTempBuf[11]);
 	result = chTempBuf[13];
-
-	pr_info("[SSP] %s - %d, %d, %d, %d, %d, %d, %d, %d\n", __func__,
-		init_status, result, shift_ratio[0], shift_ratio[1], shift_ratio[2],
-		shift_ratio_N[0], shift_ratio_N[1], shift_ratio_N[2]);
 
 	return sprintf(buf, "%d,%d,%d,%d,%d,%d,%d\n", result,
 		shift_ratio[0],	shift_ratio[1],	shift_ratio[2],

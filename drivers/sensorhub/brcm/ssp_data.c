@@ -652,15 +652,12 @@ int parse_dataframe(struct ssp_data *data, char *pchRcvDataFrame, int iLength)
 			break;
 
 		case MSG2AP_INST_SENSOR_INIT_DONE:
-			pr_err("[SSP]: MCU sensor init done\n");
 			complete(&data->hub_data->mcu_init_done);
 			break;
 // HIFI batch
 		case MSG2AP_INST_BYPASS_DATA:
 			sensor_type = pchRcvDataFrame[iDataIdx++];
 			if ((sensor_type < 0) || (sensor_type >= SENSOR_MAX)) {
-				pr_err("[SSP]: %s - Mcu data frame1 error %d\n", __func__,
-						sensor_type);
 				return ERROR;
 			}
 
@@ -684,7 +681,6 @@ int parse_dataframe(struct ssp_data *data, char *pchRcvDataFrame, int iLength)
 					data->report_sensor_data[sensor_type](data, &sensorsdata);
 				else {
 					if (data->skipSensorData == 30) {
-						pr_info("[SSP]: sensor not added,but sensor(%d) came", sensor_type);
 						data->skipSensorData = 0;
 					}
 					data->skipSensorData++;
@@ -697,8 +693,6 @@ int parse_dataframe(struct ssp_data *data, char *pchRcvDataFrame, int iLength)
 		case MSG2AP_INST_DEBUG_DATA:
 			sensor_type = print_mcu_debug(pchRcvDataFrame, &iDataIdx, iLength);
 			if (sensor_type) {
-				pr_err("[SSP]: %s - Mcu data frame3 error %d\n", __func__,
-						sensor_type);
 				return ERROR;
 			}
 			break;
@@ -720,8 +714,6 @@ int parse_dataframe(struct ssp_data *data, char *pchRcvDataFrame, int iLength)
 				goto error_return;
 
 			if ((sensorsdata.meta_data.sensor < 0) || (sensorsdata.meta_data.sensor >= SENSOR_MAX)) {
-				pr_err("[SSP]: %s - Mcu meta_data frame1 error %d\n", __func__,
-						sensorsdata.meta_data.sensor);
 				return ERROR;
 			}
 			report_meta_data(data, &sensorsdata);
@@ -730,7 +722,6 @@ int parse_dataframe(struct ssp_data *data, char *pchRcvDataFrame, int iLength)
 			data->bTimeSyncing = true;
 			break;
 		case MSG2AP_INST_GYRO_CAL:
-			pr_info("[SSP]: %s - Gyro caldata received from MCU\n",  __func__);
 			memcpy(caldata, pchRcvDataFrame + iDataIdx, sizeof(caldata));
 			wake_lock(&data->ssp_wake_lock);
 			save_gyro_caldata(data, caldata);

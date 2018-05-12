@@ -287,12 +287,6 @@ static int dma_hw_params(struct snd_pcm_substream *substream,
 		prtd->dma_period >>= 1;
 	spin_unlock_irq(&prtd->lock);
 
-	pr_info("ADMA:%s:DmaAddr=@%x Total=%d PrdSz=%d(%d) #Prds=%d dma_area=0x%p\n",
-		(substream->stream == SNDRV_PCM_STREAM_PLAYBACK) ? "P" : "C",
-		(u32)prtd->dma_start, (u32)runtime->dma_bytes,
-		params_period_bytes(params),(u32) prtd->dma_period,
-		params_periods(params), runtime->dma_area);
-
 	return 0;
 }
 

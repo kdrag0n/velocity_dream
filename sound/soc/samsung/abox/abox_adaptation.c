@@ -20,11 +20,9 @@
 #define TIMEOUT_MS 130
 #define READ_WRITE_ALL_PARAM 0
 
-#define DEBUG_ABOX_ADAPTATION
 
 #ifdef DEBUG_ABOX_ADAPTATION
-#define dbg_abox_adaptation(format, args...)	\
-pr_info("[ABOX_ADAPTATION] %s: " format "\n", __func__, ## args)
+#define dbg_abox_adaptation(format, args...)
 #else
 #define dbg_abox_adaptation(format, args...)
 #endif /* DEBUG_ABOX_ADAPTATION */
@@ -91,7 +89,6 @@ int maxim_dsm_write(uint32_t *dsm_data, int offset, int size)
 		min((sizeof(uint32_t) * size)
 		, sizeof(erap_msg->param.raw)));
 
-	dbg_abox_adaptation("");
 	abox_ipc_irq_write_avail = false;
 	dsm_offset = READ_WRITE_ALL_PARAM;
 
@@ -114,9 +111,6 @@ static irqreturn_t abox_adaptation_irq_handler(int irq,
 					void *dev_id, ABOX_IPC_MSG *msg)
 {
 	struct IPC_ERAP_MSG *erap_msg = &msg->msg.erap;
-
-	dbg_abox_adaptation("irq=%d, param[0]=%d",
-				irq, erap_msg->param.raw.params[0]);
 
 	switch (irq) {
 	case IPC_ERAP:
@@ -152,18 +146,12 @@ static irqreturn_t abox_adaptation_irq_handler(int irq,
 
 				abox_ipc_irq_read_avail = true;
 
-				dbg_abox_adaptation("read_avail after full read[%d]",
-					abox_ipc_irq_read_avail);
-
 				if (abox_ipc_irq_read_avail && waitqueue_active(&wq_read))
 					wake_up_interruptible(&wq_read);
 
 			} else if (erap_msg->param.raw.params[0] == PARAM_DSM_5_0_ABOX_WRITE_CB) {
 
 				abox_ipc_irq_write_avail = true;
-
-				dbg_abox_adaptation("write_avail[%d]",
-					abox_ipc_irq_write_avail);
 
 				if (abox_ipc_irq_write_avail && waitqueue_active(&wq_write))
 					wake_up_interruptible(&wq_write);

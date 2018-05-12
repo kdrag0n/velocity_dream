@@ -2797,8 +2797,6 @@ wl_run_escan(struct bcm_cfg80211 *cfg, struct net_device *ndev,
 	}
 	if (!cfg->p2p_supported || !p2p_scan(cfg)) {
 		/* LEGACY SCAN TRIGGER */
-		WL_SCAN((" LEGACY E-SCAN START\n"));
-
 #if defined(USE_INITIAL_2G_SCAN) || defined(USE_INITIAL_SHORT_DWELL_TIME)
 		if (!request) {
 			err = -EINVAL;
@@ -2898,7 +2896,6 @@ wl_run_escan(struct bcm_cfg80211 *cfg, struct net_device *ndev,
 
 		err = wldev_iovar_setbuf(ndev, "escan", params, params_size,
 			cfg->escan_ioctl_buf, WLC_IOCTL_MEDLEN, NULL);
-		WL_ERR(("LEGACY_SCAN sync ID: %d, bssidx: %d\n", params->sync_id, bssidx));
 		if (unlikely(err)) {
 			if (err == BCME_EPERM)
 				/* Scan Not permitted at this point of time */
@@ -3142,33 +3139,26 @@ __wl_cfg80211_scan(struct wiphy *wiphy, struct net_device *ndev,
 	 * scan. Hence return scan success.
 	 */
 	if (request && (scan_req_iftype(request) == NL80211_IFTYPE_AP)) {
-		WL_INFORM(("Scan Command on SoftAP Interface. Ignoring...\n"));
 		return 0;
 	}
 
 	ndev = ndev_to_wlc_ndev(ndev, cfg);
 
 	if (WL_DRV_STATUS_SENDING_AF_FRM_EXT(cfg)) {
-		WL_ERR(("Sending Action Frames. Try it again.\n"));
 		return -EAGAIN;
 	}
 
-	WL_DBG(("Enter wiphy (%p)\n", wiphy));
 	if (wl_get_drv_status_all(cfg, SCANNING)) {
 		if (cfg->scan_request == NULL) {
 			wl_clr_drv_status_all(cfg, SCANNING);
-			WL_DBG(("<<<<<<<<<<<Force Clear Scanning Status>>>>>>>>>>>\n"));
 		} else {
-			WL_ERR(("Scanning already\n"));
 			return -EAGAIN;
 		}
 	}
 	if (wl_get_drv_status(cfg, SCAN_ABORTING, ndev)) {
-		WL_ERR(("Scanning being aborted\n"));
 		return -EAGAIN;
 	}
 	if (request && request->n_ssids > WL_SCAN_PARAMS_SSID_MAX) {
-		WL_ERR(("request null or n_ssids > WL_SCAN_PARAMS_SSID_MAX\n"));
 		return -EOPNOTSUPP;
 	}
 
@@ -3198,7 +3188,6 @@ __wl_cfg80211_scan(struct wiphy *wiphy, struct net_device *ndev,
 	} else {
 		scan_timer_interval_ms = WL_SCAN_TIMER_INTERVAL_MS;
 	}
-	WL_TRACE_HW4(("scan_timer_interval_ms %d\n", scan_timer_interval_ms));
 #endif /* CUSTOMER_SCAN_TIMEOUT_SETTING */
 #endif /* WES_SUPPORT */
 
@@ -3303,7 +3292,6 @@ __wl_cfg80211_scan(struct wiphy *wiphy, struct net_device *ndev,
 	}
 
 	if (request && cfg->p2p_supported) {
-		WL_TRACE_HW4(("START SCAN\n"));
 		DHD_OS_SCAN_WAKE_LOCK_TIMEOUT((dhd_pub_t *)(cfg->pub),
 			SCAN_WAKE_LOCK_TIMEOUT);
 		DHD_DISABLE_RUNTIME_PM((dhd_pub_t *)(cfg->pub));
@@ -16445,20 +16433,15 @@ wl_cfg80211_event(struct net_device *ndev, const wl_event_msg_t * e, void *data)
 	struct bcm_cfg80211 *cfg = wl_get_cfg(ndev);
 	struct net_info *netinfo;
 
-	WL_DBG(("event_type (%d): %s\n", event_type, bcmevent_get_name(event_type)));
-
 	if ((cfg == NULL) || (cfg->p2p_supported && cfg->p2p == NULL)) {
-		WL_ERR(("Stale event ignored\n"));
 		return;
 	}
 
 	if (cfg->event_workq == NULL) {
-		WL_ERR(("Event handler is not created\n"));
 		return;
 	}
 
 	if (wl_get_p2p_status(cfg, IF_CHANGING) || wl_get_p2p_status(cfg, IF_ADDING)) {
-		WL_ERR(("during IF change, ignore event %d\n", event_type));
 		return;
 	}
 
@@ -16468,15 +16451,7 @@ wl_cfg80211_event(struct net_device *ndev, const wl_event_msg_t * e, void *data)
 		 * created via cfg80211 interface. so the event is not of interest
 		 * to the cfg80211 layer.
 		 */
-		WL_ERR(("ignore event %d, not interested\n", event_type));
 		return;
-	}
-
-	if (event_type == WLC_E_PFN_NET_FOUND) {
-		WL_DBG((" PNOEVENT: PNO_NET_FOUND\n"));
-	}
-	else if (event_type == WLC_E_PFN_NET_LOST) {
-		WL_DBG((" PNOEVENT: PNO_NET_LOST\n"));
 	}
 
 	if (likely(!wl_enq_event(cfg, ndev, event_type, e, data))) {

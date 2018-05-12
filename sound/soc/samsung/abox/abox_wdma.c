@@ -130,14 +130,6 @@ static int abox_wdma_hw_params(struct snd_pcm_substream *substream,
 	if (params_rate(params) > 48000)
 		abox_request_cpu_gear(dev, data->abox_data, dev, 2);
 
-	dev_info(dev, "%s:DmaAddr=%pad Total=%zu PrdSz=%u(%u) #Prds=%u dma_area=%p rate=%u, width=%d, channels=%u\n",
-			snd_pcm_stream_str(substream), &runtime->dma_addr,
-			runtime->dma_bytes, params_period_size(params),
-			params_period_bytes(params), params_periods(params),
-			runtime->dma_area, params_rate(params),
-			snd_pcm_format_width(params_format(params)),
-			params_channels(params));
-
 	return 0;
 }
 
@@ -211,8 +203,6 @@ static int abox_wdma_trigger(struct snd_pcm_substream *substream, int cmd)
 	int result;
 	ABOX_IPC_MSG msg;
 	struct IPC_PCMTASK_MSG *pcmtask_msg = &msg.msg.pcmtask;
-
-	dev_info(dev, "%s[%d](%d)\n", __func__, id, cmd);
 
 	msg.ipcid = IPC_PCMCAPTURE;
 	pcmtask_msg->msgtype = PCM_PLTDAI_TRIGGER;

@@ -92,22 +92,16 @@
  * =================================================================================================
  */
 
-#define DEBUG_LOG_MEMORY
 /* #define DEBUG */
 /* #define DBG_PSV */
-#define DBG_VIDEO
-#define DBG_DEVICE
-#define DBG_PER_FRAME
 /* #define DBG_STREAMING */
 /* #define DBG_HW */
 /* #define DEBUG_HW_SIZE */
 #define DBG_STREAM_ID 0x3F
 /* #define DBG_JITTER */
-#define FW_PANIC_ENABLE
 /* #define SENSOR_PANIC_ENABLE */
 #define OVERFLOW_PANIC_ENABLE_ISCHAIN
 #define OVERFLOW_PANIC_ENABLE_CSIS
-#define ENABLE_KERNEL_LOG_DUMP
 /* #define FIXED_FPS_DEBUG */
 
 /* 5fps */
@@ -179,93 +173,66 @@
 #ifdef err
 #undef err
 #endif
-#define err(fmt, args...) \
-	err_common("[@][ERR]%s:%d:", fmt "\n", __func__, __LINE__, ##args)
+#define err(fmt, args...)
 
 /* multi-stream */
-#define merr(fmt, object, args...) \
-	merr_common("[@][%d][ERR]%s:%d:", fmt "\n", object->instance, __func__, __LINE__, ##args)
+#define merr(fmt, object, args...)
 
 /* multi-stream & group error */
-#define mgerr(fmt, object, group, args...) \
-	merr_common("[@][%d][GP%d][ERR]%s:%d:", fmt "\n", object->instance, group->id, __func__, __LINE__, ##args)
+#define mgerr(fmt, object, group, args...)
 
 /* multi-stream & subdev error */
-#define mserr(fmt, object, subdev, args...) \
-	merr_common("[@][%d][%s][ERR]%s:%d:", fmt "\n", object->instance, subdev->name, __func__, __LINE__, ##args)
+#define mserr(fmt, object, subdev, args...)
 
 /* multi-stream & video error */
-#define mverr(fmt, object, video, args...) \
-	merr_common("[@][%d][V%02d][ERR]%s:%d:", fmt "\n", object->instance, video->id, __func__, __LINE__, ##args)
+#define mverr(fmt, object, video, args...)
 
 /* multi-stream & runtime error */
-#define mrerr(fmt, object, frame, args...) \
-	merr_common("[@][%d][F%d][ERR]%s:%d:", fmt "\n", object->instance, frame->fcount, __func__, __LINE__, ##args)
+#define mrerr(fmt, object, frame, args...)
 
 /* multi-stream & group & runtime error */
-#define mgrerr(fmt, object, group, frame, args...) \
-	merr_common("[@][%d][GP%d][F%d][ERR]%s:%d:", fmt "\n", object->instance, group->id, frame->fcount, __func__, __LINE__, ##args)
+#define mgrerr(fmt, object, group, frame, args...)
 
 /* multi-stream & pipe error */
-#define mperr(fmt, object, pipe, video, args...) \
-	merr_common("[%d][P%02d][V%02d]%s:%d:", fmt, object->instance, pipe->id, video->id, __func__, __LINE__, ##args)
+#define mperr(fmt, object, pipe, video, args...)
 
 #ifdef warn
 #undef warn
 #endif
-#define warn(fmt, args...) \
-	warn_common("[@][WRN]", fmt "\n", ##args)
+#define warn(fmt, args...)
 
-#define mwarn(fmt, object, args...) \
-	mwarn_common("[%d][WRN]", fmt "\n", object->instance, ##args)
+#define mwarn(fmt, object, args...)
+#define mgwarn(fmt, object, group, args...)
 
-#define mgwarn(fmt, object, group, args...) \
-	mwarn_common("[%d][GP%d][WRN]", fmt "\n", object->instance, group->id, ##args)
+#define mrwarn(fmt, object, frame, args...)
 
-#define mrwarn(fmt, object, frame, args...) \
-	mwarn_common("[%d][F%d][WRN]", fmt "\n", object->instance, frame->fcount, ##args)
+#define mswarn(fmt, object, subdev, args...)
 
-#define mswarn(fmt, object, subdev, args...) \
-	mwarn_common("[%d][%s][WRN]", fmt "\n", object->instance, subdev->name, ##args)
+#define mgrwarn(fmt, object, group, frame, args...)
 
-#define mgrwarn(fmt, object, group, frame, args...) \
-	mwarn_common("[%d][GP%d][F%d][WRN]", fmt, object->instance, group->id, frame->fcount, ##args)
+#define msrwarn(fmt, object, subdev, frame, args...)
 
-#define msrwarn(fmt, object, subdev, frame, args...) \
-	mwarn_common("[%d][%s][F%d][WRN]", fmt, object->instance, subdev->name, frame->fcount, ##args)
+#define mpwarn(fmt, object, pipe, video, args...)
 
-#define mpwarn(fmt, object, pipe, video, args...) \
-	mwarn_common("[%d][P%02d][V%02d]", fmt, object->instance, pipe->id, video->id, ##args)
+#define info(fmt, args...)
 
-#define info(fmt, args...) \
-	dbg_common("[@]", fmt, ##args)
+#define sfrinfo(fmt, args...)
 
-#define sfrinfo(fmt, args...) \
-	dbg_common("[@][SFR]", fmt, ##args)
+#define minfo(fmt, object, args...)
 
-#define minfo(fmt, object, args...) \
-	minfo_common("[%d]", fmt, object->instance, ##args)
+#define mvinfo(fmt, object, video, args...)
 
-#define mvinfo(fmt, object, video, args...) \
-	minfo_common("[%d][V%02d]", fmt, object->instance, video->id, ##args)
+#define msinfo(fmt, object, subdev, args...)
 
-#define msinfo(fmt, object, subdev, args...) \
-	minfo_common("[%d][%s]", fmt, object->instance, subdev->name, ##args)
+#define msrinfo(fmt, object, subdev, frame, args...)
 
-#define msrinfo(fmt, object, subdev, frame, args...) \
-	minfo_common("[%d][%s][F%d]", fmt, object->instance, subdev->name, frame->fcount, ##args)
+#define mginfo(fmt, object, group, args...)
 
-#define mginfo(fmt, object, group, args...) \
-	minfo_common("[%d][GP%d]", fmt, object->instance, group->id, ##args)
+#define mrinfo(fmt, object, frame, args...)
 
-#define mrinfo(fmt, object, frame, args...) \
-	minfo_common("[%d][F%d]", fmt, object->instance, frame->fcount, ##args)
+#define mgrinfo(fmt, object, group, frame, args...)
 
-#define mgrinfo(fmt, object, group, frame, args...) \
-	minfo_common("[%d][GP%d][F%d]", fmt, object->instance, group->id, frame->fcount, ##args)
-
-#define mpinfo(fmt, object, video, args...) \
-	minfo_common("[%d][PV%02d]", fmt, object->instance, video->id, ##args)
+#define mpinfo(fmt, object, video, args...)
 
 #if (defined(DEBUG) && defined(DBG_VIDEO))
 #define dbg(fmt, args...)
@@ -419,10 +386,8 @@
 #endif
 
 #if (defined(DEBUG) && defined(DBG_STREAMING))
-#define dbg_interface(fmt, args...) \
-	dbg_common("[@][ITF] ", fmt, ##args)
-#define dbg_frame(fmt, args...) \
-	dbg_common("[@][FRM] ", fmt, ##args)
+#define dbg_interface(fmt, args...)
+#define dbg_frame(fmt, args...)
 #else
 #define dbg_interface(fmt, args...)
 #define dbg_frame(fmt, args...)
@@ -519,22 +484,14 @@
 #define dbg_itfc(fmt, args...)
 #define dbg_lib(fmt, args...)
 #endif
-#define info_hw(fmt, args...) \
-	info("[HW]" fmt, ##args)
-#define info_itfc(fmt, args...) \
-	info("[ITFC]" fmt, ##args)
-#define info_lib(fmt, args...) \
-	info("[LIB]" fmt, ##args)
-#define warn_hw(fmt, args...) \
-	warn_common("[@][HW][WRN]%d:", fmt "\n", __LINE__, ##args)
-#define err_hw(fmt, args...) \
-	err_common("[@][HW][ERR]%d:", fmt "\n", __LINE__, ##args)
-#define err_itfc(fmt, args...) \
-	err_common("[@][ITFC][ERR]%d:", fmt "\n", __LINE__, ##args)
-#define err_lib(fmt, args...) \
-	err_common("[@][LIB][ERR]%d:", fmt "\n", __LINE__, ##args)
-#define warn_lib(fmt, args...) \
-	warn_common("[@][LIB][WARN]%d:", fmt "\n", __LINE__, ##args)
+#define info_hw(fmt, args...)
+#define info_itfc(fmt, args...)
+#define info_lib(fmt, args...)
+#define warn_hw(fmt, args...)
+#define err_hw(fmt, args...)
+#define err_itfc(fmt, args...)
+#define err_lib(fmt, args...)
+#define warn_lib(fmt, args...)
 #endif
 
 #if defined(CONFIG_VENDER_PSV)

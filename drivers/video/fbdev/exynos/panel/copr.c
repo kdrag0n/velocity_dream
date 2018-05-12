@@ -170,7 +170,6 @@ static void copr_sum_update(struct copr_info *copr, int cur_copr, int cur_brt, s
 	elapsed_msec = timespec_to_ns(&delta_ts) / 1000000;
 
 	if (elapsed_msec == 0) {
-		panel_warn("%s elapsed_msec: 0 msec\n", __func__);
 		return;
 	}
 

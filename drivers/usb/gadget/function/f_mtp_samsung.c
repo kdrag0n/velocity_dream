@@ -56,11 +56,6 @@
 #include "f_mtp.h"
 #include "configfs.h"
 
-/*-------------------------------------------------------------------------*/
-/*Only for Debug*/
-#define DEBUG_MTP 0
-/*#define CSY_TEST */
-
 #if DEBUG_MTP
 #define DEBUG_MTP_SETUP
 #define DEBUG_MTP_READ
@@ -522,8 +517,6 @@ static void mtpg_req_put(struct mtpg_dev *dev, struct list_head *head,
 {
 	unsigned long flags;
 
-	DEBUG_MTPB("[%s] \tline = [%d]\n", __func__, __LINE__);
-
 	spin_lock_irqsave(&dev->lock, flags);
 	list_add_tail(&req->list, head);
 	spin_unlock_irqrestore(&dev->lock, flags);
@@ -532,7 +525,6 @@ static void mtpg_req_put(struct mtpg_dev *dev, struct list_head *head,
 static ssize_t guid_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
-	printk(KERN_DEBUG "mtp: [%s]\tline = [%d]\n", __func__, __LINE__);
 	memcpy(buf, guid_info, MAX_GUID_SIZE);
 	return MAX_GUID_SIZE;
 }
@@ -542,7 +534,6 @@ static ssize_t guid_store(struct device *dev,
 {
 	int value;
 
-	printk(KERN_DEBUG "mtp: [%s]\tline = [%d]\n", __func__, __LINE__);
 	if (size > MAX_GUID_SIZE)
 		return -EINVAL;
 	
@@ -609,8 +600,6 @@ static int mtp_send_signal(int value)
 
 static int mtpg_open(struct inode *ip, struct file *fp)
 {
-	printk(KERN_DEBUG "[%s]\tline = [%d]\n", __func__, __LINE__);
-
 	if (_lock(&the_mtpg->open_excl)) {
 		printk(KERN_ERR "mtpg_open fn mtpg device busy\n");
 		return -EBUSY;
@@ -619,8 +608,6 @@ static int mtpg_open(struct inode *ip, struct file *fp)
 	fp->private_data = the_mtpg;
 
 	/* clear the error latch */
-
-	DEBUG_MTPB("[%s] mtpg_open and clearing the error = 0\n", __func__);
 
 	the_mtpg->error = 0;
 
@@ -1039,24 +1026,14 @@ static long  mtpg_ioctl(struct file *fd, unsigned int code, unsigned long arg)
 		return -EAGAIN;
 	}
 
-	DEBUG_MTPB("[%s] \tline = [%d]\n", __func__, __LINE__);
-
 	switch (code) {
 	case MTP_ONLY_ENABLE:
-		printk(KERN_DEBUG "[%s:%d] MTP_ONLY_ENABLE ioctl:\n",
-							 __func__, __LINE__);
 		if (dev->cdev && dev->cdev->gadget) {
 			usb_gadget_disconnect(cdev->gadget);
-			printk(KERN_DEBUG "[%s:%d] B4 disconectng gadget\n",
-							__func__, __LINE__);
 			msleep(400);
 			usb_gadget_connect(cdev->gadget);
-			printk(KERN_DEBUG "[%s:%d] after usb_gadget_connect\n",
-							__func__, __LINE__);
 		}
 		status = 10;
-		printk(KERN_DEBUG "[%s:%d] MTP_ONLY_ENABLE clearing error 0\n",
-							__func__, __LINE__);
 		the_mtpg->error = 0;
 		break;
 	case MTP_DISABLE:
@@ -1072,41 +1049,27 @@ static long  mtpg_ioctl(struct file *fd, unsigned int code, unsigned long arg)
 		status = usb_ep_clear_halt(dev->bulk_out);
 		break;
 	case MTP_WRITE_INT_DATA:
-		printk(KERN_INFO "[%s]\t%d MTP intrpt_Write no slep\n",
-						__func__, __LINE__);
 		if (copy_from_user(&event, (void __user *)arg, sizeof(event))){
 			status = -EFAULT;
-			printk(KERN_ERR "[%s]\t%d:copyfrmuser fail\n",
-							 __func__, __LINE__);
 			break;
 		}
 		ret_value = interrupt_write(fd, &event, MTP_MAX_PACKET_LEN_FROM_APP);
 		if (ret_value < 0) {
-			printk(KERN_ERR "[%s]\t%d interptFD failed\n",
-							 __func__, __LINE__);
 			status = -EIO;
 		} else {
-			printk(KERN_DEBUG "[%s]\t%d intruptFD suces\n",
-							 __func__, __LINE__);
 			status = MTP_MAX_PACKET_LEN_FROM_APP;
 		}
 		break;
 
 	case SET_MTP_USER_PID:
 		mtp_pid = arg;
-		printk(KERN_DEBUG "[%s]SET_MTP_USER_PID;pid=%d\tline=[%d]\n",
-						 __func__, mtp_pid, __LINE__);
 		break;
 
 	case GET_SETUP_DATA:
 		buf_ptr = (char *)arg;
-		printk(KERN_DEBUG "[%s] GET_SETUP_DATA\tline = [%d]\n",
-						__func__, __LINE__);
 		if (copy_to_user(buf_ptr, dev->cancel_io_buf,
 				USB_PTPREQUEST_CANCELIO_SIZE)) {
 			status = -EIO;
-			printk(KERN_ERR "[%s]\t%d:coptousr failed\n",
-							 __func__, __LINE__);
 		}
 		break;
 
@@ -1119,9 +1082,6 @@ static long  mtpg_ioctl(struct file *fd, unsigned int code, unsigned long arg)
 		req->complete = mtp_complete_ep0_transection;
 		status = usb_ep_queue(cdev->gadget->ep0,
 						req, GFP_ATOMIC);
-		if (status < 0)
-			printk(KERN_ERR "[%s]ep_queue line = [%d]\n",
-							 __func__, __LINE__);
 		break;
 
 	case SET_SETUP_DATA:
@@ -1129,15 +1089,11 @@ static long  mtpg_ioctl(struct file *fd, unsigned int code, unsigned long arg)
 		if (copy_from_user(buf, buf_ptr,
 				USB_PTPREQUEST_GETSTATUS_SIZE)) {
 			status = -EIO;
-			printk(KERN_ERR "[%s]\t%d:copyfrmuser fail\n",
-							 __func__, __LINE__);
 			break;
 		}
 		size = buf[0];
-		printk(KERN_DEBUG "[%s]SET_SETUP_DATA size=%d line=[%d]\n",
-						 __func__, size, __LINE__);
 
-		if ( size > USB_PTPREQUEST_GETSTATUS_SIZE) {
+		if (size > USB_PTPREQUEST_GETSTATUS_SIZE) {
 			size = USB_PTPREQUEST_GETSTATUS_SIZE;
 		}
 
@@ -1147,39 +1103,23 @@ static long  mtpg_ioctl(struct file *fd, unsigned int code, unsigned long arg)
 		req->complete = mtp_complete_ep0_transection;
 		status = usb_ep_queue(cdev->gadget->ep0, req,
 							GFP_ATOMIC);
-		if (status < 0)
-			printk(KERN_ERR "[%s]usbepqueue line=[%d]\n",
-							 __func__, __LINE__);
 		break;
 
 	case SET_ZLP_DATA:
 		/*req->zero = 1;*/
 		req = mtpg_req_get(dev, &dev->tx_idle);
 		if (!req) {
-			printk(KERN_DEBUG "[%s] Failed to get ZLP_DATA\n",
-						 __func__);
 			return -EAGAIN;
 		}
 		req->length = 0;
-		printk(KERN_DEBUG "[%s]ZLP_DATA data=%d\tline=[%d]\n",
-						 __func__, size, __LINE__);
 		status = usb_ep_queue(dev->bulk_in, req, GFP_ATOMIC);
-		if (status < 0) {
-			printk(KERN_ERR "[%s]usbepqueue line=[%d]\n",
-							 __func__, __LINE__);
-		} else {
-			printk(KERN_DEBUG "%sZLPstatus=%d\tline=%d\n",
-						__func__, __LINE__, status);
+		if (status > 0) {
 			status = 20;
 		}
 		break;
 
 	case GET_HIGH_FULL_SPEED:
-		printk(KERN_DEBUG "[%s]GET_HIGH_FULLSPEED line=[%d]\n",
-							 __func__, __LINE__);
 		max_pkt = dev->bulk_in->maxpacket;
-		printk(KERN_DEBUG "[%s] line = %d max_pkt = [%d]\n",
-						 __func__, __LINE__, max_pkt);
 		if (max_pkt == 64)
 			status = 64;
 		else
@@ -1190,8 +1130,6 @@ static long  mtpg_ioctl(struct file *fd, unsigned int code, unsigned long arg)
 		struct read_send_info	info;
 		struct work_struct *work;
 		struct file *file = NULL;
-		printk(KERN_DEBUG "[%s]SEND_FILE_WITH_HEADER line=[%d]\n",
-							__func__, __LINE__);
 
 		if (copy_from_user(&info, (void __user *)arg, sizeof(info))) {
 			status = -EFAULT;
@@ -1201,8 +1139,6 @@ static long  mtpg_ioctl(struct file *fd, unsigned int code, unsigned long arg)
 		file = fget(info.Fd);
 		if (!file) {
 			status = -EBADF;
-			printk(KERN_DEBUG "[%s] line=[%d] bad file number\n",
-							__func__, __LINE__);
 			goto exit;
 		}
 
@@ -1224,11 +1160,8 @@ static long  mtpg_ioctl(struct file *fd, unsigned int code, unsigned long arg)
 		break;
 	}
 	case MTP_VBUS_DISABLE:
-		printk(KERN_DEBUG "[%s] line=[%d] \n",
-							__func__, __LINE__);
 		if (dev->cdev && dev->cdev->gadget) {
 			usb_gadget_vbus_disconnect(cdev->gadget);
-			printk(KERN_DEBUG "Restricted policy so disconnecting mtp gadget\n");
 		}
 		break;
 	default:

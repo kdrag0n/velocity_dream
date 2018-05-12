@@ -441,8 +441,6 @@ static void max77865_set_input_current(struct max77865_charger_data *charger,
 	}
 
 	mutex_unlock(&charger->charger_mutex);
-	pr_info("[%s] REG(0x%02x) DATA(0x%02x), CURRENT(%d)\n",
-		__func__, set_reg, reg_data, input_current);
 }
 
 static void max77865_set_charge_current(struct max77865_charger_data *charger,
@@ -463,10 +461,6 @@ static void max77865_set_charge_current(struct max77865_charger_data *charger,
 		reg_data |= (fast_charging_current / curr_step);
 		max77865_write_reg(charger->i2c, MAX77865_CHG_REG_CNFG_02, reg_data);
 	}
-
-	pr_info("[%s] REG(0x%02x) DATA(0x%02x), CURRENT(%d)\n",
-		__func__, MAX77865_CHG_REG_CNFG_02,
-		reg_data, fast_charging_current);
 }
 
 static void max77865_set_wireless_input_current(struct max77865_charger_data *charger,

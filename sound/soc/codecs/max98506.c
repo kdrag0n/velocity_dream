@@ -24,7 +24,6 @@
 #include <sound/maxim_dsm_cal.h>
 #endif
 
-#define DEBUG_MAX98506
 #ifdef DEBUG_MAX98506
 #define msg_maxim(format, args...)	\
 pr_info("[MAX98506_DEBUG] %s: " format "\n", __func__, ## args)
@@ -1353,21 +1352,18 @@ static int max98506_dai_hw_params(struct snd_pcm_substream *substream,
 
 	switch (params_format(params)) {
 	case SNDRV_PCM_FORMAT_S16_LE:
-		msg_maxim("set SNDRV_PCM_FORMAT_S16_LE");
 		max98506_regmap_update_bits(max98506,
 				MAX98506_R020_FORMAT,
 				MAX98506_DAI_CHANSZ_MASK,
 				MAX98506_DAI_CHANSZ_16);
 		break;
 	case SNDRV_PCM_FORMAT_S24_LE:
-		msg_maxim("set SNDRV_PCM_FORMAT_S24_LE");
 		max98506_regmap_update_bits(max98506,
 				MAX98506_R020_FORMAT,
 				MAX98506_DAI_CHANSZ_MASK,
 				MAX98506_DAI_CHANSZ_24);
 		break;
 	case SNDRV_PCM_FORMAT_S32_LE:
-		msg_maxim("set SNDRV_PCM_FORMAT_S32_LE");
 		max98506_regmap_update_bits(max98506,
 				MAX98506_R020_FORMAT,
 				MAX98506_DAI_CHANSZ_MASK,
@@ -1412,16 +1408,14 @@ static int max98506_dai_mute_stream(struct snd_soc_dai *dai,
 #endif
 #endif
 
-	if (stream == SNDRV_PCM_STREAM_PLAYBACK) {
-		msg_maxim("max98506_spk_enable mute=%d\n", mute);
+	if (stream == SNDRV_PCM_STREAM_PLAYBACK)
+	{
 		max98506_spk_enable(max98506, mute != 0 ? 0 : 1);
 	}
 
 #ifdef CONFIG_SND_SOC_MAXIM_DSM
 	if ((!pdata->nodsm)
 		&& (stream == SNDRV_PCM_STREAM_CAPTURE) && (mute == 0)) {
-
-		msg_maxim("set maxdsm calibration\n");
 
 		ret = maxdsm_cal_get_rdc(&rdc);
 		if (ret || rdc <= 0) {

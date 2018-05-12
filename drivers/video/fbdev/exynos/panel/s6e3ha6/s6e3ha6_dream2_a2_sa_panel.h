@@ -1925,9 +1925,6 @@ static void *dream2_a2_sa_init_cmdtbl[] = {
 	&KEYINFO(dream2_a2_sa_level1_key_disable),
 	&PKTINFO(dream2_a2_sa_sleep_out),
 	&DLYINFO(dream2_a2_sa_wait_sleep_out),
-#ifdef CONFIG_DISPLAY_USE_INFO
-	&s6e3ha6_dmptbl[DUMP_SELF_DIAG],
-#endif
 #ifdef CONFIG_SUPPORT_DSU
 	&KEYINFO(dream2_a2_sa_level2_key_enable),
 	&PKTINFO(dream2_a2_sa_scaler),
@@ -2056,9 +2053,7 @@ static void *dream2_a2_sa_exit_cmdtbl[] = {
 	&KEYINFO(dream2_a2_sa_level1_key_enable),
 #ifdef CONFIG_DISPLAY_USE_INFO
 	&KEYINFO(dream2_a2_sa_level2_key_enable),
-	&s6e3ha6_dmptbl[DUMP_ERR_FG],
 	&KEYINFO(dream2_a2_sa_level2_key_disable),
-	&s6e3ha6_dmptbl[DUMP_DSI_ERR],
 #endif
 	&PKTINFO(dream2_a2_sa_sleep_in),
 	&KEYINFO(dream2_a2_sa_level1_key_disable),
@@ -2254,21 +2249,6 @@ static void *dream2_a2_sa_active_clk_update_cmdtbl[] = {
 	&KEYINFO(dream2_a2_sa_level2_key_disable),
 };
 
-static void *dream2_a2_sa_dump_cmdtbl[] = {
-	&KEYINFO(dream2_a2_sa_level1_key_enable),
-	&KEYINFO(dream2_a2_sa_level2_key_enable),
-	&KEYINFO(dream2_a2_sa_level3_key_enable),
-	&s6e3ha6_dmptbl[DUMP_RDDPM],
-	&s6e3ha6_dmptbl[DUMP_RDDSM],
-	&s6e3ha6_dmptbl[DUMP_ERR],
-	&s6e3ha6_dmptbl[DUMP_ERR_FG],
-	&s6e3ha6_dmptbl[DUMP_DSI_ERR],
-	&s6e3ha6_dmptbl[DUMP_SELF_DIAG],
-	&KEYINFO(dream2_a2_sa_level3_key_disable),
-	&KEYINFO(dream2_a2_sa_level2_key_disable),
-	&KEYINFO(dream2_a2_sa_level1_key_disable),
-};
-
 static void *dream2_a2_sa_dummy_cmdtbl[] = {
 	&PKTINFO(dream2_a2_sa_te_off),
 };
@@ -2312,7 +2292,6 @@ static struct seqinfo dream2_a2_sa_seqtbl[MAX_PANEL_SEQ] = {
 	[PANEL_GRAYSPOT_ON_SEQ] = SEQINFO_INIT("grayspot-on-seq", dream2_a2_sa_grayspot_on_cmdtbl),
 	[PANEL_GRAYSPOT_OFF_SEQ] = SEQINFO_INIT("grayspot-off-seq", dream2_a2_sa_grayspot_off_cmdtbl),
 #endif
-	[PANEL_DUMP_SEQ] = SEQINFO_INIT("dump-seq", dream2_a2_sa_dump_cmdtbl),
 	[PANEL_DUMMY_SEQ] = SEQINFO_INIT("dummy-seq", dream2_a2_sa_dummy_cmdtbl),
 };
 
@@ -2331,8 +2310,6 @@ struct common_panel_info s6e3ha6_dream2_a2_sa_default_panel_info = {
 	.nr_rditbl = ARRAY_SIZE(s6e3ha6_rditbl),
 	.restbl = s6e3ha6_restbl,
 	.nr_restbl = ARRAY_SIZE(s6e3ha6_restbl),
-	.dumpinfo = s6e3ha6_dmptbl,
-	.nr_dumpinfo = ARRAY_SIZE(s6e3ha6_dmptbl),
 #ifdef CONFIG_EXYNOS_DECON_MDNIE_LITE
 	.mdnie_tune = &s6e3ha6_dream2_a2_sa_mdnie_tune,
 #endif

@@ -49,39 +49,13 @@ extern char *dhd_log_dump_get_timestamp(void);
 #define DHD_LOG_DUMP_WRITE_EX(fmt, ...)	dhd_log_dump_write(DLD_BUF_TYPE_SPECIAL, fmt, ##__VA_ARGS__)
 #endif /* !_DHD_LOG_DUMP_DEFINITIONS_ */
 
-#ifdef DHD_EFI
-#define DHD_ERROR(args)	\
-do {	\
-	if (dhd_msg_level & DHD_ERROR_VAL) {	\
-		printf args;	\
-		dhd_log_dump_print_drv("[%s] %s: ", dhd_log_dump_get_timestamp(), __FUNCTION__); \
-		dhd_log_dump_print_drv args; \
-	}	\
-} while (0)
-#define DHD_INFO(args) \
-do {	\
-	if (dhd_msg_level & DHD_INFO_VAL) {	\
-		printf args;	\
-		dhd_log_dump_print_drv("[%s] %s: ", dhd_log_dump_get_timestamp(), __FUNCTION__); \
-		dhd_log_dump_print_drv args; \
-	}	\
-} while (0)
-#else /* DHD_EFI */
-#define DHD_ERROR(args)	\
-do {	\
-	if (dhd_msg_level & DHD_ERROR_VAL) {	\
-		printf args;	\
-		DHD_LOG_DUMP_WRITE("[%s] %s: ", dhd_log_dump_get_timestamp(), __func__);	\
-		DHD_LOG_DUMP_WRITE args;	\
-	}	\
-} while (0)
-#define DHD_INFO(args)		do {if (dhd_msg_level & DHD_INFO_VAL) printf args;} while (0)
-#endif /* DHD_EFI */
+#define DHD_ERROR(args)
+#define DHD_INFO(args)
 #else /* DHD_LOG_DUMP */
-#define DHD_ERROR(args)		do {if (dhd_msg_level & DHD_ERROR_VAL) printf args;} while (0)
-#define DHD_INFO(args)		do {if (dhd_msg_level & DHD_INFO_VAL) printf args;} while (0)
+#define DHD_ERROR(args)
+#define DHD_INFO(args)
 #endif /* DHD_LOG_DUMP */
-#define DHD_TRACE(args)		do {if (dhd_msg_level & DHD_TRACE_VAL) printf args;} while (0)
+#define DHD_TRACE(args)
 
 #define DHD_DATA(args)		do {if (dhd_msg_level & DHD_DATA_VAL) printf args;} while (0)
 #define DHD_CTL(args)		do {if (dhd_msg_level & DHD_CTL_VAL) printf args;} while (0)
@@ -220,27 +194,12 @@ do {                                        \
 #if defined(DHD_EFI)
 extern void dhd_log_dump_print_drv(const char *fmt, ...);
 extern char *dhd_log_dump_get_timestamp(void);
-#define DHD_ERROR(args)	\
-do {	\
-	if (dhd_msg_level & DHD_ERROR_VAL) {	\
-		printf args;	\
-		dhd_log_dump_print_drv("[%s] %s: ", dhd_log_dump_get_timestamp(), __FUNCTION__); \
-		dhd_log_dump_print_drv args; \
-	}	\
-} while (0)
-#define DHD_INFO(args) \
-do {	\
-	if (dhd_msg_level & DHD_INFO_VAL) {	\
-		printf args;	\
-		dhd_log_dump_print_drv("[%s] %s: ", dhd_log_dump_get_timestamp(), __FUNCTION__); \
-		dhd_log_dump_print_drv args; \
-	}	\
-} while (0)
+#define DHD_ERROR(args)
+#define DHD_INFO(args)
 #define DHD_TRACE(args)
 #else /* DHD_EFI */
 
-#define DHD_ERROR(args)		do {if (dhd_msg_level & DHD_ERROR_VAL) \
-								printf args;} while (0)
+#define DHD_ERROR(args)
 #define DHD_TRACE(args)
 #define DHD_INFO(args)
 #endif 

@@ -196,15 +196,6 @@ int exynos_fimc_is_module_pins_cfg(struct fimc_is_module_enum *module,
 	pin_ctrls = pdata->pin_ctrls;
 	idx_max = pdata->pinctrl_index[scenario][gpio_scenario];
 
-	/* print configs */
-	for (idx = 0; idx < idx_max; ++idx) {
-		printk(KERN_DEBUG "[@] pin_ctrl(act(%d), pin(%ld), val(%d), nm(%s)\n",
-			pin_ctrls[scenario][gpio_scenario][idx].act,
-			(pin_ctrls[scenario][gpio_scenario][idx].act == PIN_FUNCTION) ? 0 : pin_ctrls[scenario][gpio_scenario][idx].pin,
-			pin_ctrls[scenario][gpio_scenario][idx].value,
-			pin_ctrls[scenario][gpio_scenario][idx].name);
-	}
-
 	/* do configs */
 	for (idx = 0; idx < idx_max; ++idx) {
 		ret = exynos_fimc_is_module_pin_control(module->dev, pinctrl, &pin_ctrls[scenario][gpio_scenario][idx]);
@@ -306,15 +297,6 @@ int exynos_fimc_is_module_pins_dbg(struct fimc_is_module_enum *module,
 	pinctrl = pdata->pinctrl;
 	pin_ctrls = pdata->pin_ctrls;
 	idx_max = pdata->pinctrl_index[scenario][gpio_scenario];
-
-	/* print configs */
-	for (idx = 0; idx < idx_max; ++idx) {
-		printk(KERN_DEBUG "[@] pin_ctrl(act(%d), pin(%ld), val(%d), nm(%s)\n",
-			pin_ctrls[scenario][gpio_scenario][idx].act,
-			(pin_ctrls[scenario][gpio_scenario][idx].act == PIN_FUNCTION) ? 0 : pin_ctrls[scenario][gpio_scenario][idx].pin,
-			pin_ctrls[scenario][gpio_scenario][idx].value,
-			pin_ctrls[scenario][gpio_scenario][idx].name);
-	}
 
 	/* do configs */
 	for (idx = 0; idx < idx_max; ++idx) {

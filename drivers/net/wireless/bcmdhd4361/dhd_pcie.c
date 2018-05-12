@@ -606,7 +606,6 @@ dhdpcie_bus_isr(dhd_bus_t *bus)
 
 		/* Check if the interrupt is ours or not */
 		if (intstatus == 0) {
-			DHD_ERROR(("%s : this interrupt is not ours\n", __FUNCTION__));
 			break;
 		}
 

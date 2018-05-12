@@ -290,18 +290,13 @@ int fts_fw_wait_for_event(struct fts_ts_info *info, unsigned char eid)
 			if ((data[0] == EVENTID_STATUS_EVENT) && (data[1] == eid)) {
 				rc = 0;
 				break;
-			} else {
-				input_info(true, info->dev, "%s: %2X,%2X,%2X,%2X\n", __func__, data[0],data[1],data[2],data[3]);
 			}
 		} else if (data[0] == EVENTID_FROM_SPONGE && data[1] == FTS_STRING_EVENT_PRESSURE_RELEASED) {
 			info->force_release = true;
-			input_info(true, info->dev, "%s: %2X,%2X,%2X,%2X  force_release %d\n",
-					__func__, data[0], data[1], data[2], data[3], info->force_release);
 		}
 
 		if (retry++ > FTS_RETRY_COUNT * 15) {
 			rc = -1;
-			input_err(true, info->dev, "%s: Time Over (%2X,%2X,%2X,%2X)\n", __func__, data[0],data[1],data[2],data[3]);
 			break;
 		}
 		fts_delay(20);
@@ -326,13 +321,10 @@ int fts_fw_wait_for_event_D3(struct fts_ts_info *info, unsigned char eid0, unsig
 			if ((data[0] == EVENTID_STATUS_EVENT) && (data[1] == eid0) && (data[2] == eid1)) {
 				rc = 0;
 				break;
-			} else {
-				input_info(true, info->dev, "%s: %2X,%2X,%2X,%2X\n", __func__, data[0],data[1],data[2],data[3]);
 			}
 		}
 		if (retry++ > FTS_RETRY_COUNT * 15) {
 			rc = -1;
-			input_err(true, info->dev, "%s: Time Over (%2X,%2X,%2X,%2X)\n", __func__, data[0],data[1],data[2],data[3]);
 			break;
 		}
 		fts_delay(20);
@@ -357,13 +349,10 @@ int fts_fw_wait_for_specific_event(struct fts_ts_info *info, unsigned char eid0,
 			if ((data[0] == eid0) && (data[1] == eid1) && (data[2] == eid2)) {
 				rc = 0;
 				break;
-			} else {
-				input_info(true, info->dev, "%s: %2X,%2X,%2X,%2X\n", __func__, data[0],data[1],data[2],data[3]);
 			}
 		}
 		if (retry++ > FTS_RETRY_COUNT * 15) {
 			rc = -1;
-			input_err(true, info->dev, "%s: Time Over ( %2X,%2X,%2X,%2X )\n", __func__, data[0],data[1],data[2],data[3]);
 			break;
 		}
 		fts_delay(20);

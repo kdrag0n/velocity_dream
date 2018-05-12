@@ -3390,8 +3390,6 @@ static int fimc_is_ischain_close(struct fimc_is_device_ischain *device)
 	atomic_set(&device->open_cnt, 0);
 	clear_bit(FIMC_IS_ISCHAIN_OPEN_STREAM, &device->state);
 
-	minfo("[ISC:D] %s():%d\n", device, __func__, ret);
-
 p_err:
 	return ret;
 }

@@ -591,8 +591,6 @@ struct common_panel_info {
 	int nr_rditbl;
 	struct resinfo *restbl;
 	int nr_restbl;
-	struct dumpinfo *dumpinfo;
-	int nr_dumpinfo;
 	struct mdnie_tune *mdnie_tune;
 	struct panel_dimming_info *panel_dim_info[2];
 #ifdef CONFIG_EXYNOS_DECON_LCD_COPR
@@ -752,8 +750,6 @@ struct panel_info {
 	int nr_seqtbl;
 	struct rdinfo *rditbl;
 	int nr_rditbl;
-	struct dumpinfo *dumpinfo;
-	int nr_dumpinfo;
 	struct resinfo *restbl;
 	int nr_restbl;
 	struct panel_dimming_info *panel_dim_info[2];

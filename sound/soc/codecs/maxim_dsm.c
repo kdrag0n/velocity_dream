@@ -13,7 +13,6 @@
 #endif /* CONFIG_COMPAT */
 #include <sound/sec_adaptation.h>
 
-#define DEBUG_MAXIM_DSM
 #ifdef DEBUG_MAXIM_DSM
 #define dbg_maxdsm(format, args...)	\
 pr_info("[MAXIM_DSM] %s: " format "\n", __func__, ## args)
@@ -1824,8 +1823,6 @@ int maxdsm_set_rdc_temp(int rdc, int temp)
 {
 	int ret = 0;
 
-	dbg_maxdsm("rdc=0x%08x temp=0x%08x", rdc, temp);
-
 	switch (maxdsm.platform_type) {
 	case PLATFORM_TYPE_B:
 		maxdsm.tx_port_id |= 1 << 31;
@@ -2239,7 +2236,6 @@ EXPORT_SYMBOL_GPL(maxdsm_get_power_measurement);
 
 void maxdsm_set_stereo_mode_configuration(unsigned int mode)
 {
-	dbg_maxdsm("platform %d, mode %d", maxdsm.platform_type, mode);
 	switch (maxdsm.platform_type) {
 	case PLATFORM_TYPE_A:
 		maxdsm_regmap_write(0x2A0380, mode);

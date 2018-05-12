@@ -37,9 +37,8 @@ struct mutex gPtr_bin_load_ctrl;
  * Log write
  */
 
-int fimc_is_log_write_console(char *str)
+inline int fimc_is_log_write_console(char *str)
 {
-	pr_info("[@][LIB] %s", str);
 	return 0;
 }
 

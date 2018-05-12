@@ -14,10 +14,6 @@
 #ifndef _DIMMING_H_
 #define _DIMMING_H_
 
-//#define DEBUG_DIMMING
-#define DEBUG_EXCUTION_TIME
-#define DEBUG_DIMMING_RESULT
-//#define DEBUG_DIMMING_RESULT_ASCENDING
 #define MAX_PRINT_BUF_SIZE	(512)
 
 #ifndef __KERNEL__

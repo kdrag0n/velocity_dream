@@ -159,12 +159,6 @@ static int exynos8895_uaif0_hw_params(struct snd_pcm_substream *substream,
 	struct snd_soc_card *card = rtd->card;
 	struct exynos8895_drvdata *drvdata = card->drvdata;
 
-	dev_info(card->dev, "%s\n", __func__);
-	dev_info(card->dev, "%s-%d %dch, %dHz, %dbytes, %dbit\n",
-			rtd->dai_link->name, substream->stream,
-			params_channels(params), params_rate(params),
-			params_buffer_bytes(params), params_width(params));
-
 	drvdata->fll2_refclk.rate = params_rate(params) * params_width(params) * 2;
 
 	if (params_rate(params) % SYSCLK_RATE_CHECK_PARAM)
@@ -182,23 +176,15 @@ static int exynos8895_uaif0_prepare(struct snd_pcm_substream *substream)
 	struct exynos8895_drvdata *drvdata = card->drvdata;
 	int ret;
 
-	dev_info(card->dev, "%s-%d prepare\n",
-			rtd->dai_link->name, substream->stream);
-
 	ret = snd_soc_codec_set_sysclk(drvdata->codec, drvdata->asyncclk.id,
 				       drvdata->asyncclk.source,
 				       drvdata->asyncclk.rate,
 				       SND_SOC_CLOCK_IN);
-	if (ret < 0)
-		dev_err(card->dev, "Failed to set ASYNCCLK to FLL2: %d\n", ret);
 
 	ret = snd_soc_codec_set_pll(drvdata->codec, drvdata->fll2_refclk.id,
 					drvdata->fll2_refclk.source,
 					drvdata->fll2_refclk.rate,
 					drvdata->asyncclk.rate);
-	if (ret < 0)
-		dev_err(card->dev,
-				"Failed to start ASYNCCLK FLL REF: %d\n", ret);
 
 	return 0;
 }
@@ -1189,80 +1175,48 @@ static struct snd_soc_dai_link exynos8895_dai[] = {
 static int dream_dmic1(struct snd_soc_dapm_widget *w,
 		struct snd_kcontrol *kcontrol, int event)
 {
-	struct snd_soc_card *card = w->dapm->card;
-
-	dev_info(card->dev, "%s ev: %d\n", __func__, event);
-
 	return 0;
 }
 
 static int dream_dmic2(struct snd_soc_dapm_widget *w,
 		struct snd_kcontrol *kcontrol, int event)
 {
-	struct snd_soc_card *card = w->dapm->card;
-
-	dev_info(card->dev, "%s ev: %d\n", __func__, event);
-
 	return 0;
 }
 
 static int dream_headsetmic(struct snd_soc_dapm_widget *w,
 		struct snd_kcontrol *kcontrol, int event)
 {
-	struct snd_soc_card *card = w->dapm->card;
-
-	dev_info(card->dev, "%s ev: %d\n", __func__, event);
-
 	return 0;
 }
 
 static int dream_receiver(struct snd_soc_dapm_widget *w,
 		struct snd_kcontrol *kcontrol, int event)
 {
-	struct snd_soc_card *card = w->dapm->card;
-
-	dev_info(card->dev, "%s ev: %d\n", __func__, event);
-
 	return 0;
 }
 
 static int dream_headphone(struct snd_soc_dapm_widget *w,
 		struct snd_kcontrol *kcontrol, int event)
 {
-	struct snd_soc_card *card = w->dapm->card;
-
-	dev_info(card->dev, "%s ev: %d\n", __func__, event);
-
 	return 0;
 }
 
 static int dream_speaker(struct snd_soc_dapm_widget *w,
 		struct snd_kcontrol *kcontrol, int event)
 {
-	struct snd_soc_card *card = w->dapm->card;
-
-	dev_info(card->dev, "%s ev: %d\n", __func__, event);
-
 	return 0;
 }
 
 static int dream_btsco_tx(struct snd_soc_dapm_widget *w,
 		struct snd_kcontrol *kcontrol, int event)
 {
-	struct snd_soc_card *card = w->dapm->card;
-
-	dev_info(card->dev, "%s ev: %d\n", __func__, event);
-
 	return 0;
 }
 
 static int dream_btsco_rx(struct snd_soc_dapm_widget *w,
 		struct snd_kcontrol *kcontrol, int event)
 {
-	struct snd_soc_card *card = w->dapm->card;
-
-	dev_info(card->dev, "%s ev: %d\n", __func__, event);
-
 	return 0;
 }
 

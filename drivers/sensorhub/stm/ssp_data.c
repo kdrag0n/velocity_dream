@@ -228,11 +228,9 @@ int parse_dataframe(struct ssp_data *data, char *dataframe, int frame_len)
 			data->bTimeSyncing = true;
 			break;
 		case MSG2AP_INST_RESET:
-			ssp_infof("Reset MSG received from MCU");
 			queue_refresh_task(data, 0);
 			break;
 		case MSG2AP_INST_GYRO_CAL:
-			ssp_infof("Gyro caldata received from MCU");
 			memcpy(caldata, dataframe + index, sizeof(caldata));
 			wake_lock(&data->ssp_wake_lock);
 			save_gyro_caldata(data, caldata);

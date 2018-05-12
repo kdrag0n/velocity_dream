@@ -66,11 +66,6 @@ static int vts_platform_hw_params(struct snd_pcm_substream *substream,
 	} else {
 		snd_pcm_set_runtime_buffer(substream, &data->vts_data->dmab_rec);
 	}
-	dev_info(dev, "%s:%s:DmaAddr=%pad Total=%zu PrdSz=%u(%u) #Prds=%u dma_area=%p\n",
-			__func__, snd_pcm_stream_str(substream), &runtime->dma_addr,
-			runtime->dma_bytes, params_period_size(params),
-			params_period_bytes(params), params_periods(params),
-			runtime->dma_area);
 
 	data->pointer = 0;
 

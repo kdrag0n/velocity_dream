@@ -1030,7 +1030,6 @@ int decon_enable(struct decon_device *decon)
 		}
 
 		pm_stay_awake(decon->dev);
-		dev_warn(decon->dev, "pm_stay_awake");
 
 		if (decon->pdata->out_type == DECON_OUT_DSI) {
 			ret = v4l2_subdev_call(decon->output_sd, video, s_stream, 1);
@@ -3993,8 +3992,6 @@ decon_init_done:
 			dev_err(decon->dev, "failed to init wakeup device\n");
 			goto fail_update_thread;
 		}
-		pm_stay_awake(decon->dev);
-		dev_warn(decon->dev, "pm_stay_awake");
 		cam_stat = of_get_child_by_name(decon->dev->of_node, "cam-stat");
 		if (!cam_stat) {
 			decon_info("No DT node for cam-stat\n");

@@ -1847,8 +1847,6 @@ static int fill_and_eval_dacs(struct hda_codec *codec,
 	return badness;
 }
 
-#define DEBUG_BADNESS
-
 #ifdef DEBUG_BADNESS
 #define debug_badness(fmt, ...)						\
 	codec_dbg(codec, fmt, ##__VA_ARGS__)

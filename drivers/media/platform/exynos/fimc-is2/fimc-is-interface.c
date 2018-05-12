@@ -3356,55 +3356,11 @@ p_err:
 	return ret;
 }
 
-int fimc_is_hw_memdump(struct fimc_is_interface *this,
+inline int fimc_is_hw_memdump(struct fimc_is_interface *this,
 	ulong start,
 	ulong end)
 {
-	struct fimc_is_core *core;
-	struct fimc_is_minfo *minfo;
-	int ret = 0;
-	ulong *cur;
-	u32 items, offset;
-	char term[50], sentence[250];
-
-	if (!test_bit(IS_IF_STATE_OPEN, &this->state)) {
-		warn("interface is closed");
-		ret = -EINVAL;
-		goto p_err;
-	}
-
-	cur = (ulong *)start;
-	items = 0;
-	offset = 0;
-
-	core = (struct fimc_is_core *)this->core;
-	minfo = &core->resourcemgr.minfo;
-	CALL_BUFOP(minfo->pb_fw, sync_for_cpu,
-			minfo->pb_fw, start, (end - start), DMA_FROM_DEVICE);
-
-	memset(sentence, 0, sizeof(sentence));
-	printk(KERN_DEBUG "[@] Memory Dump(0x%08lX ~ 0x%08lX)\n", start, end);
-
-	while ((ulong)cur <= end) {
-		if (!(items % 8)) {
-			printk(KERN_DEBUG "%s\n", sentence);
-			offset = 0;
-			snprintf(term, sizeof(term), "[@] %p:      ", cur);
-			snprintf(&sentence[offset], sizeof(sentence) - offset, "%s", term);
-			offset += strlen(term);
-		}
-
-		snprintf(term, sizeof(term), "%016lX   ", *cur);
-		snprintf(&sentence[offset], sizeof(sentence) - offset, "%s", term);
-		offset += strlen(term);
-		cur++;
-		items++;
-	}
-
-	ret = (ulong)cur - end;
-
-p_err:
-	return ret;
+	return 0;
 }
 
 int fimc_is_hw_enum(struct fimc_is_interface *this)

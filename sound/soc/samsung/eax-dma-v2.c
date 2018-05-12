@@ -434,9 +434,6 @@ static void eax_adma_hw_params(unsigned long dma_period_bytes)
 		di.buf_wr_p[n] += dma_period_bytes * n;
 	}
 
-	pr_info("EAXDMA-V2:DmaAddr=@%x Total=%d PrdSz=%d #Prds=%d dma_area=0x%p\n",
-		(u32)di.dma_start, (u32)(di.dma_end - di.dma_start),
-		di.dma_period, DMA_PERIOD_CNT, di.dma_buf);
 out:
 	mutex_unlock(&di.mutex);
 }
@@ -622,12 +619,6 @@ static int eax_dma_hw_params(struct snd_pcm_substream *substream,
         open_file(prtd, prtd->name);
         dump_count++;
 #endif
-
-	pr_info("EAX-V2:%s:DmaAddr=@%x Total=%d PrdSz=%d #Prds=%d area=0x%p\n",
-			(substream->stream == SNDRV_PCM_STREAM_PLAYBACK) ? "P" : "C",
-			(u32)prtd->dma_start, (int)runtime->dma_bytes,
-			params_period_bytes(params), params_periods(params),
-			runtime->dma_area);
 
 	return 0;
 }

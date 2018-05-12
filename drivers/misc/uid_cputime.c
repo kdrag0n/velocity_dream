@@ -74,9 +74,6 @@ static struct uid_entry *find_or_register_uid_of_task(struct task_struct *task)
 	uid_entry->uid = uid;
 	uid_entry->pid = task->group_leader->pid;
 	get_task_comm(uid_entry->comm, task->group_leader);
-	pr_info("add uid %llu: pid %d %s (uid_count: %d)\n",
-		(unsigned long long)uid, uid_entry->pid, uid_entry->comm,
-		++uid_count);
 
 	hash_add(hash_table, &uid_entry->hash, uid);
 
@@ -190,10 +187,6 @@ static ssize_t uid_remove_write(struct file *file,
 		hash_for_each_possible_safe(hash_table, uid_entry, tmp,
 							hash, (uid_t)uid_start) {
 			if (uid_start == uid_entry->uid) {
-			        pr_info("remove uid %llu: pid %d %s (uid_count: %d)\n",
-				        (unsigned long long)uid_entry->uid,
-				        uid_entry->pid, uid_entry->comm,
-				        --uid_count);
 				hash_del(&uid_entry->hash);
 				kfree(uid_entry);
 			}

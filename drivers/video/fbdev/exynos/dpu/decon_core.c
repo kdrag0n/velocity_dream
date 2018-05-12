@@ -693,7 +693,6 @@ static int decon_enable(struct decon_device *decon)
 	}
 
 	pm_stay_awake(decon->dev);
-	dev_warn(decon->dev, "pm_stay_awake");
 	ret = v4l2_subdev_call(decon->out_sd[0], video, s_stream, 1);
 	if (ret) {
 		decon_err("starting stream failed for %s\n",
@@ -2819,7 +2818,6 @@ int decon_set_doze(struct decon_device *decon)
 	}
 
 	pm_stay_awake(decon->dev);
-	dev_warn(decon->dev, "pm_stay_awake");
 	ret = v4l2_subdev_call(decon->out_sd[0], core, ioctl, DSIM_IOC_DOZE, NULL);
 	if (ret) {
 		decon_err("DECON:ERR:%s:failed to doze\n", __func__);
@@ -4245,7 +4243,6 @@ static int decon_probe(struct platform_device *pdev)
 		}
 		if (decon->dt.out_type == DECON_OUT_DSI) {
 			pm_stay_awake(decon->dev);
-			dev_warn(decon->dev, "pm_stay_awake");
 		}
 	}
 #ifdef CONFIG_SUPPORT_GRAM_CHECKSUM

@@ -69,21 +69,10 @@ enum P3_DEBUG_LEVEL {
 /* Variable to store current debug level request by ioctl */
 static unsigned char debug_level = P3_FULL_DEBUG;
 
-#define P3_DBG_MSG(msg...) do { \
-		switch (debug_level) { \
-		case P3_DEBUG_OFF: \
-			break; \
-		case P3_FULL_DEBUG: \
-			pr_info("[ESE-P3] :  " msg); \
-			break; \
-		default: \
-			pr_err("[ESE-P3] : debug level %d", debug_level);\
-			break; \
-		}; \
-	} while (0);
+#define P3_DBG_MSG(msg...)
 
-#define P3_ERR_MSG(msg...) pr_err("[ESE-P3] : " msg);
-#define P3_INFO_MSG(msg...) pr_info("[ESE-P3] : " msg);
+#define P3_ERR_MSG(msg...)
+#define P3_INFO_MSG(msg...)
 
 static DEFINE_MUTEX(device_list_lock);
 
@@ -231,7 +220,6 @@ static int p3_regulator_onoff(struct p3_data *data, int onoff)
 		return -ENODEV;
 	}
 
-	P3_DBG_MSG("%s - onoff = %d\n", __func__, onoff);
 	if (onoff == 1) {
 		rc = regulator_enable(regulator_vdd_1p8);
 		if (rc) {

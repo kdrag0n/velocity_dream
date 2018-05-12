@@ -370,8 +370,6 @@ static int max77865_rgb_blink(struct device *dev,
 	int value;
 	int ret = 0;
 
-	pr_info("leds-max77865-rgb: %s\n", __func__);
-
 	value = (LEDBLNK_ON(delay_on) << 4) | LEDBLNK_OFF(delay_off);
 	ret = max77865_write_reg(max77865_rgb->i2c,
 				MAX77865_RGBLED_REG_LEDBLNK, value);
@@ -593,8 +591,6 @@ static ssize_t store_max77865_rgb_lowpower(struct device *dev,
 	max77865_rgb_set_state(&max77865_rgb->led[RED], led_dynamic_current, LED_BLINK);
 	max77865_rgb_set_state(&max77865_rgb->led[GREEN], led_dynamic_current, LED_BLINK);
 	max77865_rgb_set_state(&max77865_rgb->led[BLUE], led_dynamic_current, LED_BLINK);
-
-	pr_info("leds-max77865-rgb: led_lowpower mode set to %i\n", led_lowpower);
 
 	return count;
 }
@@ -846,9 +842,6 @@ static ssize_t store_max77865_rgb_blink(struct device *dev,
 		max77865_rgb_ramp(dev, leds_control.noti_ramp_up, leds_control.noti_ramp_down);
 
 	max77865_rgb_blink(dev, delay_on_time, delay_off_time);
-
-	pr_info("leds-max77865-rgb: %s, delay_on_time: %d, delay_off_time: %d, color: 0x%x, lowpower: %i\n", 
-			__func__, delay_on_time, delay_off_time, led_brightness, led_lowpower_mode);
 
 	return count;
 }

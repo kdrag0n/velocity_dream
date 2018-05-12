@@ -132,23 +132,15 @@
 #define MADERA_FMT_I2S_MODE		2
 #define MADERA_FMT_LEFT_JUSTIFIED_MODE	3
 
-#define madera_fll_err(_fll, fmt, ...) \
-	dev_err(_fll->madera->dev, "FLL%d: " fmt, _fll->id, ##__VA_ARGS__)
-#define madera_fll_warn(_fll, fmt, ...) \
-	dev_warn(_fll->madera->dev, "FLL%d: " fmt, _fll->id, ##__VA_ARGS__)
-#define madera_fll_info(_fll, fmt, ...) \
-	dev_info(_fll->madera->dev, "FLL%d: " fmt, _fll->id, ##__VA_ARGS__)
-#define madera_fll_dbg(_fll, fmt, ...) \
-	dev_dbg(_fll->madera->dev, "FLL%d: " fmt, _fll->id, ##__VA_ARGS__)
+#define madera_fll_err(_fll, fmt, ...)
+#define madera_fll_warn(_fll, fmt, ...)
+#define madera_fll_info(_fll, fmt, ...)
+#define madera_fll_dbg(_fll, fmt, ...)
 
-#define madera_aif_err(_dai, fmt, ...) \
-	dev_err(_dai->dev, "AIF%d: " fmt, _dai->id, ##__VA_ARGS__)
-#define madera_aif_warn(_dai, fmt, ...) \
-	dev_warn(_dai->dev, "AIF%d: " fmt, _dai->id, ##__VA_ARGS__)
-#define madera_aif_info(_dai, fmt, ...) \
-	dev_info(_dai->dev, "AIF%d: " fmt, _dai->id, ##__VA_ARGS__)
-#define madera_aif_dbg(_dai, fmt, ...) \
-	dev_dbg(_dai->dev, "AIF%d: " fmt, _dai->id, ##__VA_ARGS__)
+#define madera_aif_err(_dai, fmt, ...)
+#define madera_aif_warn(_dai, fmt, ...)
+#define madera_aif_info(_dai, fmt, ...)
+#define madera_aif_dbg(_dai, fmt, ...)
 
 static const int madera_dsp_bus_error_irqs[MADERA_MAX_ADSP] = {
 	MADERA_IRQ_DSP1_BUS_ERROR,
@@ -3222,8 +3214,6 @@ int madera_set_sysclk(struct snd_soc_codec *codec, int clk_id,
 	if (freq % 6144000)
 		val |= MADERA_SYSCLK_FRAC;
 
-	dev_info(madera->dev, "%s set to %uHz\n", name, freq);
-
 	return regmap_update_bits(madera->regmap, reg, mask, val);
 }
 EXPORT_SYMBOL_GPL(madera_set_sysclk);
@@ -3701,9 +3691,6 @@ static int madera_hw_params(struct snd_pcm_substream *substream,
 	}
 
 	lrclk = rates[bclk] / params_rate(params);
-
-	madera_aif_info(dai, "BCLK %dHz LRCLK %dHz\n",
-			rates[bclk], rates[bclk] / lrclk);
 
 	frame = wl << MADERA_AIF1TX_WL_SHIFT | tdm_width;
 
@@ -5054,10 +5041,6 @@ static int madera_fllhj_enable(struct madera_fll *fll)
 
 	if (!already_enabled)
 		pm_runtime_get_sync(madera->dev);
-
-	madera_fll_info(fll, "Enabling FLL (%u - %u), initially %s\n",
-			fll->ref_freq, fll->fout,
-		       already_enabled ? "enabled" : "disabled");
 
 	/* FLLn_HOLD must be set before configuring any registers */
 	regmap_update_bits(fll->madera->regmap,

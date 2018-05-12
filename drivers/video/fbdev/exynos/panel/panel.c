@@ -856,9 +856,6 @@ int panel_do_seqtbl(struct panel_device *panel, struct seqinfo *seqtbl)
 			case CMD_TYPE_MAP:
 				ret = panel_do_init_maptbl(panel, (struct maptbl *)cmdtbl[i]);
 				break;
-			case CMD_TYPE_DMP:
-				ret = panel_dumpinfo_update(panel, (struct dumpinfo *)cmdtbl[i]);
-				break;
 			case CMD_TYPE_NONE:
 			default:
 				pr_warn("%s, unknown pakcet type %d\n", __func__, type);
@@ -1369,20 +1366,6 @@ int panel_resource_update_by_name(struct panel_device *panel, char *name)
 
 int panel_dumpinfo_update(struct panel_device *panel, struct dumpinfo *info)
 {
-	int ret;
-
-	if (unlikely(!panel || !info || !info->res || !info->callback)) {
-		pr_err("%s, invalid parameter\n", __func__);
-		return -EINVAL;
-	}
-
-	ret = panel_resource_update(panel, info->res);
-	if (unlikely(ret)) {
-		pr_err("%s, failed to update resource\n", __func__);
-		return ret;
-	}
-	info->callback(info);
-
 	return 0;
 }
 

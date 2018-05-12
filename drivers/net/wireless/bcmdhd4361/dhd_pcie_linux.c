@@ -1463,9 +1463,7 @@ dhdpcie_isr(int irq, void *arg)
 {
 	dhd_bus_t *bus = (dhd_bus_t*)arg;
 
-	if (!dhdpcie_bus_isr(bus)) {
-		DHD_ERROR(("%s: dhdpcie_bus_isr returns with FALSE\n", __FUNCTION__));
-	}
+	dhdpcie_bus_isr(bus);
 	return IRQ_HANDLED;
 }
 

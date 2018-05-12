@@ -107,3 +107,10 @@ out/
 anykernel/Image
 anykernel/dtb
 anykernel/dtb2
+
+# Samsung temporary files
+fips_crypto_utils
+fips_fmp_utils
+kaslr_fips
+offsets_sizes_crypto.txt
+offsets_sizes_fmp.txt

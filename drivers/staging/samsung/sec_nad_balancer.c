@@ -20,8 +20,7 @@
 #include <linux/sec_nad_balancer.h>
 #include <linux/sec_ext.h>
 
-#define NAD_PRINT(format, ...) pr_info("[NAD_BALANCER] " format, ##__VA_ARGS__)
-#define DEBUG_NAD_BALANCER
+#define NAD_PRINT(format, ...)
 
 #if defined(CONFIG_SEC_FACTORY)
 #ifdef CONFIG_OF

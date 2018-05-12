@@ -106,9 +106,6 @@ int save_gyro_caldata(struct ssp_data *data, s16 *iCalData)
 	data->gyrocal.y = iCalData[1];
 	data->gyrocal.z = iCalData[2];
 
-	ssp_dbg("[SSP]: do gyro calibrate %d, %d, %d\n",
-		data->gyrocal.x, data->gyrocal.y, data->gyrocal.z);
-
 	old_fs = get_fs();
 	set_fs(KERNEL_DS);
 

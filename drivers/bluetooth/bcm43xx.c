@@ -146,7 +146,6 @@ static void set_wake_locked(int wake)
 			port->ops->set_wake(port, wake);
 		}
 #endif
-		pr_err("[BT] set_wake_locked value = %d\n", wake);
 		bt_wake_state = wake;
 	}
 }

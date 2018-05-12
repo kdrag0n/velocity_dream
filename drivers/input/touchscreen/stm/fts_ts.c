@@ -918,10 +918,8 @@ void fts_interrupt_set(struct fts_ts_info *info, int enable)
 
 	if (enable) {
 		regAdd[3] = INT_ENABLE_D3;
-		input_info(true, &info->client->dev, "%s: Enable\n", __func__);
 	} else {
 		regAdd[3] = INT_DISABLE_D3;
-		input_info(true, &info->client->dev, "%s: Disable\n", __func__);
 	}
 
 	fts_write_reg(info, &regAdd[0], 4);
@@ -2169,8 +2167,6 @@ static irqreturn_t fts_interrupt_handler(int irq, void *handle)
 	if (info->fts_power_state == FTS_POWER_STATE_LOWPOWER) {
 		int ret;
 
-		input_dbg(true, &info->client->dev, "%s: run LPM interrupt handler\n", __func__);
-
 		wake_lock_timeout(&info->wakelock, msecs_to_jiffies(3 * MSEC_PER_SEC));
 		/* waiting for blsp block resuming, if not occurs i2c error */
 		ret = wait_for_completion_interruptible_timeout(&info->resume_done, msecs_to_jiffies(3 * MSEC_PER_SEC));
@@ -2183,9 +2179,6 @@ static irqreturn_t fts_interrupt_handler(int irq, void *handle)
 			input_err(true, &info->client->dev, "%s: LPM: -ERESTARTSYS if interrupted, %d\n", __func__, ret);
 			return IRQ_NONE;
 		}
-
-		input_info(true, &info->client->dev, "%s: run LPM interrupt handler, %d\n", __func__, ret);
-		/* run lpm interrupt handler */
 	}
 
 	evtcount = 0;

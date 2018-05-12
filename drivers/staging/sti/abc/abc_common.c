@@ -19,14 +19,13 @@
  */
 #include <linux/sti/abc_common.h>
 
-#define DEBUG_ABC
 // #define ABC_WARNING_REPORT
 
 static struct device *sec_abc;
 static int abc_enabled;
 static int abc_init;
 
-#define ABC_PRINT(format, ...) pr_info("[sec_abc] " format, ##__VA_ARGS__)
+#define ABC_PRINT(format, ...)
 
 #ifdef CONFIG_OF
 static int parse_gpu_data(struct device *dev,

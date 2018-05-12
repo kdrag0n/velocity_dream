@@ -294,8 +294,6 @@ static int madera_runtime_resume(struct device *dev)
 	bool force_reset = false;
 	int ret;
 
-	dev_info(madera->dev, "Leaving sleep mode\n");
-
 	switch (madera->type) {
 	case CS47L93:
 		force_reset = true;
@@ -378,8 +376,6 @@ err:
 static int madera_runtime_suspend(struct device *dev)
 {
 	struct madera *madera = dev_get_drvdata(dev);
-
-	dev_info(madera->dev, "Entering sleep mode\n");
 
 	regcache_cache_only(madera->regmap, true);
 	regcache_mark_dirty(madera->regmap);

@@ -478,7 +478,6 @@ static ssize_t set_sensor_delay(struct device *dev,
 		change_sensor_delay(data, index, delay);
 	}
 
-	pr_err("[SSP]: %s, dev_name = %s index = %d\n", __func__, indio_dev->name, index);
 	return 0;
 }
 

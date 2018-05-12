@@ -36,29 +36,11 @@ extern int panel_log_level;
 
 void clear_disp_det_pend(struct panel_device *panel);
 
-#define panel_err(fmt, ...)							\
-	do {									\
-		if (panel_log_level >= 3) {					\
-			pr_err(pr_fmt(fmt), ##__VA_ARGS__);			\
-		}								\
-	} while (0)
+#define panel_err(fmt, ...)
 
-#define panel_warn(fmt, ...)							\
-	do {									\
-		if (panel_log_level >= 4) {					\
-			pr_warn(pr_fmt(fmt), ##__VA_ARGS__);			\
-		}								\
-	} while (0)
-#define panel_info(fmt, ...)							\
-	do {									\
-		if (panel_log_level >= 6)					\
-			pr_info(pr_fmt(fmt), ##__VA_ARGS__);			\
-	} while (0)
-#define panel_dbg(fmt, ...)							\
-	do {									\
-		if (panel_log_level >= 6)					\
-			pr_info(pr_fmt(fmt), ##__VA_ARGS__);			\
-	} while (0)
+#define panel_warn(fmt, ...)
+#define panel_info(fmt, ...)
+#define panel_dbg(fmt, ...)
 
 
 enum {

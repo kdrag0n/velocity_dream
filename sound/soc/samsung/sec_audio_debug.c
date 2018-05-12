@@ -87,86 +87,12 @@ static const struct file_operations audio_log_fops = {
 
 void sec_audio_log(int level, const char *fmt, ...)
 {
-	u32 len = 0;
-	va_list args;
-	unsigned long long time;
-	unsigned long nanosec_t;
-
-	if (!debug_enable) {
-		pr_info("%s: not enabled\n", __func__);
-		return;
-	}
-
-	time = local_clock();
-
-	len += snprintf(debug_log_data.audio_log[debug_log_data.count] + len,
-				MAX_DEBUG_MSG_SIZE - len, "<%d> ", level);
-
-	nanosec_t = do_div(time, 1000000000);
-	len += snprintf(debug_log_data.audio_log[debug_log_data.count] + len,
-				MAX_DEBUG_MSG_SIZE - len, "[%5lu.%06lu] ",
-			(unsigned long) time, nanosec_t / 1000);
-
-	va_start(args, fmt);
-	len += vsnprintf(debug_log_data.audio_log[debug_log_data.count] + len,
-				MAX_DEBUG_MSG_SIZE - len, fmt, args);
-	va_end(args);
-
-	/* To avoid buffer overflow due to too long log messages
-	 * change end of buffer character to return character.
-	 */
-	if (len >= MAX_DEBUG_MSG_SIZE) {
-		len = MAX_DEBUG_MSG_SIZE - 1;
-		snprintf(debug_log_data.audio_log[debug_log_data.count] + len,
-				1, "\n");
-	}
-
-	debug_log_data.count++;
-	if (debug_log_data.count > debug_enable - 1) {
-		debug_log_data.full = debug_enable;
-		debug_log_data.count = 0;
-	}
+	return;
 }
 EXPORT_SYMBOL_GPL(sec_audio_log);
 
 int alloc_sec_audio_log(int buffer_len)
 {
-	int i, ret;
-
-	if (debug_enable)
-		free_sec_audio_log();
-
-	debug_log_data.count = 0;
-	debug_log_data.full = 0;
-
-	if (buffer_len <= 0) {
-		pr_err("%s: Invalid buffer_len %d\n", __func__, buffer_len);
-		debug_enable = 0;
-		return 0;
-	}
-
-	debug_enable = buffer_len;
-
-	debug_log_data.audio_log =
-		kzalloc(sizeof(char *) * debug_enable, GFP_KERNEL);
-	if (debug_log_data.audio_log == NULL) {
-		pr_err("%s: Failed to alloc num log buffer\n", __func__);
-		return -ENOMEM;
-	}
-
-	for (i = 0; i < debug_enable; i++) {
-		debug_log_data.audio_log[i] =
-			kzalloc(sizeof(char *)
-				* MAX_DEBUG_MSG_SIZE, GFP_KERNEL);
-
-		if (!debug_log_data.audio_log[i]) {
-			pr_err("%s: Failed to alloc log buffer idx %d\n",
-				__func__, i);
-			ret = -ENOMEM;
-			goto alloc_err;
-		}
-	}
-
 	return 0;
 
 alloc_err:
@@ -183,49 +109,19 @@ EXPORT_SYMBOL_GPL(alloc_sec_audio_log);
 
 void free_sec_audio_log(void)
 {
-	int i;
-
-	for (i = 0; i < debug_enable; i++)
-		kfree(debug_log_data.audio_log[i]);
-
-	kfree(debug_log_data.audio_log);
-	debug_log_data.audio_log = NULL;
-	debug_enable = 0;
 }
 
 static ssize_t log_enable_read_file(struct file *file, char __user *user_buf,
 					size_t count, loff_t *ppos)
 {
-	char buf[16];
-	int len;
-
-	len = snprintf(buf, 16, "%d\n", debug_enable);
-	return simple_read_from_buffer(user_buf, count, ppos, buf, len);
+	return 0;
 }
 
 static ssize_t log_enable_write_file(struct file *file,
 				     const char __user *user_buf,
 				     size_t count, loff_t *ppos)
 {
-	char buf[16];
-	size_t size;
-	int value;
-
-	size = min(count, (sizeof(buf)-1));
-	if (copy_from_user(buf, user_buf, size)) {
-		pr_err("%s: copy_from_user err\n", __func__);
-		return -EFAULT;
-	}
-	buf[size] = 0;
-
-	if (kstrtoint(buf, 10, &value)) {
-		pr_err("%s: Invalid value\n", __func__);
-		return -EINVAL;
-	}
-
-	alloc_sec_audio_log(value);
-
-	return size;
+	return 0;
 }
 
 static const struct file_operations log_enable_fops = {
@@ -237,23 +133,6 @@ static const struct file_operations log_enable_fops = {
 
 static int __init sec_audio_debug_init(void)
 {
-	audio_debugfs = debugfs_create_dir("audio", NULL);
-	if (!audio_debugfs) {
-		pr_err("Failed to create audio debugfs\n");
-		return -EPERM;
-	}
-
-	debugfs_create_file("log_enable",
-			S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP,
-			audio_debugfs, NULL, &log_enable_fops);
-
-	debugfs_create_file("log",
-			S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP,
-			audio_debugfs, NULL, &audio_log_fops);
-
-	debug_log_data.audio_log = NULL;
-	debug_enable = 0;
-
 	return 0;
 }
 module_init(sec_audio_debug_init);

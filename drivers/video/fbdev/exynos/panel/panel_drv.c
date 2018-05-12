@@ -224,7 +224,6 @@ check_disp_det:
 
 	enable_irq(panel->pad.irq_disp_det);
 
-	panel_info("PANEL:INFO:%s:check disp det .. success\n", __func__);
 	return 0;
 
 do_exit:
@@ -571,8 +570,6 @@ static int panel_prepare(struct panel_device *panel, struct common_panel_info *i
 	panel_data->nr_rditbl = info->nr_rditbl;
 	panel_data->restbl = info->restbl;
 	panel_data->nr_restbl = info->nr_restbl;
-	panel_data->dumpinfo = info->dumpinfo;
-	panel_data->nr_dumpinfo = info->nr_dumpinfo;
 	panel_data->panel_dim_info[0] = info->panel_dim_info[0];
 	panel_data->panel_dim_info[1] = info->panel_dim_info[1];
 	for (i = 0; i < panel_data->nr_maptbl; i++)
@@ -1873,8 +1870,6 @@ void disp_det_handler(struct work_struct *data)
 
 	disp_det = gpio_get_value(pad->gpio_disp_det);
 
-	panel_info("PANEL:INFO:%s: disp_det:%d\n", __func__, disp_det);
-
 	switch (state->cur_state) {
 	case PANEL_STATE_ALPM:
 	case PANEL_STATE_NORMAL:
@@ -1883,17 +1878,12 @@ void disp_det_handler(struct work_struct *data)
 
 			/* delay for disp_det deboundce */
 			usleep_range(200000, 210000);
-			panel_err("PANEL:ERR:%s:disp_det is abnormal state\n",
-				__func__);
 			if (reset_cb->cb) {
 #ifdef CONFIG_CHECK_SMPL_STATE
 				ret = reset_cb->cb(reset_cb->data, check_smpl_condition);
 #else
 				ret = reset_cb->cb(reset_cb->data, NULL);
 #endif
-				if (ret)
-					panel_err("PANEL:ERR:%s:failed to reset panel\n",
-						__func__);
 				backlight_update_status(bd);
 			}
 			clear_disp_det_pend(panel);

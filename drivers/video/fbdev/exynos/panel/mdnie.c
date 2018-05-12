@@ -492,7 +492,6 @@ int mdnie_update(struct mdnie_info *mdnie)
 
 	mutex_lock(&mdnie->lock);
 	if (!IS_MDNIE_ENABLED(mdnie)) {
-		dev_err(mdnie->dev, "mdnie is off state\n");
 		mutex_unlock(&mdnie->lock);
 		return -EINVAL;
 	}
@@ -505,7 +504,6 @@ int mdnie_update(struct mdnie_info *mdnie)
 
 	ret = panel_set_mdnie(panel);
 	if (ret < 0) {
-		pr_err("%s, failed to set mdnie %d\n", __func__, ret);
 		mutex_unlock(&mdnie->lock);
 		return ret;
 	}
@@ -915,9 +913,6 @@ static ssize_t night_mode_store(struct device *dev,
 
 	ret = sscanf(buf, "%d %d", &enable, &level);
 
-	dev_info(dev, "%s: night_mode %s level %d\n",
-			__func__, enable ? "on" : "off", level);
-
 	if (ret < 0)
 		return ret;
 
@@ -1177,7 +1172,6 @@ struct device_attribute mdnie_dev_attrs[] = {
 int mdnie_enable(struct mdnie_info *mdnie)
 {
 	if (IS_MDNIE_ENABLED(mdnie)) {
-		dev_info(mdnie->dev, "mdnie already enabled\n");
 		return 0;
 	}
 
@@ -1190,15 +1184,12 @@ int mdnie_enable(struct mdnie_info *mdnie)
 	mdnie->props.trans_mode = TRANS_ON;
 	mutex_unlock(&mdnie->lock);
 
-	dev_info(mdnie->dev, "%s: done\n", __func__);
-
 	return 0;
 }
 
 int mdnie_disable(struct mdnie_info *mdnie)
 {
 	if (!IS_MDNIE_ENABLED(mdnie)) {
-		dev_info(mdnie->dev, "mdnie already disabled\n");
 		return 0;
 	}
 
@@ -1207,8 +1198,6 @@ int mdnie_disable(struct mdnie_info *mdnie)
 	mdnie->props.trans_mode = TRANS_OFF;
 	mdnie->props.update_sensorRGB = false;
 	mutex_unlock(&mdnie->lock);
-
-	dev_info(mdnie->dev, "%s: done\n", __func__);
 
 	return 0;
 }

@@ -368,10 +368,6 @@ static void eax_slowpath_adma_hw_params(unsigned long dma_period_bytes)
 		esa_fw_start();
 	}
 
-	pr_info("EAX-SLOW-DMA:DmaAddr=@%x Total=%d PrdSz=%d #Prds=%d dma_area=0x%p\n",
-		(u32)dsi.sram_dma_start, (u32)(dsi.dma_end - dsi.sram_dma_start),
-		dsi.dma_period, DMA_PERIOD_CNT, dsi.sram_dma_buf);
-
 	mutex_unlock(&dsi.mutex);
 }
 
@@ -508,11 +504,6 @@ static int eax_slowpath_dma_hw_params(struct snd_pcm_substream *substream,
         open_file(prtd, prtd->name);
         dump_count++;
 #endif
-
-	pr_info("EAX-SLOW:DmaAddr=@%llx Total=%d PrdSz=%d #Prds=%d area=0x%p\n",
-			prtd->dma_start, (int)runtime->dma_bytes,
-			params_period_bytes(params), params_periods(params),
-			runtime->dma_area);
 
 	return 0;
 }
