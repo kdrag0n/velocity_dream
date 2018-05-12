@@ -102,14 +102,6 @@ static inline bool is_partial_io(struct bio_vec *bvec)
 	return bvec->bv_len != PAGE_SIZE;
 }
 
-static void zram_revalidate_disk(struct zram *zram)
-{
-	revalidate_disk(zram->disk);
-	/* revalidate_disk reset the BDI_CAP_STABLE_WRITES so set again */
-	zram->disk->queue->backing_dev_info.capabilities |=
-		BDI_CAP_STABLE_WRITES;
-}
-
 /*
  * Check if request is within bounds and aligned on zram logical blocks.
  */
@@ -902,8 +894,6 @@ static int zram_rw_page(struct block_device *bdev, sector_t sector,
 	bv.bv_offset = 0;
 
 	err = zram_bvec_rw(zram, &bv, index, offset, rw);
-put_zram:
-	zram_meta_put(zram);
 out:
 	/*
 	 * If I/O fails, just return error(ie, non-zero) without
