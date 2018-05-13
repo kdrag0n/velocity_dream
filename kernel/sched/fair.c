@@ -5079,7 +5079,6 @@ static void task_waking_fair(struct task_struct *p)
 	record_wakee(p);
 }
 
-#ifndef	CONFIG_BLD
 #ifdef CONFIG_FAIR_GROUP_SCHED
 /*
  * effective_load() calculates the load change as seen from the root_task_group
@@ -6904,7 +6903,6 @@ select_task_rq_fair(struct task_struct *p, int prev_cpu, int sd_flag, int wake_f
 
 	return new_cpu;
 }
-#endif	/* CONFIG_BLD */
 
 /*
  * Called immediately before a task is migrated to a new cpu; task_cpu(p) and

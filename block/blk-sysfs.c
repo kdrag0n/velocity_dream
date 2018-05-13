@@ -517,28 +517,6 @@ static struct queue_sysfs_entry queue_poll_delay_entry = {
 	.store = queue_poll_delay_store,
 };
 
-static struct queue_sysfs_entry queue_wc_entry = {
-	.attr = {.name = "write_cache", .mode = S_IRUGO | S_IWUSR },
-	.show = queue_wc_show,
-	.store = queue_wc_store,
-};
-
-static struct queue_sysfs_entry queue_dax_entry = {
-	.attr = {.name = "dax", .mode = S_IRUGO },
-	.show = queue_dax_show,
-};
-
-static struct queue_sysfs_entry queue_stats_entry = {
-	.attr = {.name = "stats", .mode = S_IRUGO },
-	.show = queue_stats_show,
-};
-
-static struct queue_sysfs_entry queue_wb_lat_entry = {
-	.attr = {.name = "wbt_lat_usec", .mode = S_IRUGO | S_IWUSR },
-	.show = queue_wb_lat_show,
-	.store = queue_wb_lat_store,
-};
-
 static struct attribute *default_attrs[] = {
 	&queue_requests_entry.attr,
 	&queue_ra_entry.attr,
@@ -564,10 +542,6 @@ static struct attribute *default_attrs[] = {
 	&queue_iostats_entry.attr,
 	&queue_random_entry.attr,
 	&queue_poll_entry.attr,
-	&queue_wc_entry.attr,
-	&queue_dax_entry.attr,
-	&queue_stats_entry.attr,
-	&queue_wb_lat_entry.attr,
 	&queue_poll_delay_entry.attr,
 	NULL,
 };
