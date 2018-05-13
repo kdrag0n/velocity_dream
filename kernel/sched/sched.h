@@ -402,8 +402,9 @@ struct cfs_rq {
 #endif /* CONFIG_FAIR_GROUP_SCHED */
 #endif /* CONFIG_SMP */
 
-	struct rq *rq;	/* cpu runqueue to which this cfs_rq is attached */
 #ifdef CONFIG_FAIR_GROUP_SCHED
+	struct rq *rq;	/* cpu runqueue to which this cfs_rq is attached */
+
 	/*
 	 * leaf cfs_rqs are those that hold tasks (lowest schedulable entity in
 	 * a hierarchy). Non-leaf lrqs hold other higher schedulable entities
@@ -427,11 +428,6 @@ struct cfs_rq {
 	struct list_head throttled_list;
 #endif /* CONFIG_CFS_BANDWIDTH */
 #endif /* CONFIG_FAIR_GROUP_SCHED */
-
-#ifdef CONFIG_BLD
-	struct list_head bld_cfs_list;
-	char pos;
-#endif
 };
 
 static inline int rt_bandwidth_enabled(void)
@@ -470,15 +466,11 @@ struct rt_rq {
 	/* Nests inside the rq lock: */
 	raw_spinlock_t rt_runtime_lock;
 
-	struct rq *rq;
 #ifdef CONFIG_RT_GROUP_SCHED
 	unsigned long rt_nr_boosted;
 
+	struct rq *rq;
 	struct task_group *tg;
-#endif
-#ifdef CONFIG_BLD
-	struct list_head bld_rt_list;
-	int lowbit;
 #endif
 };
 
