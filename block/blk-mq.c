@@ -165,7 +165,7 @@ bool blk_mq_can_queue(struct blk_mq_hw_ctx *hctx)
 }
 EXPORT_SYMBOL(blk_mq_can_queue);
 
-void blk_mq_rq_ctx_init(struct request_queue *q, struct blk_mq_ctx *ctx,
+static void blk_mq_rq_ctx_init(struct request_queue *q, struct blk_mq_ctx *ctx,
 			       struct request *rq, unsigned int rw_flags)
 {
 	if (blk_queue_io_stat(q))
@@ -212,9 +212,9 @@ void blk_mq_rq_ctx_init(struct request_queue *q, struct blk_mq_ctx *ctx,
 
 	ctx->rq_dispatched[rw_is_sync(rw_flags)]++;
 }
-EXPORT_SYMBOL_GPL(blk_mq_rq_ctx_init);
 
-struct request *__blk_mq_alloc_request(struct blk_mq_alloc_data *data, int rw)
+static struct request *
+__blk_mq_alloc_request(struct blk_mq_alloc_data *data, int rw)
 {
 	struct request *rq;
 	unsigned int tag;
@@ -236,7 +236,6 @@ struct request *__blk_mq_alloc_request(struct blk_mq_alloc_data *data, int rw)
 
 	return NULL;
 }
-EXPORT_SYMBOL_GPL(__blk_mq_alloc_request);
 
 struct request *blk_mq_alloc_request(struct request_queue *q, int rw, gfp_t gfp,
 		bool reserved)
@@ -267,8 +266,8 @@ struct request *blk_mq_alloc_request(struct request_queue *q, int rw, gfp_t gfp,
 }
 EXPORT_SYMBOL(blk_mq_alloc_request);
 
-void __blk_mq_free_request(struct blk_mq_hw_ctx *hctx, struct blk_mq_ctx *ctx,
-			   struct request *rq)
+static void __blk_mq_free_request(struct blk_mq_hw_ctx *hctx,
+				  struct blk_mq_ctx *ctx, struct request *rq)
 {
 	const int tag = rq->tag;
 	struct request_queue *q = rq->q;
@@ -733,7 +732,7 @@ static bool flush_busy_ctx(struct sbitmap *sb, unsigned int bitnr, void *data)
  * Process software queues that have been marked busy, splicing them
  * to the for-dispatch
  */
-void blk_mq_flush_busy_ctxs(struct blk_mq_hw_ctx *hctx, struct list_head *list)
+static void flush_busy_ctxs(struct blk_mq_hw_ctx *hctx, struct list_head *list)
 {
 	struct flush_busy_ctx_data data = {
 		.hctx = hctx,
@@ -742,7 +741,6 @@ void blk_mq_flush_busy_ctxs(struct blk_mq_hw_ctx *hctx, struct list_head *list)
 
 	sbitmap_for_each_set(&hctx->ctx_map, flush_busy_ctx, &data);
 }
-EXPORT_SYMBOL_GPL(blk_mq_flush_busy_ctxs);
 
 static inline unsigned int queued_to_index(unsigned int queued)
 {
@@ -853,7 +851,7 @@ static void blk_mq_process_rq_list(struct blk_mq_hw_ctx *hctx)
 	/*
 	 * Touch any software queue that has pending entries.
 	 */
-	blk_mq_flush_busy_ctxs(hctx, &rq_list);
+	flush_busy_ctxs(hctx, &rq_list);
 
 	/*
 	 * If we have previous entries on our dispatch list, grab them
@@ -1067,8 +1065,8 @@ static inline void __blk_mq_insert_req_list(struct blk_mq_hw_ctx *hctx,
 		list_add_tail(&rq->queuelist, &ctx->rq_list);
 }
 
-void __blk_mq_insert_request(struct blk_mq_hw_ctx *hctx, struct request *rq,
-			     bool at_head)
+static void __blk_mq_insert_request(struct blk_mq_hw_ctx *hctx,
+				    struct request *rq, bool at_head)
 {
 	struct blk_mq_ctx *ctx = rq->mq_ctx;
 
