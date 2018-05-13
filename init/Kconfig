@@ -68,6 +68,15 @@ config BROKEN_ON_SMP
 	depends on BROKEN || !SMP
 	default y
 
+config BLD
+	bool "An alternate CPU load distribution technique for task scheduler"
+	depends on SMP
+	default y
+	help
+	  This is an alternate CPU load distribution technique based for task
+	  scheduler based on The Barbershop Load Distribution algorithm. Not
+	  suitable for NUMA, should work well on SMP.
+
 config INIT_ENV_ARG_LIMIT
 	int
 	default 32 if !UML
