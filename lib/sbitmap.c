@@ -16,6 +16,7 @@
  */
 
 #include <linux/sbitmap.h>
+#include <linux/sched.h>
 
 int sbitmap_init_node(struct sbitmap *sb, unsigned int depth, int shift,
 		      gfp_t flags, int node)
