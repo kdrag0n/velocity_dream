@@ -1227,7 +1227,6 @@ static struct request *blk_mq_map_request(struct request_queue *q,
 	struct blk_mq_ctx *ctx;
 	struct request *rq;
 	int rw = bio_data_dir(bio);
-	struct blk_mq_alloc_data alloc_data;
 
 	blk_queue_enter_live(q);
 	ctx = blk_mq_get_ctx(q);
@@ -1954,12 +1953,6 @@ static void blk_mq_map_swqueue(struct request_queue *q,
 			hctx->next_cpu_batch = BLK_MQ_CPU_WORK_BATCH;
 		}
 	}
-
-	queue_for_each_ctx(q, ctx, i) {
-		hctx = q->mq_ops->map_queue(q, i);
-		if (cpumask_test_cpu(i, online_mask))
-			cpumask_set_cpu(i, hctx->tags->cpumask);
-	}
 }
 
 static void queue_set_hctx_shared(struct request_queue *q, bool shared)
@@ -2234,7 +2227,6 @@ static int blk_mq_queue_reinit_notify(struct notifier_block *nb,
 	struct request_queue *q;
 	struct blk_mq_hw_ctx *hctx;
 	int i;
-	int cpu = (unsigned long)hcpu;
 
 	/*
 	 * Before hotadded cpu starts handling requests, new mappings must

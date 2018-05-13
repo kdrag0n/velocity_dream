@@ -45,11 +45,6 @@ int blk_mq_alloc_rqs(struct blk_mq_tag_set *set, struct blk_mq_tags *tags,
 		     unsigned int hctx_idx, unsigned int depth);
 
 /*
- * Internal helpers for request insertion into sw queues
- */
-void __blk_mq_insert_request(struct blk_mq_hw_ctx *hctx, struct request *rq,
-				bool at_head);
-/*
  * CPU hotplug helpers
  */
 struct blk_mq_cpu_notifier;
