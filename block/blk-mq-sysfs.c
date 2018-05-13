@@ -418,14 +418,12 @@ void blk_mq_hctx_kobj_init(struct blk_mq_hw_ctx *hctx)
 static void blk_mq_sysfs_init(struct request_queue *q)
 {
 	struct blk_mq_ctx *ctx;
-	int cpu;
+	int i;
 
 	kobject_init(&q->mq_kobj, &blk_mq_ktype);
 
-	for_each_possible_cpu(cpu) {
-		ctx = per_cpu_ptr(q->queue_ctx, cpu);
+	queue_for_each_ctx(q, ctx, i)
 		kobject_init(&ctx->kobj, &blk_mq_ctx_ktype);
-	}
 }
 
 int blk_mq_register_disk(struct gendisk *disk)
