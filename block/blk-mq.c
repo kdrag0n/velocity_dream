@@ -2266,25 +2266,12 @@ static int blk_mq_queue_reinit_notify(struct notifier_block *nb,
 	 * so the request in ctx1->rq_list is ignored.
 	 */
 	switch (action & ~CPU_TASKS_FROZEN) {
-	case CPU_DEAD:
-	case CPU_UP_CANCELED:
-		mutex_lock(&all_q_mutex);
-		list_for_each_entry(q, &all_q_list, all_q_node) {
-			queue_for_each_hw_ctx(q, hctx, i) {
-				cpumask_clear_cpu(cpu, hctx->cpumask);
-				cpumask_clear_cpu(cpu, hctx->tags->cpumask);
-			}
-		}
-		mutex_unlock(&all_q_mutex);
-		break;
 	case CPU_UP_PREPARE:
 		/* Update hctx->cpumask for newly onlined CPUs */
 		mutex_lock(&all_q_mutex);
 		list_for_each_entry(q, &all_q_list, all_q_node) {
 			queue_for_each_hw_ctx(q, hctx, i) {
-				cpumask_set_cpu(cpu, hctx->cpumask);
 				hctx->next_cpu_batch = BLK_MQ_CPU_WORK_BATCH;
-				cpumask_set_cpu(cpu, hctx->tags->cpumask);
 			}
 		}
 		mutex_unlock(&all_q_mutex);
