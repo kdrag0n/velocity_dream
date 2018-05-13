@@ -259,44 +259,11 @@ struct request *blk_mq_alloc_request(struct request_queue *q, int rw, gfp_t gfp,
 	rq = __blk_mq_alloc_request(&alloc_data, rw);
 	blk_mq_put_ctx(ctx);
 
-	/*
-	 * If the tag allocator sleeps we could get an allocation for a
-	 * different hardware context.  No need to complicate the low level
-	 * allocator for this for the rare use case of a command tied to
-	 * a specific queue.
-	 */
-	if (WARN_ON_ONCE(!(flags & BLK_MQ_REQ_NOWAIT)))
-		return ERR_PTR(-EINVAL);
-
-	if (hctx_idx >= q->nr_hw_queues)
-		return ERR_PTR(-EIO);
-
-	ret = blk_queue_enter(q, true);
-	if (ret)
-		return ERR_PTR(ret);
-
-	/*
-	 * Check if the hardware context is actually mapped to anything.
-	 * If not tell the caller that it should skip this queue.
-	 */
-	hctx = q->queue_hw_ctx[hctx_idx];
-	if (!blk_mq_hw_queue_mapped(hctx)) {
-		ret = -EXDEV;
-		goto out_queue_exit;
-	}
-	ctx = __blk_mq_get_ctx(q, cpumask_first(hctx->cpumask));
-
-	blk_mq_set_alloc_data(&alloc_data, q, flags, ctx, hctx);
-	rq = __blk_mq_alloc_request(&alloc_data, rw, 0);
 	if (!rq) {
-		ret = -EWOULDBLOCK;
-		goto out_queue_exit;
+		blk_queue_exit(q);
+		return ERR_PTR(-EWOULDBLOCK);
 	}
 	return rq;
-
-out_queue_exit:
-	blk_queue_exit(q);
-	return ERR_PTR(ret);
 }
 EXPORT_SYMBOL(blk_mq_alloc_request);
 
