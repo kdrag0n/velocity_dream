@@ -888,7 +888,6 @@ wl_probe_wdev_all(struct bcm_cfg80211 *cfg)
 {
 	struct net_info *_net_info, *next;
 	unsigned long int flags;
-	int idx = 0;
 	spin_lock_irqsave(&cfg->net_list_sync, flags);
 	GCC_DIAGNOSTIC_PUSH();
 	BCM_LIST_FOR_EACH_ENTRY_SAFE(_net_info, next,
