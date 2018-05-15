@@ -892,12 +892,14 @@ static int exec_mmap(struct mm_struct *mm)
 		}
 	}
 	task_lock(tsk);
+	preempt_disable_rt();
 	active_mm = tsk->active_mm;
 	tsk->mm = mm;
 	tsk->active_mm = mm;
 	activate_mm(active_mm, mm);
 	tsk->mm->vmacache_seqnum = 0;
 	vmacache_flush(tsk);
+	preempt_enable_rt();
 #ifdef CONFIG_RKP_KDP
 	if(rkp_cred_enable){
 		rkp_call(RKP_CMDID(0x43),(unsigned long long)current_cred(), (unsigned long long)mm->pgd,0,0,0);
