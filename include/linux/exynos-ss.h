@@ -14,10 +14,10 @@
 #ifndef EXYNOS_SNAPSHOT_H
 #define EXYNOS_SNAPSHOT_H
 
-#ifdef CONFIG_EXYNOS_SNAPSHOT
-#include <asm/ptrace.h>
 #include <linux/bug.h>
 
+#ifdef CONFIG_EXYNOS_SNAPSHOT
+#include <asm/ptrace.h>
 /* mandatory */
 extern void exynos_ss_task(int cpu, void *v_task);
 extern void exynos_ss_work(void *worker, void *v_task, void *fn, int en);
@@ -179,7 +179,7 @@ void exynos_ss_dump_sfr(void);
 #define exynos_ss_irq_exit(a,b)		do { } while(0)
 #define exynos_ss_irqs_disabled(a)	do { } while(0)
 #define exynos_ss_spinlock(a,b)		do { } while(0)
-#define exynos_ss_clk(a,b,c)		do { } while(0)
+#define exynos_ss_clk(a,b,c,d)		do { } while(0)
 #define exynos_ss_freq(a,b,c,d)		do { } while(0)
 #define exynos_ss_irq_exit_var(v)	do { v = 0; } while(0)
 #define exynos_ss_reg(a,b,c,d)		do { } while(0)
@@ -210,6 +210,7 @@ void exynos_ss_dump_sfr(void);
 #define exynos_ss_hook_hardlockup_entry(a) do { } while(0)
 #define exynos_ss_hook_hardlockup_exit() do { } while(0)
 #define exynos_ss_dump_task_info()	do { } while (0)
+#define exynos_ss_pmu(a,b,c)		do { } while (0)
 
 static inline unsigned long exynos_ss_get_item_vaddr(char *name)
 {
