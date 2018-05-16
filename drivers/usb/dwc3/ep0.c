@@ -35,8 +35,6 @@
 #include "gadget.h"
 #include "io.h"
 
-extern bool lockup_noti;
-
 static void __dwc3_ep0_do_control_status(struct dwc3 *dwc, struct dwc3_ep *dep);
 static void __dwc3_ep0_do_control_data(struct dwc3 *dwc,
 		struct dwc3_ep *dep, struct dwc3_request *req);
@@ -378,9 +376,6 @@ static int dwc3_ep0_handle_status(struct dwc3 *dwc,
 
 	recip = ctrl->bRequestType & USB_RECIP_MASK;
 
-	if (lockup_noti)
-		pr_err("%s: recip: 0x%08X\n", __func__, recip);
-
 	switch (recip) {
 	case USB_RECIP_DEVICE:
 		/*
@@ -448,9 +443,6 @@ static int dwc3_ep0_handle_feature(struct dwc3 *dwc,
 	wIndex = le16_to_cpu(ctrl->wIndex);
 	recip = ctrl->bRequestType & USB_RECIP_MASK;
 	state = dwc->gadget.state;
-
-	if (lockup_noti)
-		pr_err("%s: recip: 0x%08X\n", __func__, recip);
 
 	switch (recip) {
 	case USB_RECIP_DEVICE:
@@ -607,9 +599,6 @@ static int dwc3_ep0_set_config(struct dwc3 *dwc, struct usb_ctrlrequest *ctrl)
 #endif
 
 	cfg = le16_to_cpu(ctrl->wValue);
-
-	if (lockup_noti)
-		pr_err("%s: state: 0x%08X\n", __func__, state);
 
 	switch (state) {
 	case USB_STATE_DEFAULT:
@@ -775,9 +764,6 @@ static int dwc3_ep0_set_isoch_delay(struct dwc3 *dwc, struct usb_ctrlrequest *ct
 static int dwc3_ep0_std_request(struct dwc3 *dwc, struct usb_ctrlrequest *ctrl)
 {
 	int ret;
-
-	if (lockup_noti)
-		pr_err("%s: ctrl->bRequest: 0x%08X\n", __func__, ctrl->bRequest);
 
 	switch (ctrl->bRequest) {
 	case USB_REQ_GET_STATUS:
@@ -1005,9 +991,6 @@ static void dwc3_ep0_xfer_complete(struct dwc3 *dwc,
 	dep->resource_index = 0;
 	dwc->setup_packet_pending = false;
 
-	if (lockup_noti)
-		pr_err("%s: ep0state: 0x%08X\n", __func__, dwc->ep0state);
-
 	switch (dwc->ep0state) {
 	case EP0_SETUP_PHASE:
 		dwc3_trace(trace_dwc3_ep0, "Setup Phase");
@@ -1149,9 +1132,6 @@ static void dwc3_ep0_xfernotready(struct dwc3 *dwc,
 {
 	dwc->setup_packet_pending = true;
 
-	if (lockup_noti)
-		pr_err("%s: event->status: 0x%08X\n", __func__, event->status);
-
 	switch (event->status) {
 	case DEPEVT_STATUS_CONTROL_DATA:
 		dwc3_trace(trace_dwc3_ep0, "Control Data");
@@ -1204,10 +1184,6 @@ void dwc3_ep0_interrupt(struct dwc3 *dwc,
 			dwc3_ep_event_string(event->endpoint_event),
 			epnum >> 1, (epnum & 1) ? "in" : "out",
 			dwc3_ep0_state_string(dwc->ep0state));
-
-	if (lockup_noti)
-		pr_err("%s: event->endpoint_event: 0x%08X\n",
-					__func__, event->endpoint_event);
 
 	switch (event->endpoint_event) {
 	case DWC3_DEPEVT_XFERCOMPLETE:

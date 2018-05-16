@@ -1116,8 +1116,8 @@ static int ion_debug_client_show(struct seq_file *s, void *unused)
 		return -EINVAL;
 	}
 
-	seq_printf(s, "%16.s %4.s %16.s %4.s %10.s %8.s %9.s\n",
-		   "task", "pid", "thread", "tid", "size", "# procs", "flag");
+	seq_printf(s, "%16.s %4.s %10.s %8.s %9.s\n",
+		   "task", "pid", "size", "# procs", "flag");
 	seq_printf(s, "----------------------------------------------"
 			"--------------------------------------------\n");
 
@@ -1132,10 +1132,9 @@ static int ion_debug_client_show(struct seq_file *s, void *unused)
 			names[id] = buffer->heap->name;
 		sizes[id] += buffer->size;
 		sizes_pss[id] += (buffer->size / buffer->handle_count);
-		seq_printf(s, "%16.s %4u %16.s %4u %10zu %8d %9lx\n",
+		seq_printf(s, "%16.s %4u %10zu %8d %9lx\n",
 			   buffer->task_comm, buffer->pid,
-				buffer->thread_comm, buffer->tid, buffer->size,
-				buffer->handle_count, buffer->flags);
+				buffer->size, buffer->handle_count, buffer->flags);
 	}
 	mutex_unlock(&client->lock);
 	up_read(&g_idev->lock);
