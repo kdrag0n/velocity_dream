@@ -254,6 +254,7 @@ static int __init quiet_kernel(char *str)
 early_param("debug", debug_kernel);
 early_param("quiet", quiet_kernel);
 
+#ifndef CONFIG_IGNORE_LOGLEVEL_PARAM
 static int __init loglevel(char *str)
 {
 	int newlevel;
@@ -272,6 +273,7 @@ static int __init loglevel(char *str)
 }
 
 early_param("loglevel", loglevel);
+#endif
 
 /* Change NUL term back to "=", to make "param" the whole string. */
 static int __init repair_env_string(char *param, char *val,

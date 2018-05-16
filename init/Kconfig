@@ -898,6 +898,10 @@ config LOG_CPU_MAX_BUF_SHIFT
 		     13 =>   8 KB for each CPU
 		     12 =>   4 KB for each CPU
 
+config IGNORE_LOGLEVEL_PARAM
+	bool
+	default y
+
 #
 # Architectures with an unreliable sched_clock() should select this:
 #
