@@ -19,6 +19,7 @@
 #include <linux/pm_qos.h>
 #include <linux/exynos-ss.h>
 #include <linux/pm_opp.h>
+#include <linux/sched.h>
 
 #include <soc/samsung/cal-if.h>
 #include <soc/samsung/exynos-dm.h>

@@ -1318,8 +1318,6 @@ void fimc_is_dual_dvfs_update(struct fimc_is_device_ischain *device,
 		pre_scenario_id = static_ctrl->cur_scenario_id;
 		scenario_id = fimc_is_dvfs_sel_static(device);
 		if (scenario_id >= 0 && scenario_id != pre_scenario_id) {
-			struct fimc_is_dvfs_scenario_ctrl *static_ctrl = resourcemgr->dvfs_ctrl.static_ctrl;
-
 			mgrinfo("tbl[%d] dual static scenario(%d)-[%s]\n", device, group, frame,
 				resourcemgr->dvfs_ctrl.dvfs_table_idx,
 				static_ctrl->cur_scenario_id,
