@@ -176,8 +176,6 @@ source "drivers/irqchip/Kconfig"
 
 source "drivers/ipack/Kconfig"
 
-source "drivers/battery/Kconfig"
-
 source "drivers/battery_v2/Kconfig"
 
 source "drivers/reset/Kconfig"
