@@ -1,7 +1,6 @@
 #export CROSS_COMPILE=$HOME/code/android/google49/bin/aarch64-linux-android-
 #export CROSS_COMPILE=$HOME/code/android/gclang/clang-4691093/bin/
-#export CROSS_COMPILE=$HOME/code/android/linaro731/bin/aarch64-linux-gnu-
-export CROSS_COMPILE=$HOME/code/android/cortex53/bin/aarch64-cortex_a53-linux-gnueabi-
+export CROSS_COMPILE=$HOME/code/android/linaro641/bin/aarch64-linux-gnu-
 export ARCH=arm64
 export SUBARCH=arm64
 export CFLAGS="-Ofast"

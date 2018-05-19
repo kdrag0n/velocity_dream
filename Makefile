@@ -679,7 +679,7 @@ ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS	+= $(call cc-option,-Oz,-Os)
 KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
 else
-KBUILD_CFLAGS   += -O2
+KBUILD_CFLAGS   += -Ofast -ffast-math -funsafe-math-optimizations -march=armv8-a+crypto+fp16+crc -mtune=cortex-a73.cortex-a53 -mcpu=cortex-a73.cortex-a53+crypto+fp16+crc
 endif
 
 # Disallow introduction of unaligned stores
