@@ -30,11 +30,11 @@ do_dtb() {
 }
 
 cleanbuild() {
-    make clean && make -j$jobs && mkzip
+    make clean && make -j$jobs $@ && mkzip
 }
 
 incbuild() {
-    make -j$jobs && mkzip
+    make -j$jobs $@ && mkzip
 }
 
 test() {
@@ -46,5 +46,5 @@ test() {
 }
 
 inc() {
-    incbuild && test
+    incbuild $@ && test
 }
