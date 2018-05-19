@@ -163,6 +163,12 @@ config CPU_FREQ_DEFAULT_GOV_CULTIVATION
 	help
 	Use the CPUFreq governor 'cultivation' as default.
 
+config CPU_FREQ_DEFAULT_GOV_IMPULSE
+	bool "impulse"
+	select CPU_FREQ_GOV_IMPULSE
+	help
+	  Use the CPUFreq governor 'impulse' as default.
+
 endchoice
 
 config CPU_FREQ_GOV_PERFORMANCE
@@ -292,6 +298,10 @@ config CPU_FREQ_GOV_SCHEDUTIL
 	  be called cpufreq_schedutil.
 
 	  If in doubt, say N.
+
+config CPU_FREQ_GOV_IMPULSE
+	tristate "'impulse' cpufreq policy governor"
+	depends on CPU_FREQ
 
 config FREQVAR_SCHEDTUNE
 	depends on CPU_FREQ_GOV_SCHEDUTIL
