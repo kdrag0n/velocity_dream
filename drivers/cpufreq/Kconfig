@@ -256,7 +256,6 @@ config CPU_FREQ_GOV_INTELLIACTIVE
 
 config CPU_FREQ_GOV_CONSERVATIVE
 	tristate "'conservative' cpufreq governor"
-	depends on CPU_FREQ
 	select CPU_FREQ_GOV_COMMON
 	help
 	  'conservative' - this driver is rather similar to the 'ondemand'
@@ -299,9 +298,42 @@ config CPU_FREQ_GOV_SCHEDUTIL
 
 	  If in doubt, say N.
 
+config CPU_FREQ_GOV_BLU_ACTIVE
+	tristate "'blu_active' cpufreq policy governor"
+	help
+	  'blu_active' - This driver adds a dynamic cpufreq policy governor
+	  designed for latency-sensitive workloads.
+
+	  This governor attempts to reduce the latency of clock
+	  increases so that the system is more responsive to
+	  interactive workloads.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called cpufreq_blu_active.
+
+	  If in doubt, say N.
+
+config CPU_FREQ_GOV_BIOSHOCK
+ 	tristate "'bioshock' cpufreq policy governor"
+	help
+	  'bioshock' - More aggressive version of conservative
+
+config CPU_FREQ_GOV_DARKNESS
+ 	tristate "'darkness' cpufreq policy governor"
+
+config CPU_FREQ_GOV_CULTIVATION
+	tristate "'cultivation' cpufreq policy governor"
+	help
+	  'cultivation' - another tuned interactive with extra options
+
+config FINGERPRINT_BOOST
+	bool "Fingerprint Boost"
+	default y
+	help
+	  Boosts available CPUs to max frequency on fingerprint sensor input.
+
 config CPU_FREQ_GOV_IMPULSE
 	tristate "'impulse' cpufreq policy governor"
-	depends on CPU_FREQ
 
 config FREQVAR_SCHEDTUNE
 	depends on CPU_FREQ_GOV_SCHEDUTIL
@@ -326,42 +358,6 @@ config CPUFREQ_DT
 	  systems which share clock and voltage across all CPUs.
 
 	  If in doubt, say N.
-
-config CPU_FREQ_GOV_BLU_ACTIVE
-	tristate "'blu_active' cpufreq policy governor"
-	help
-	  'blu_active' - This driver adds a dynamic cpufreq policy governor
-	  designed for latency-sensitive workloads.
-
-	  This governor attempts to reduce the latency of clock
-	  increases so that the system is more responsive to
-	  interactive workloads.
-
-	  To compile this driver as a module, choose M here: the
-	  module will be called cpufreq_blu_active.
-
-	  If in doubt, say N.
-
-config CPU_FREQ_GOV_BIOSHOCK
- 	tristate "'bioshock' cpufreq bioshock"
-	depends on CPU_FREQ
-	help
-	  'bioshock' - More aggressive version of conservative
-
-config CPU_FREQ_GOV_DARKNESS
- 	tristate "'darkness' cpufreq policy governor"
-
-config CPU_FREQ_GOV_CULTIVATION
-	tristate "'cultivation' cpufreq governor"
-	depends on CPU_FREQ
-	help
-	  'cultivation' - another tuned interactive with extra options
-
-config FINGERPRINT_BOOST
-	bool "Fingerprint Boost"
-	default y
-	help
-	  Boosts available CPUs to max frequency on fingerprint sensor input.
 
 if X86
 source "drivers/cpufreq/Kconfig.x86"
