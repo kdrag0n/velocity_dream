@@ -9,6 +9,9 @@
  * The MS-DOS filesystem constants/structures
  */
 
+#ifdef SECTOR_SIZE
+#undef SECTOR_SIZE
+#endif
 #define SECTOR_SIZE	512		/* sector size (bytes) */
 #define SECTOR_BITS	9		/* log2(SECTOR_SIZE) */
 #define MSDOS_DPB	(MSDOS_DPS)	/* dir entries per block */
