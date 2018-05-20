@@ -1,10 +1,10 @@
 # helpers
 mkzip() {
-    echo '  ZIP     velocity_kernel.zip'
     rm velocity_kernel.zip > /dev/null 2>&1
     build_dtb
     cp arch/arm64/boot/Image flasher/
     cd flasher
+    echo '  ZIP     velocity_kernel.zip'
     zip -r9 ../velocity_kernel.zip . > /dev/null
     cd ..
 }
