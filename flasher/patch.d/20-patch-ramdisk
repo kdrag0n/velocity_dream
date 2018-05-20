@@ -1,0 +1,32 @@
+#!/sbin/sh
+
+. "$env"
+
+cd "$ramdisk_patch" && [ "$(ls)" ] || exit 0
+
+# fix permissions of patch files
+chmod -R 0755 .
+
+find -type f \( \
+	-name "*.rc" ! -name "ueventd.*" \
+	\) -exec chmod 0750 {} \;
+
+find -type f \( \
+	-name "*.xml" -o -name "*.do" -o -name "*.pem" -o -name "*.vtab" -o \
+	-name "fstab.*" -o -name "*.prop" -o -name "*_contexts" -o \
+	-name "ueventd.*" -o -name "sepolicy" -o -name "sepolicy_version" \
+	\) -exec chmod 0644 {} \;
+
+print "Copying new files to the ramdisk..."
+cp -rd ./. "$ramdisk/"
+
+import_rc init.velocity.rc
+import_rc init.spectrum.rc
+
+# Disable TGPKernel services
+sed -i '/init\.services\.rc/d' "$ramdisk/init.rc"
+for file in sbin/init.dalvik.sh sbin/kernelinit.sh sbin/initd.sh sbin/resetprop sbin/sysinit.sh sbin/wakelock.sh init.services.rc; do
+    rm "$ramdisk/$file"
+done
+
+exit 0

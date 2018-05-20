@@ -104,9 +104,9 @@ build.log
 out/
 
 # Misc
-anykernel/Image
-anykernel/dtb
-anykernel/dtb2
+flasher/Image
+flasher/dtb.img
+flasher/dtb2.img
 
 # Samsung temporary files
 fips_crypto_utils

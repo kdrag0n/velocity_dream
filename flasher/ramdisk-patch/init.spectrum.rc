@@ -1,0 +1,68 @@
+on property:sys.boot_completed=1
+	# First boot default
+	exec u:r:init:s0 root root -- /init.spectrum.sh
+	exec u:r:su:s0 root root -- /init.spectrum.sh
+
+	# Enable Spectrum
+	setprop spectrum.support 1
+	setprop persist.spectrum.kernel Velocity
+
+# Balanced (default)
+on property:persist.spectrum.profile=0
+	write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor schedutil
+	write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 455000
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 1690000
+    write /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor schedutil
+    write /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq 741000
+	write /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq 2314000
+	write /sys/kernel/hmp/up_threshold 524
+	write /sys/kernel/hmp/down_threshold 214
+	write /sys/power/cpuhotplug/enabled 1
+    write /dev/cpuset/foreground/cpus 0-2,4-7
+    write /dev/cpuset/foreground/boost/cpus 4-7
+	write /dev/cpuset/top-app/cpus 0-7
+
+# Performance
+on property:persist.spectrum.profile=1
+	write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor intelliactive
+	write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 949000
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 1690000
+    write /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor intelliactive
+    write /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq 1170000
+	write /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq 2314000
+	write /sys/kernel/hmp/up_threshold 430
+	write /sys/kernel/hmp/down_threshold 150
+	write /sys/power/cpuhotplug/enabled 0
+	write /dev/cpuset/foreground/cpus 0-2,4-7
+    write /dev/cpuset/foreground/boost/cpus 4-7
+	write /dev/cpuset/top-app/cpus 0-7
+
+# Battery
+on property:persist.spectrum.profile=2
+	write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor darkness
+	write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 455000
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 1248000
+    write /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor darkness
+    write /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq 741000
+	write /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq 1703000
+	write /sys/kernel/hmp/up_threshold 700
+	write /sys/kernel/hmp/down_threshold 256
+	write /sys/power/cpuhotplug/enabled 1
+	write /dev/cpuset/foreground/cpus 0-2,4-5
+    write /dev/cpuset/foreground/boost/cpus 4-5
+	write /dev/cpuset/top-app/cpus 0-5
+
+# Gaming
+on property:persist.spectrum.profile=3
+	write /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor intelliactive
+	write /sys/devices/system/cpu/cpu0/cpufreq/scaling_min_freq 832000
+    write /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq 1690000
+    write /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor intelliactive
+    write /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq 1066000
+	write /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq 2314000
+	write /sys/kernel/hmp/up_threshold 430
+	write /sys/kernel/hmp/down_threshold 150
+	write /sys/power/cpuhotplug/enabled 0
+	write /dev/cpuset/foreground/cpus 0-2,4-7
+    write /dev/cpuset/foreground/boost/cpus 4-7
+	write /dev/cpuset/top-app/cpus 0-7

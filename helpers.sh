@@ -1,18 +1,17 @@
 # helpers
 mkzip() {
-    rm anykernel/Image > /dev/null 2>&1
+    echo '  ZIP     velocity_kernel.zip'
     rm velocity_kernel.zip > /dev/null 2>&1
     build_dtb
-    cp arch/arm64/boot/Image anykernel/
-    cd anykernel
-    zip -r ../velocity_kernel.zip * > /dev/null
+    cp arch/arm64/boot/Image flasher/
+    cd flasher
+    zip -r9 ../velocity_kernel.zip . > /dev/null
     cd ..
-    echo '  ZIP     velocity_kernel.zip'
 }
 
 build_dtb() {
-    do_dtb anykernel/dtb dream/{00,01,02,03,04,05,07,08,09,10}
-    do_dtb anykernel/dtb2 dream2/{03,04,05,06,07,08,09,10}
+    do_dtb flasher/dtb.img dream/{00,01,02,03,04,05,07,08,09,10}
+    do_dtb flasher/dtb2.img dream2/{03,04,05,06,07,08,09,10}
 }
 
 do_dtb() {
@@ -38,8 +37,12 @@ incbuild() {
 }
 
 test() {
-    adb reboot recovery && \
-    sleep 20 && \
+    adb shell ls '/init.recovery*' > /dev/null 2>&1
+    if [ $? -eq 1 ]; then
+        adb reboot recovery && \
+        sleep 20
+    fi
+
     adb push velocity_kernel.zip /tmp && \
     adb shell twrp install /tmp/velocity_kernel.zip && \
     adb shell reboot

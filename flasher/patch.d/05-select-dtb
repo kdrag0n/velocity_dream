@@ -1,0 +1,14 @@
+#!/sbin/sh
+
+. "$env"
+cd "$tmp"
+
+# select dtb to use based on device
+bl=$(getprop ro.boot.bootloader)
+model=${bl:1:3}
+
+if [ $model = 955 ]; then
+    mv dtb2.img dtb.img
+fi
+
+exit 0
