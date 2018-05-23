@@ -97,9 +97,9 @@ int vm_highmem_is_dirtyable;
  * The generator of dirty data starts writeback at this percentage
  */
 #ifdef CONFIG_ZEN_INTERACTIVE
-int vm_dirty_ratio = 50;
+int __read_mostly vm_dirty_ratio = 50;
 #else
-int vm_dirty_ratio = 20;
+int __read_mostly vm_dirty_ratio = 25;
 #endif
 
 /*
