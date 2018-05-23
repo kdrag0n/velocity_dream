@@ -3590,7 +3590,7 @@ static int fts_stop_device(struct fts_ts_info *info, bool lpmode)
 #endif
 	if (lpmode) {
 		if (info->board->support_sidegesture) {
-			fts_enable_feature(info, FTS_FEATURE_SIDE_GUSTURE, true);
+			fts_enable_feature(info, FTS_FEATURE_SIDE_GESTURE, true);
 			fts_delay(20);
 		}
 
