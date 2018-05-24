@@ -28,12 +28,18 @@ do_dtb() {
     scripts/dtbTool/dtbTool -o $1 -d /tmp/kdtb -s 2048 > /dev/null
 }
 
+zerover() {
+    echo 0 >| .version
+}
+
 cleanbuild() {
-    make clean && make -j$jobs $@ && mkzip
+    zerover
+    make $MAKEFLAGS clean && make -j$jobs $@ && mkzip
 }
 
 incbuild() {
-    make -j$jobs $@ && mkzip
+    zerover
+    make $MAKEFLAGS -j$jobs $@ && mkzip
 }
 
 test() {

@@ -21,8 +21,8 @@ export CFLAGS=""
 export CXXFLAGS=""
 export LDFLAGS=""
 
-cc_ver="$(${tc}gcc --version|head -n1|cut -d'(' -f2|tr -d ')')"
+cc_ver="$(${tc}gcc --version|head -n1|cut -d'(' -f2|tr -d ')'|awk '{$5=""; print $0}'|sed -e 's/[[:space:]]*$//')"
 
-alias make="make KBUILD_COMPILER_STRING=\"${cc_ver}\" KBUILD_BUILD_VERSION=1"
+MAKEFLAGS="KBUILD_COMPILER_STRING=\"${cc_ver}\""
 
 source helpers.sh
