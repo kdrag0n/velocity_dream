@@ -23,6 +23,6 @@ export LDFLAGS=""
 
 cc_ver="$(${tc}gcc --version|head -n1|cut -d'(' -f2|tr -d ')'|awk '{$5=""; print $0}'|sed -e 's/[[:space:]]*$//')"
 
-MAKEFLAGS="KBUILD_COMPILER_STRING=\"${cc_ver}\""
+MAKEFLAGS="KBUILD_COMPILER_STRING=${cc_ver}"
 
 source helpers.sh
