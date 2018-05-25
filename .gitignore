@@ -114,3 +114,4 @@ fips_fmp_utils
 kaslr_fips
 offsets_sizes_crypto.txt
 offsets_sizes_fmp.txt
+releases/

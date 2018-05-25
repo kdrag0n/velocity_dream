@@ -1,4 +1,6 @@
 # helpers
+_RELEASE=0
+
 mkzip() {
     rm velocity_kernel.zip > /dev/null 2>&1
     build_dtb
@@ -28,18 +30,33 @@ do_dtb() {
     scripts/dtbTool/dtbTool -o $1 -d /tmp/kdtb -s 2048 > /dev/null
 }
 
+rel() {
+    [ ! -f .relversion ] && echo 0 > .relversion
+    mv .version .devversion && \
+    mv .relversion .version
+    _RELEASE=1
+    incbuild
+    _RELEASE=0
+    mv .version .relversion && \
+    mv .devversion .version && \
+    mkdir -p releases
+    fn="releases/velocity_kernel-r$(cat .relversion)-$(date +%Y%m%d).zip"
+    echo "  REL     $fn"
+    mv velocity_kernel.zip "$fn"
+}
+
 zerover() {
     echo 0 >| .version
 }
 
 cleanbuild() {
-    zerover
-    make $MAKEFLAGS clean && make -j$jobs $@ && mkzip
+    [ ! $_RELEASE ] && zerover
+    make "${MAKEFLAGS[@]}" clean && make -j$jobs $@ && mkzip
 }
 
 incbuild() {
-    zerover
-    make $MAKEFLAGS -j$jobs $@ && mkzip
+    [ ! $_RELEASE ] && zerover
+    make "${MAKEFLAGS[@]}" -j$jobs $@ && mkzip
 }
 
 test() {
