@@ -102,7 +102,7 @@ cd "$tmp"
 	[ $match != 1 ] && abort "Unsupported device"
 }
 
-mount /system
+# mount /system
 # mount /data
 
 setperm 0755 0755 "$bin"
