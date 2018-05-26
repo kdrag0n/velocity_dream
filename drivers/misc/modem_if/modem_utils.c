@@ -539,7 +539,7 @@ void mif_netif_wake(struct link_device *ld)
 __be32 ipv4str_to_be32(const char *ipv4str, size_t count)
 {
 	unsigned char ip[4];
-	char ipstr[16]; /* == strlen("xxx.xxx.xxx.xxx") + 1 */
+	char ipstr[16]; /* == DSTRLEN("xxx.xxx.xxx.xxx") + 1 */
 	char *next = ipstr;
 	char *p;
 	int i;
@@ -680,7 +680,7 @@ void mif_dump2format16(const char *data, int len, char *buff, char *tag)
 				strncat(line, tb, strlen(tb));
 			}
 		}
-		strncat(line, "\n", strlen("\n"));
+		strncat(line, "\n", DSTRLEN("\n"));
 
 		strncat(buff, line, strlen(line));
 	}
@@ -727,7 +727,7 @@ void mif_dump2format4(const char *data, int len, char *buff, char *tag)
 			snprintf(tb, ARRAY_SIZE(tb), " %02x", d[i]);
 			strncat(line, tb, strlen(tb));
 		}
-		strncat(line, "\n", strlen("\n"));
+		strncat(line, "\n", DSTRLEN("\n"));
 
 		strncat(buff, line, strlen(line));
 	}
@@ -798,21 +798,21 @@ static void strcat_tcp_header(char *buff, u8 *pkt)
 	strncat(buff, line, strlen(line));
 
 	if (tcph->cwr)
-		strncat(flag_str, "CWR ", strlen("CWR "));
+		strncat(flag_str, "CWR ", DSTRLEN("CWR "));
 	if (tcph->ece)
-		strncat(flag_str, "ECE", strlen("ECE"));
+		strncat(flag_str, "ECE", DSTRLEN("ECE"));
 	if (tcph->urg)
-		strncat(flag_str, "URG ", strlen("URG "));
+		strncat(flag_str, "URG ", DSTRLEN("URG "));
 	if (tcph->ack)
-		strncat(flag_str, "ACK ", strlen("ACK "));
+		strncat(flag_str, "ACK ", DSTRLEN("ACK "));
 	if (tcph->psh)
-		strncat(flag_str, "PSH ", strlen("PSH "));
+		strncat(flag_str, "PSH ", DSTRLEN("PSH "));
 	if (tcph->rst)
-		strncat(flag_str, "RST ", strlen("RST "));
+		strncat(flag_str, "RST ", DSTRLEN("RST "));
 	if (tcph->syn)
-		strncat(flag_str, "SYN ", strlen("SYN "));
+		strncat(flag_str, "SYN ", DSTRLEN("SYN "));
 	if (tcph->fin)
-		strncat(flag_str, "FIN ", strlen("FIN "));
+		strncat(flag_str, "FIN ", DSTRLEN("FIN "));
 	eol = strlen(flag_str) - 1;
 	if (eol > 0)
 		flag_str[eol] = 0;
@@ -934,11 +934,11 @@ void print_ip4_packet(const u8 *ip_pkt, bool tx)
 	strncat(buff, line, strlen(line));
 
 	if (flags & IP_CE)
-		strncat(flag_str, "CE ", strlen("CE "));
+		strncat(flag_str, "CE ", DSTRLEN("CE "));
 	if (flags & IP_DF)
-		strncat(flag_str, "DF ", strlen("DF "));
+		strncat(flag_str, "DF ", DSTRLEN("DF "));
 	if (flags & IP_MF)
-		strncat(flag_str, "MF ", strlen("MF "));
+		strncat(flag_str, "MF ", DSTRLEN("MF "));
 	eol = strlen(flag_str) - 1;
 	if (eol > 0)
 		flag_str[eol] = 0;

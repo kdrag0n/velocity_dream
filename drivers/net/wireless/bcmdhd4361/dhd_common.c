@@ -877,7 +877,7 @@ dhd_wl_ioctl(dhd_pub_t *dhd_pub, int ifidx, wl_ioctl_t *ioc, void *buf, int len)
 					bcopy((msg + slen), &lval, min_len);
 				}
 			}
-			if (!strncmp(msg, "cur_etheraddr", strlen("cur_etheraddr"))) {
+			if (!strncmp(msg, "cur_etheraddr", DSTRLEN("cur_etheraddr"))) {
 				lval = 0;
 			}
 			DHD_ERROR_MEM(("%s: cmd: %d, msg: %s, val: 0x%x, len: %d, set: %d\n",

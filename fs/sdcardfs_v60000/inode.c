@@ -364,7 +364,7 @@ static int sdcardfs_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode
 		}
 
 		fullpath_namelen = page_buf + PAGE_SIZE - nomedia_dir_name - 1;
-		fullpath_namelen += strlen("/.nomedia");
+		fullpath_namelen += DSTRLEN("/.nomedia");
 		nomedia_fullpath = kzalloc(fullpath_namelen + 1, GFP_KERNEL);
 		if (!nomedia_fullpath) {
 			free_page((unsigned long)page_buf);

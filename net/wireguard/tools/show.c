@@ -176,7 +176,7 @@ static char *every(uint16_t seconds)
 {
 	static char buf[1024] = "every ";
 
-	pretty_time(buf + strlen("every "), sizeof(buf) - strlen("every ") - 1, seconds);
+	pretty_time(buf + DSTRLEN("every "), sizeof(buf) - strlen("every ") - 1, seconds);
 	return buf;
 }
 

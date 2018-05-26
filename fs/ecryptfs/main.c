@@ -612,11 +612,11 @@ static int ecryptfs_parse_options(struct ecryptfs_sb_info *sbi, char *options,
 			propagate_type = match_strdup(&args[0]);
 			if (!propagate_type)
 				return -ENOMEM;
-			if (!strncmp(propagate_type, "default", strlen("default")))
+			if (!strncmp(propagate_type, "default", DSTRLEN("default")))
 				propagate_stat->propagate_type = TYPE_E_DEFAULT;
-			else if (!strncmp(propagate_type, "read", strlen("read")))
+			else if (!strncmp(propagate_type, "read", DSTRLEN("read")))
 				propagate_stat->propagate_type = TYPE_E_READ;
-			else if (!strncmp(propagate_type, "write", strlen("write")))
+			else if (!strncmp(propagate_type, "write", DSTRLEN("write")))
 				propagate_stat->propagate_type = TYPE_E_WRITE;
 			else {
 				printk(KERN_WARNING

@@ -128,7 +128,7 @@ dhd_read_cis(dhd_pub_t *dhdp)
 	int ret = 0;
 	cis_rw_t *cish;
 	int buf_size = CIS_BUF_SIZE;
-	int length = strlen("cisdump");
+	int length = DSTRLEN("cisdump");
 
 	if (length >= buf_size) {
 		DHD_ERROR(("%s: check CIS_BUF_SIZE\n", __FUNCTION__));

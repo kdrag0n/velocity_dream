@@ -812,7 +812,7 @@ void resume_net_ifaces(struct link_device *ld)
 __be32 ipv4str_to_be32(const char *ipv4str, size_t count)
 {
 	unsigned char ip[4];
-	char ipstr[16]; /* == strlen("xxx.xxx.xxx.xxx") + 1 */
+	char ipstr[16]; /* == DSTRLEN("xxx.xxx.xxx.xxx") + 1 */
 	char *next = ipstr;
 	int i;
 

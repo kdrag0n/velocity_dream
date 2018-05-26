@@ -1739,7 +1739,7 @@ static struct usb_function *ncm_alloc(struct usb_function_instance *fi)
 	status = gether_get_host_addr_cdc(opts->net, ncm->ethaddr,
 				      sizeof(ncm->ethaddr));
 	
-	if (status < 12) { /* strlen("01234567890a") */
+	if (status < 12) { /* DSTRLEN("01234567890a") */
 		kfree(ncm);
 		mutex_unlock(&opts->lock);
 		return ERR_PTR(-EINVAL);

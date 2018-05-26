@@ -1366,7 +1366,7 @@ static ssize_t reset_info_show(struct device *dev,
 	int totalLen = 0;
 
 	totalLen = (int)strlen(data->resetInfo)
-		+ (data->IsGpsWorking ? (int)strlen("GPS ON ") : (int)strlen("GPS OFF "));
+		+ (data->IsGpsWorking ? (int)DSTRLEN("GPS ON ") : (int)strlen("GPS OFF "));
 
 	if ((int)strlen(data->resetInfo))
 		ret = snprintf(buf, totalLen + 1, "%s%s",

@@ -707,7 +707,7 @@ static void itmon_post_handler_by_master(struct itmon_dev *itmon,
 	if (!traceinfo->port || strlen(traceinfo->port) < 1)
 		return;
 
-	if (!strncmp(traceinfo->port, "CPU", strlen("CPU"))) {
+	if (!strncmp(traceinfo->port, "CPU", DSTRLEN("CPU"))) {
 		/* if master is CPU, then we expect any exception */
 		if (pdata->err_cnt > PANIC_ALLOWED_THRESHOLD) {
 			pdata->err_cnt = 0;

@@ -1692,7 +1692,7 @@ static void shmem_remap_4mb_ipc_region(struct shmem_link_device *shmd)
 	/* FMT */
 	dev = &shmd->ipc_map.dev[IPC_FMT];
 
-	memmove(dev->name, "FMT", strlen("FMT"));
+	memmove(dev->name, "FMT", DSTRLEN("FMT"));
 	dev->id = IPC_FMT;
 
 	dev->txq.head = (u32 __iomem *)&map->fmt_tx_head;
@@ -1712,7 +1712,7 @@ static void shmem_remap_4mb_ipc_region(struct shmem_link_device *shmd)
 	/* RAW */
 	dev = &shmd->ipc_map.dev[IPC_RAW];
 
-	memmove(dev->name, "RAW", strlen("RAW"));
+	memmove(dev->name, "RAW", DSTRLEN("RAW"));
 	dev->id = IPC_RAW;
 
 	dev->txq.head = (u32 __iomem *)&map->raw_tx_head;

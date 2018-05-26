@@ -357,7 +357,7 @@ static irqreturn_t busmon_logging_irq(int irq, void *data)
 		/* call notifier_call_chain of busmon */
 		atomic_notifier_call_chain(&busmon_notifier_list, 0, &pdata->notifier_info);
 
-		if (init_desc && !strncmp(init_desc, "CPU", strlen("CPU")))
+		if (init_desc && !strncmp(init_desc, "CPU", DSTRLEN("CPU")))
 			dev_err(busmon->dev, "Error detected by BUS monitor.\n");
 		else
 			panic("Error detected by BUS monitor.");

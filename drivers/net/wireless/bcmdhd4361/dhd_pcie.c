@@ -1628,13 +1628,13 @@ static int concate_revision_bcm4359(dhd_bus_t *bus, char *fw_path, char *nv_path
 	chip_ver = bus->sih->chiprev;
 	if (chip_ver == 4) {
 		DHD_ERROR(("----- CHIP 4359 B0 -----\n"));
-		strncat(chipver_tag, "_b0", strlen("_b0"));
+		strncat(chipver_tag, "_b0", DSTRLEN("_b0"));
 	} else if (chip_ver == 5) {
 		DHD_ERROR(("----- CHIP 4359 B1 -----\n"));
-		strncat(chipver_tag, "_b1", strlen("_b1"));
+		strncat(chipver_tag, "_b1", DSTRLEN("_b1"));
 	} else if (chip_ver == 9) {
 		DHD_ERROR(("----- CHIP 4359 C0 -----\n"));
-		strncat(chipver_tag, "_c0", strlen("_c0"));
+		strncat(chipver_tag, "_c0", DSTRLEN("_c0"));
 	} else {
 		DHD_ERROR(("----- Unknown chip version, ver=%x -----\n", chip_ver));
 		return -1;
@@ -1655,7 +1655,7 @@ static int concate_revision_bcm4359(dhd_bus_t *bus, char *fw_path, char *nv_path
 			 * loading B90S FW force for initial MFG boot up.
 			*/
 			if (chip_ver == 5) {
-				strncat(fw_path, "_b90s", strlen("_b90s"));
+				strncat(fw_path, "_b90s", DSTRLEN("_b90s"));
 			}
 			strcat(fw_path, chipver_tag);
 			strcat(nv_path, chipver_tag);
