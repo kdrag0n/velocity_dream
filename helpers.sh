@@ -40,7 +40,7 @@ rel() {
     mv .version .relversion && \
     mv .devversion .version && \
     mkdir -p releases
-    fn="releases/velocity_kernel-r$(cat .relversion)-$(date +%Y%m%d).zip"
+    fn="releases/velocity_kernel-dream-r$(cat .relversion)-$(date +%Y%m%d).zip"
     echo "  REL     $fn"
     mv velocity_kernel.zip "$fn"
 }
