@@ -1,6 +1,4 @@
 # helpers
-_RELEASE=0
-
 mkzip() {
     rm velocity_kernel.zip > /dev/null 2>&1
     build_dtb
@@ -31,14 +29,19 @@ do_dtb() {
 }
 
 rel() {
+    # Swap version files
     [ ! -f .relversion ] && echo 0 > .relversion
     mv .version .devversion && \
     mv .relversion .version
-    _RELEASE=1
+
+    # Compile kernel
     incbuild
-    _RELEASE=0
+
+    # Revert version files
     mv .version .relversion && \
-    mv .devversion .version && \
+    mv .devversion .version
+
+    # Rename to release format
     mkdir -p releases
     fn="releases/velocity_kernel-dream-r$(cat .relversion)-$(date +%Y%m%d).zip"
     echo "  REL     $fn"
@@ -50,12 +53,10 @@ zerover() {
 }
 
 cleanbuild() {
-    [ ! $_RELEASE ] && zerover
     make "${MAKEFLAGS[@]}" clean && make -j$jobs $@ && mkzip
 }
 
 incbuild() {
-    [ ! $_RELEASE ] && zerover
     make "${MAKEFLAGS[@]}" -j$jobs $@ && mkzip
 }
 
