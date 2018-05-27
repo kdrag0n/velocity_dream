@@ -1,11 +1,17 @@
-# helpers
+_RELEASE=0
+
 mkzip() {
-    rm velocity_kernel.zip > /dev/null 2>&1
     build_dtb
     cp arch/arm64/boot/Image flasher/
+    [ $_RELEASE -eq 0 ] && rm -f flasher/.rel
+    [ $_RELEASE -eq 1 ] && touch flasher/.rel
     cd flasher
-    echo '  ZIP     velocity_kernel.zip'
-    zip -r9 ../velocity_kernel.zip . > /dev/null
+
+    fn="velocity_kernel.zip"
+    [ "x$1" != "x" ] && fn="$1"
+    rm -f "../$fn"
+    echo "  ZIP     $fn"
+    zip -r9 "../$fn" . > /dev/null
     cd ..
 }
 
@@ -29,23 +35,25 @@ do_dtb() {
 }
 
 rel() {
+    _RELEASE=1
+
     # Swap version files
     [ ! -f .relversion ] && echo 0 > .relversion
     mv .version .devversion && \
     mv .relversion .version
 
     # Compile kernel
-    incbuild
+    make "${MAKEFLAGS[@]}" -j$jobs $@
 
     # Revert version files
     mv .version .relversion && \
     mv .devversion .version
 
-    # Rename to release format
+    # Pack release zip
     mkdir -p releases
-    fn="releases/velocity_kernel-dream-r$(cat .relversion)-$(date +%Y%m%d).zip"
-    echo "  REL     $fn"
-    mv velocity_kernel.zip "$fn"
+    mkzip "releases/velocity_kernel-dream-r$(cat .relversion)-$(date +%Y%m%d).zip"
+
+    _RELEASE=0
 }
 
 zerover() {

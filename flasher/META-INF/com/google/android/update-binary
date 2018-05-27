@@ -15,7 +15,7 @@ fi
 
 print() {
 	if [ "$1" ]; then
-		echo "ui_print $1" > "$console"
+		echo "ui_print   • $1" > "$console"
 	else
 		echo "ui_print  " > "$console"
 	fi
@@ -77,7 +77,7 @@ EOF
 
 # Unpack the installer
 [ "$zip" ] && {
-	print "  • Unpacking installer..."
+	print "Unpacking installer..."
 	extract "$zip" "$tmp"
 }
 cd "$tmp"
@@ -102,6 +102,18 @@ cd "$tmp"
 	[ $match != 1 ] && abort "Unsupported device"
 }
 
+verstr="$(strings Image|grep ' SMP PREEMPT '|sed -E '/.+\#([0-9]+).+/d')"
+ver="$(echo $verstr|awk '{print $1}'|tr -d '#')"
+build="$(echo $verstr|awk '{print $4 " " $5 " " $6 " " $9}')"
+
+if [ -f .rel ]; then
+	print "Installing version r$ver"
+	print "Built on $build"
+else
+	print "Installing development build $ver"
+	print "Built on $build at $(echo $verstr|awk '{print $7 " " $8}')"
+fi
+
 # mount /system
 # mount /data
 
@@ -110,4 +122,4 @@ setperm 0755 0755 "$bin"
 sh boot-patcher.sh || abort
 
 cleanup
-print "  • Finished!"
+print "Finished!"
