@@ -69,12 +69,15 @@ incbuild() {
 }
 
 test() {
+    adb wait-for-any && \
     adb shell ls '/init.recovery*' > /dev/null 2>&1
     if [ $? -eq 1 ]; then
-        adb reboot recovery && \
-        sleep 20
+        adb reboot recovery
     fi
 
+    fn="velocity_kernel.zip"
+    [ "x$1" != "x" ] && fn="$1"
+    adb wait-for-usb-recovery && \
     adb push velocity_kernel.zip /tmp && \
     adb shell twrp install /tmp/velocity_kernel.zip && \
     adb shell reboot
