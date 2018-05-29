@@ -1,7 +1,7 @@
 # Toolchain paths
 
 # Path to the GCC toolchain, including the target prefix.
-tc=$HOME/code/android/linaro641/bin/aarch64-linux-gnu-
+tc=$HOME/code/android/linaro731/bin/aarch64-linux-gnu-
 
 # Number of parallel jobs to run
 # This should be set to the number of CPU cores on your system.
