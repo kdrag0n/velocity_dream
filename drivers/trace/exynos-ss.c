@@ -2061,6 +2061,7 @@ bool exynos_ss_dumper_one(void *v_dumper,
 		break;
 	}
 #endif
+#ifndef CONFIG_EXYNOS_SNAPSHOT_MINIMIZED_MODE
 	case ESS_FLAG_PRINTK:
 	{
 		char *log;
@@ -2114,6 +2115,7 @@ bool exynos_ss_dumper_one(void *v_dumper,
 						msg, val, callstack[0], callstack[1], callstack[2], callstack[3]);
 		break;
 	}
+#endif
 	default:
 		snprintf(line, size, "unsupported inforation to dump\n");
 		goto out;
@@ -2187,8 +2189,9 @@ void exynos_ss_panic_handler_safe(void)
 
 	exynos_ss_report_reason(ESS_SIGN_SAFE_FAULT);
 	exynos_ss_dump_panic(text, len);
+#ifdef CONFIG_EXYNOS_SNAPSHOT_WATCHDOG_RESET
 	s3c2410wdt_set_emergency_reset(100);
-
+#endif
 }
 
 static size_t __init exynos_ss_remap(unsigned int base, unsigned int size)
