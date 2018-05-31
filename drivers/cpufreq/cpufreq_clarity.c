@@ -89,8 +89,8 @@ static cpumask_t controlled_cpus;
 #define DEFAULT_TARGET_LOAD 90
 static unsigned int default_target_loads[] = {DEFAULT_TARGET_LOAD};
 
-#define DEFAULT_TIMER_RATE (20 * USEC_PER_MSEC)
-#define DEFAULT_ABOVE_HISPEED_DELAY (40 * USEC_PER_MSEC)
+#define DEFAULT_TIMER_RATE 100000
+#define DEFAULT_ABOVE_HISPEED_DELAY 50000
 static unsigned int default_above_hispeed_delay[] = {
 	DEFAULT_ABOVE_HISPEED_DELAY };
 
@@ -102,7 +102,7 @@ struct cpufreq_clarity_tunables {
 #define DEFAULT_SUSPEND_MAX_FREQ 980000
 	unsigned int suspend_max_freq;
 	/* Go to hi speed when CPU load at or above this value. */
-#define DEFAULT_GO_HISPEED_LOAD 99
+#define DEFAULT_GO_HISPEED_LOAD 95
 	unsigned long go_hispeed_load;
 	/* Go to low speed when CPU load at or above this value. */
 #define DEFAULT_GO_LOWSPEED_LOAD 30
@@ -115,7 +115,7 @@ struct cpufreq_clarity_tunables {
 	 * The minimum amount of time to spend at a frequency before we can ramp
 	 * down.
 	 */
-#define DEFAULT_MIN_SAMPLE_TIME (40 * USEC_PER_MSEC)
+#define DEFAULT_MIN_SAMPLE_TIME 30000
 	unsigned long min_sample_time;
 	/*
 	 * The sample rate of the timer used to increase frequency
@@ -132,7 +132,7 @@ struct cpufreq_clarity_tunables {
 	 * Max additional time to wait in idle, beyond timer_rate, at speeds
 	 * above minimum before wakeup to reduce speed, or -1 if unnecessary.
 	 */
-#define DEFAULT_TIMER_SLACK (4 * DEFAULT_TIMER_RATE)
+#define DEFAULT_TIMER_SLACK 120000
 	int timer_slack_val;
 	bool io_is_busy;
 
