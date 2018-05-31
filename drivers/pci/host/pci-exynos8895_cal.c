@@ -262,7 +262,7 @@ static void quirk_brcm_enable(struct pci_dev *dev)
 		if (reg == 0x11C00000)
 			break;
 		pci_write_config_dword(dev, PCI_BASE_ADDRESS_0, 0x11C00000);
-		if (count > 100)
+		if (++count > 100)
 			break;
 	}
 

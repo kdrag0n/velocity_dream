@@ -5052,6 +5052,7 @@ dhd_bus_hostready(struct  dhd_bus *bus)
 		return;
 	}
 
+	dhd_pcie_config_read(bus->osh, PCI_CFG_CMD, sizeof(uint32));
 	si_corereg(bus->sih, bus->sih->buscoreidx, PCIH2D_DB1, ~0, 0x12345678);
 	bus->hostready_count ++;
 }

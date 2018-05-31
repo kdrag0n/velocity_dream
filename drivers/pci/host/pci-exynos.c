@@ -711,6 +711,7 @@ static void exynos_pcie_assert_phy_reset(struct pcie_port *pp)
 		exynos_pcie->phy_ops.phy_config(exynos_pcie->phy_base,
 				exynos_pcie->phy_pcs_base, exynos_pcie->block_base,
 				exynos_pcie->elbi_base, exynos_pcie->ch_num);
+	exynos_pcie_phy_clock_enable(&exynos_pcie->pp, 1);
 
 	/* Bus number enable */
 	val = exynos_elb_readl(exynos_pcie, PCIE_SW_WAKE);
@@ -1423,6 +1424,7 @@ static void exynos_pcie_resumed_phydown(struct pcie_port *pp)
 	struct exynos_pcie *exynos_pcie = to_exynos_pcie(pp);
 
 	/* phy all power down on wifi off during suspend/resume */
+	exynos_pcie_clock_enable(pp, 1);
 	exynos_pcie_enable_interrupts(pp);
 	regmap_update_bits(exynos_pcie->pmureg,
 			   PCIE_PHY_CONTROL + exynos_pcie->ch_num * 4,
@@ -1521,6 +1523,7 @@ int exynos_pcie_poweron(int ch_num)
 			goto poweron_fail;
 		}
 
+		exynos_pcie_clock_enable(pp, 1);
 		regmap_update_bits(exynos_pcie->pmureg,
 				   PCIE_PHY_CONTROL + exynos_pcie->ch_num * 4,
 				   PCIE_PHY_CONTROL_MASK, 1);
