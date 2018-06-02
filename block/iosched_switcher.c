@@ -18,7 +18,7 @@
 #include <linux/elevator.h>
 #include <linux/fb.h>
 
-#define NOOP_IOSCHED "noop"
+#define NOOP_IOSCHED "fifo"
 #define RESTORE_DELAY_MS (5000)
 
 struct req_queue_data {
