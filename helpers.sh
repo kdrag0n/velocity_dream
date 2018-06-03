@@ -16,8 +16,8 @@ mkzip() {
 }
 
 build_dtb() {
-    do_dtb flasher/dtb.img dream/{00,01,02,03,04,05,07,08,09,10}
-    do_dtb flasher/dtb2.img dream2/{03,04,05,06,07,08,09,10}
+    do_dtb flasher/dtb.img dream/{09,10}
+    do_dtb flasher/dtb2.img dream2/{09,10}
 }
 
 do_dtb() {
