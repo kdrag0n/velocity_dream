@@ -163,7 +163,7 @@ struct cs_cpu_dbs_info_s {
 };
 
 struct ac_cpu_dbs_info_s {
-	struct cpu_dbs_common_info cdbs;
+	struct cpu_dbs_info cdbs;
 	struct cpufreq_frequency_table *freq_table;
 	unsigned int up_rate:1;
 	unsigned int down_rate:1;
@@ -172,12 +172,12 @@ struct ac_cpu_dbs_info_s {
 };
 
 struct dk_cpu_dbs_info_s {
-	struct cpu_dbs_common_info cdbs;
+	struct cpu_dbs_info cdbs;
 	struct cpufreq_frequency_table *freq_table;
 };
 
 struct nm_cpu_dbs_info_s {
-	struct cpu_dbs_common_info cdbs;
+	struct cpu_dbs_info cdbs;
 	struct cpufreq_frequency_table *freq_table;
 };
 
@@ -293,7 +293,7 @@ struct od_ops {
 
 struct ac_ops {
 	void (*get_cpu_frequency_table)(int cpu);
-	void (*get_cpu_frequency_table_minmax)(struct cpufreq_policy *policy, 
+	void (*get_cpu_frequency_table_minmax)(struct cpufreq_policy *policy,
 			int cpu);
 };
 
