@@ -104,7 +104,7 @@ cd "$tmp"
 
 verstr="$(strings Image|grep ' SMP PREEMPT '|sed -E '/.+\#([0-9]+).+/d')"
 ver="$(echo $verstr|awk '{print $1}'|tr -d '#')"
-build="$(echo $verstr|awk '{print $4 " " $5 " " $6 " " $9}')"
+build="$(echo $verstr|awk '{print $4 " " $5 " " $6 ", " $9}')"
 
 if [ -f .rel ]; then
 	print "Installing version r$ver"
