@@ -16,13 +16,12 @@ on boot
 	exec u:r:init:s0 root root -- swapon /dev/block/zram0
 
 	# UKSM
-	write /sys/kernel/mm/uksm/cpu_governor full
+	write /sys/kernel/mm/uksm/cpu_governor medium
 	write /sys/kernel/mm/uksm/sleep_millisecs 150
 	write /sys/kernel/mm/uksm/max_cpu_percentage 90
 
 	# Virtual Memory
 	write /proc/sys/vm/vfs_cache_pressure 60
-	write /proc/sys/vm/swappiness 25
 
 	# Storage
 	write /sys/block/sda/queue/iostats 0
