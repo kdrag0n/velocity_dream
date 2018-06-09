@@ -114,7 +114,7 @@ else
 	print "Built on $build at $(echo $verstr|awk '{print $7 " " $8}')"
 fi
 
-# mount /system
+mount /system
 # mount /data
 
 setperm 0755 0755 "$bin"
