@@ -15689,6 +15689,7 @@ static s32 wl_escan_handler(struct bcm_cfg80211 *cfg, bcm_struct_cfgdev *cfgdev,
 		} else if ((likely(cfg->scan_request)) || (cfg->sched_scan_running)) {
 			DBG_EVENT_LOG((dhd_pub_t *)cfg->pub, WIFI_EVENT_DRIVER_SCAN_COMPLETE);
 			cfg->bss_list = wl_escan_get_buf(cfg, FALSE);
+			scan_req_match(cfg);
 			wl_inform_bss(cfg);
 			wl_notify_escan_complete(cfg, ndev, false, false);
 		}
@@ -15766,6 +15767,7 @@ static s32 wl_escan_handler(struct bcm_cfg80211 *cfg, bcm_struct_cfgdev *cfgdev,
 				complete(&cfg->act_frm_scan);
 		} else if ((likely(cfg->scan_request)) || (cfg->sched_scan_running)) {
 			cfg->bss_list = wl_escan_get_buf(cfg, TRUE);
+			scan_req_match(cfg);
 			wl_inform_bss(cfg);
 			wl_notify_escan_complete(cfg, ndev, true, false);
 		}
