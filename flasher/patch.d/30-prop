@@ -1,0 +1,20 @@
+#!/sbin/sh
+
+. "$env"
+
+print "Disabling and removing Samsung security..."
+setprop ro.config.tima 0
+setprop ro.securestorage.support false
+setprop ro.boottime.secure_storage false
+setprop ro.config.knox v30
+setprop ro.security.vaultkeeper.feature 0
+setprop ro.sec.fle.encryption false
+setprop wlan.wfd.hdcp disable
+
+sed -i '/init\.container\.rc/d' "$ramdisk/init.rc"
+
+rm -fr /system/vendor/app/mcRegistry/ffffffffd0000000000000000000000a.tlbin
+rm -fr /system/priv-app/Rlc
+rm -fr /system/app/SecurityLogAgent
+
+exit 0

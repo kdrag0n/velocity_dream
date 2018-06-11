@@ -150,6 +150,13 @@ dump_embedded_ramdisk() {
 		abort "Failed to unpack embedded boot ramdisk"
 }
 
+# extract the new ramdisk
+extract_ramdisk() {
+	cd "$ramdisk"
+	cpio -i < "$tmp/ramdisk.cpio"
+	[ $? != 0 ] && abort "Unpacking ramdisk failed"
+}
+
 # execute all scripts in patch.d
 patch_ramdisk() {
 	cd "$tmp"
@@ -281,13 +288,9 @@ dump_boot
 
 determine_ramdisk_format
 
-dump_ramdisk
-
-dump_embedded_ramdisk
+extract_ramdisk
 
 patch_ramdisk
-
-build_embedded_ramdisk
 
 build_ramdisk
 

@@ -23,10 +23,7 @@ cp -rd ./. "$ramdisk/"
 import_rc init.velocity.rc
 import_rc init.spectrum.rc
 
-# Disable TGPKernel services
-sed -i '/init\.services\.rc/d' "$ramdisk/init.rc"
-for file in sbin/init.dalvik.sh sbin/kernelinit.sh sbin/initd.sh sbin/resetprop sbin/sysinit.sh sbin/wakelock.sh init.services.rc; do
-    rm "$ramdisk/$file"
-done
+rm -fr /system/etc/NOTO_LOGs
+rm -f /system/bin/notorious.sh /system/bin/init.dalvik.sh /system/bin/init.selinux.sh
 
 exit 0
