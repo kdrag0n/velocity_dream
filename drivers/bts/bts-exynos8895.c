@@ -1106,6 +1106,7 @@ static const struct file_operations debug_qbusy_status_fops = {
 	.release	= single_release,
 };
 
+#ifdef CONFIG_DEBUG_FS
 static int bts_debugfs(void)
 {
 	struct dentry *den;
@@ -1136,6 +1137,7 @@ static int bts_debugfs(void)
 
 	return 0;
 }
+#endif
 
 static void bts_initialize_domains(void)
 {
@@ -1319,12 +1321,18 @@ void bts_update_bw(enum bts_bw_type type, struct bts_bw bw)
 
 static int __init exynos_bts_init(void)
 {
+#ifdef CONFIG_DEBUG_FS
 	int i, ret;
+#else
+	int i;
+#endif
 	struct bts_info *bts;
 
+#ifdef CONFIG_DEBUG_FS
 	ret = bts_debugfs();
 	if (ret)
 		return ret;
+#endif
 
 	for (bts = exynos_bts;
 	     bts <= &exynos_bts[ARRAY_SIZE(exynos_bts) - 1]; bts++) {
