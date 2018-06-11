@@ -138,6 +138,7 @@ static int __init core_reg_init(void)
 {
 	struct dentry *root, *d;
 
+#ifdef CONFIG_DEBUG_FS
 	root = debugfs_create_dir("core_reg", NULL);
 	if (!root) {
 		pr_err("%s: couln't create debugfs\n", __FILE__);
@@ -148,6 +149,7 @@ static int __init core_reg_init(void)
 				&ops_dump_ecc_status);
 	if (!d)
 		return -ENOMEM;
+#endif
 
 	return 0;
 }
