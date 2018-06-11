@@ -438,7 +438,7 @@ endif
   DHDCFLAGS += -DDHD_USE_SINGLE_NVRAM_FILE
 #STAT REPORT
 #stat report shall be defined only if LINK STAT is defined
-  DHDCFLAGS += -DSTAT_REPORT
+#  DHDCFLAGS += -DSTAT_REPORT
 #define temp static only when SDK doesn't support static memory for STAT REPORT
 #  DHDCFLAGS += -DSTAT_REPORT_TEMP_STATIC
 
