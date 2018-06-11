@@ -11,6 +11,10 @@ for fstab in fstab.*; do
 	sed -i "
 		s/\b\(forceencrypt\|forcefdeorfbe\)=/encryptable=/g
 	" "$fstab"
+
+	# Disable quota
+	sed -i "s/,quota//g" "$fstab"
+
 	found_fstab=true
 done
 
