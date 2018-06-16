@@ -6,3 +6,8 @@
 if [ ! -f /data/property/persist.spectrum.profile ]; then
 	setprop persist.spectrum.profile 0
 fi
+
+# Additional tweaks
+stop secure_storage # fix battery drain
+mkswap /dev/block/zram0
+swapon /dev/block/zram0 # activate zswap
