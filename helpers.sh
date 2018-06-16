@@ -68,6 +68,14 @@ incbuild() {
     make "${MAKEFLAGS[@]}" -j$jobs $@ && mkzip
 }
 
+dbuild() {
+    make "${MAKEFLAGS[@]}" -j$jobs $@ && dzip
+}
+
+dzip() {
+    mkzip "betas/velocity_kernel-dream-b$(cat .version)-$(date +%Y%m%d).zip"
+}
+
 test() {
     adb wait-for-any && \
     adb shell ls '/init.recovery*' > /dev/null 2>&1
