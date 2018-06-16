@@ -87,7 +87,7 @@ test() {
     [ "x$1" != "x" ] && fn="$1"
     adb wait-for-usb-recovery && \
     adb push velocity_kernel.zip /tmp && \
-    adb shell "twrp install /tmp/velocity_kernel.zip && reboot"
+    adb shell "twrp install /tmp/velocity_kernel.zip && twrp install /sdcard/Magisk-v16.0.zip && reboot"
 }
 
 inc() {
