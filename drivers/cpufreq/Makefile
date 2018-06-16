@@ -31,6 +31,9 @@ obj-$(CONFIG_FINGERPRINT_BOOST)			+= fp-boost.o
 
 obj-$(CONFIG_CPUFREQ_DT)				+= cpufreq-dt.o
 
+# CPU Input Boost
+obj-$(CONFIG_CPU_INPUT_BOOST)		+= cpu_input_boost.o
+
 ##################################################################################
 # x86 drivers.
 # Link order matters. K8 is preferred to ACPI because of firmware bugs in early
