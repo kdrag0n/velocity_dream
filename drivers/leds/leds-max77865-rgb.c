@@ -144,10 +144,10 @@ static struct leds_control {
     .current_low = 5,
     .current_high = 20,
     .noti_ramp_control = 1,
-    .noti_ramp_up = 300,
-    .noti_ramp_down = 400,
-    .noti_delay_on = 400,
-    .noti_delay_off = 700,
+    .noti_ramp_up = 600,
+    .noti_ramp_down = 900,
+    .noti_delay_on = 500,
+    .noti_delay_off = 1700,
 };
 #endif
 
