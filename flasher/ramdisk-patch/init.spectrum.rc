@@ -1,7 +1,6 @@
 on property:sys.boot_completed=1
 	# First boot default
 	exec u:r:init:s0 root root -- /init.spectrum.sh
-	exec u:r:su:s0 root root -- /init.spectrum.sh
 
 	# Enable Spectrum
 	setprop spectrum.support 1

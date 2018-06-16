@@ -8,9 +8,7 @@ on boot
 
 	# ZRAM
 	write /sys/block/zram0/reset 1
-	write /sys/block/zram0/disksize 1048576000
-	exec u:r:init:s0 root root -- mkswap /dev/block/zram0
-	exec u:r:init:s0 root root -- swapon /dev/block/zram0
+	write /sys/block/zram0/disksize 1468000000
 
 	# Virtual Memory
 	write /proc/sys/vm/vfs_cache_pressure 80
