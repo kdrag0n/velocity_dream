@@ -3089,6 +3089,13 @@ static int sec_ts_pm_resume(struct device *dev)
 	if (ts->lowpower_mode)
 		complete_all(&ts->resume_done);
 
+#ifdef CONFIG_WAKE_GESTURES
+	is_suspended = false;
+
+	if (s2w_switch || dt2w_switch)
+		disable_irq_wake(ts->client->irq);
+#endif
+
 	return 0;
 }
 #endif
