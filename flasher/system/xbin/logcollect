@@ -1,0 +1,67 @@
+#!/system/bin/sh
+
+# Automatic full log collector script
+#
+# Copyright 2018 kdrag0n
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+set -e
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Requesting root..."
+    su -c "$0" "$@"
+    exit 0
+fi
+
+collect="sys syserr kernel"
+if [ "x$1" != "x" ]; then
+    collect="$@"
+fi
+
+echo "Preparing to collect logs..."
+cd /data/local/tmp
+rm -rf lctmp
+mkdir lctmp
+cd lctmp
+
+echo "Collecting logs..."
+
+for ltype in $collect; do
+    if [ "$ltype" = "sys" ]; then
+        echo "  - System logs (all)"
+        logcat -d '*:I' > sys_all.log
+    fi
+    if [ "$ltype" = "syserr" ]; then
+        echo "  - System logs (errors)"
+        logcat -d '*:E' > sys_err.log
+    fi
+    if [ "$ltype" = "kernel" ]; then
+        echo "  - Kernel logs"
+        if [ -f /sys/kernel/printk_mode/printk_mode ]; then
+            if [ "x$(cat /sys/kernel/printk_mode/printk_mode)" = "x0" ]; then
+                echo 1 > /sys/kernel/printk_mode/printk_mode
+                echo "    Enabled kernel logs, please reproduce your issue and wait a few seconds"
+                echo "    After that, press any key to continue"
+                read -n1
+                echo
+            fi
+        fi
+
+        dmesg > kmsg.log
+    fi
+done
+
+echo "Logs collected, packing..."
+cd ..
+larc="logs_$(date +%Y%m%d_%H%M%S)"
+mv lctmp "$larc"
+tar czf "/sdcard/$larc.tar.gz" "$larc"
+rm -rf "$larc"
+
+echo "Finished!"
+echo "Please send $larc.tar.gz from internal storage (internal SD card) to the developer."

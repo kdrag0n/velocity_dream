@@ -4,7 +4,7 @@
 
 cd "$tmp/system" && [ "$(ls)" ] || exit 0
 
-# fix permissions of vendor files
+# fix permissions of system files
 chmod -R 0755 .
 
 find -type f \( \
