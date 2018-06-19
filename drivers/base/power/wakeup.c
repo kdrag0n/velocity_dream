@@ -1280,7 +1280,7 @@ static const struct kernfs_ops wakeup_sources_kern_fops = {
 
 static int __init wakeup_sources_debugfs_init(void)
 {
-	struct kobject *kobj;
+	struct kobject *kobj, *mems, *mali;
 	struct kernfs_node *node;
 
 	wakeup_sources_stats_dentry = debugfs_create_file("wakeup_sources",
@@ -1302,6 +1302,12 @@ static int __init wakeup_sources_debugfs_init(void)
 		kobject_put(kobj);
 		return PTR_ERR(node);
 	}
+
+	/* Create mem and mali subdirs */
+	mali = kobject_create_and_add("mali", kobj);
+	mems = kobject_create_and_add("mem", mali);
+	if (!mali || !mems)
+		return -ENOMEM;
 
 	return 0;
 }
