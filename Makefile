@@ -719,6 +719,10 @@ KBUILD_CFLAGS   += -mtune=cortex-a53 -mcpu=cortex-a53+crypto+fp16+crc
 endif
 endif
 
+ifeq ($(cc-name),clang)
+KBUILD_CFLAGS	+= -mno-unaligned-access -mstrict-align
+endif
+
 # Disallow introduction of unaligned stores
 KBUILD_CFLAGS	+= $(call cc-option,--param=store-merging-allow-unaligned=0)
 ifdef CONFIG_CC_WERROR
