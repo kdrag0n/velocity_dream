@@ -7,12 +7,12 @@ tc_clang=$HOME/code/android/dtc/out/7.0
 # Whether the given clang toolchain is DragonTC.
 # Controls use of optimizations.
 # Value: true or false
-dragontc=true
+dragontc=false
 
 # Path to the root of the gcc toolchain.
 # Must be recent, or you may encounter problems.
 # Do not add /bin/... or anything.
-tc_gcc=$HOME/code/android/linaro731
+tc_gcc=$HOME/code/android/linaro641
 
 # Number of parallel jobs to run
 # This should be set to the number of CPU cores on your system.
