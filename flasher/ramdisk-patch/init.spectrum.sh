@@ -23,3 +23,6 @@ for i in $(ls /sys/class/scsi_disk/); do
 		echo 'temporary none' > /sys/class/scsi_disk/$i/cache_type
 	fi
 done
+
+# safetynet fix
+chmod 640 /sys/fs/selinux/enforce
