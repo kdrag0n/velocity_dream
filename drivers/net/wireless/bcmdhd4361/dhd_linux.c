@@ -4076,7 +4076,7 @@ _dhd_set_multicast_list(dhd_info_t *dhd, int ifidx)
 	}
 }
 
-static int randomize_mac = 1;
+static int randomize_mac = 0;
 
 static struct ctl_table randomize_mac_table[] =
 {
