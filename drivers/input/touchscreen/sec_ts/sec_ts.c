@@ -2823,6 +2823,11 @@ static void sec_ts_input_close(struct input_dev *dev)
 
 	ts->pressure_setting_mode = 0;
 
+#ifdef CONFIG_WAKE_GESTURES
+	if (s2w_switch || dt2w_switch) 
+		enable_irq_wake(ts->client->irq);
+	else 
+#endif
 	if (ts->lowpower_mode) {
 		int ret;
 
@@ -2833,13 +2838,7 @@ static void sec_ts_input_close(struct input_dev *dev)
 			schedule_delayed_work(&ts->reset_work, msecs_to_jiffies(TOUCH_RESET_DWORK_TIME));
 		}
 	} else {
-#ifdef CONFIG_WAKE_GESTURES
-		if (s2w_switch || dt2w_switch)
-			enable_irq_wake(ts->client->irq);
-		else
-#endif
-
-		sec_ts_stop_device(ts);
+			sec_ts_stop_device(ts);
 	}
 }
 #endif
