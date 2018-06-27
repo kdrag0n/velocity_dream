@@ -1,6 +1,9 @@
 on boot
 	# Base settings
 
+	exec u:r:su:s0 root root -- /init.early.sh
+	exec u:r:magisk:s0 root root -- /init.early.sh
+
 	# UKSM
 	write /sys/kernel/mm/uksm/cpu_governor medium
 	write /sys/kernel/mm/uksm/sleep_millisecs 150
