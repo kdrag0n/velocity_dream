@@ -2183,6 +2183,9 @@ static irqreturn_t fts_interrupt_handler(int irq, void *handle)
 		}
 	}
 
+	/* prevent CPU from entering deep sleep */
+	pm_qos_update_request(&info->pm_qos_req, 100);
+
 	evtcount = 0;
 	fts_read_reg(info, &regAdd[0], 3, (unsigned char *)&evtcount, 2);
 
@@ -2198,6 +2201,8 @@ static irqreturn_t fts_interrupt_handler(int irq, void *handle)
 				  FTS_EVENT_SIZE * evtcount);
 		fts_event_handler_type_b(info, info->data, evtcount);
 	}
+
+	pm_qos_update_request(&info->pm_qos_req, PM_QOS_DEFAULT_VALUE);
 
 	return IRQ_HANDLED;
 }
@@ -2840,6 +2845,15 @@ static int fts_probe(struct i2c_client *client, const struct i2c_device_id *idp)
 		info->finger[i].mcount = 0;
 	}
 
+	/*
+	 * This *must* be done before err_enable_irq is called.
+	 * Otherwise, if an interrupt is received before request is added,
+	 * but after the interrupt has been subscribed to, pm_qos_req
+	 * may be accessed before initialization in the interrupt handler.
+	 */
+	pm_qos_add_request(&info->pm_qos_req, PM_QOS_CPU_DMA_LATENCY,
+			PM_QOS_DEFAULT_VALUE);
+
 	retval = fts_irq_enable(info, true);
 	if (retval < 0) {
 		input_err(true, &info->client->dev,
@@ -2971,6 +2985,7 @@ err_sec_cmd:
 	tui_tsp_info = NULL;
 #endif	
 err_enable_irq:
+	pm_qos_remove_request(&info->pm_qos_req);
 	if (info->board->support_dex) {
 		input_unregister_device(info->input_dev_pad);
 		info->input_dev_pad = NULL;
@@ -3013,6 +3028,7 @@ err_setup_drv_data:
 static int fts_remove(struct i2c_client *client)
 {
 	struct fts_ts_info *info = i2c_get_clientdata(client);
+
 #if defined(CONFIG_SECURE_TOUCH)
 	int i = 0;
 #endif
@@ -3087,6 +3103,8 @@ static int fts_remove(struct i2c_client *client)
 #endif
 	info->shutdown_is_on_going = false;
 	kfree(info);
+
+	pm_qos_remove_request(&info->pm_qos_req);
 
 	return 0;
 }
