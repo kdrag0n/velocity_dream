@@ -23,9 +23,12 @@ choose() {
 }
 
 enforce=0
+first_time=1
 
 if [ -f /sdcard/.velocity_settings ]; then
-	enforce=$(grep -q "selinux=enforcing" /sdcard/.velocity_settings)
+	grep -q "selinux=enforcing" /sdcard/.velocity_settings
+	enforce=$?
+	first_time=0
 else
 	print "Please choose a SELinux mode:"
 	raw_iprint "Vol+ = Enforcing (highly recommended)"
@@ -37,11 +40,19 @@ fi
 
 if [ $enforce = 0 ]; then # enforcing
 	replace_line "$ramdisk/init.early.sh" "enforce=0" "enforce=1"
-	echo 'selinux=enforcing' > /sdcard/.velocity_settings
-	print "Enforcing has been set. Choice saved to /sdcard/.velocity_settings"
+	if [ $first_time = 1 ]; then
+		echo 'selinux=enforcing' > /sdcard/.velocity_settings
+		print "Enforcing has been set. Choice saved to /sdcard/.velocity_settings"
+	else
+		print "Setting SELinux to enforcing..."
+	fi
 else # permissive
-	echo 'selinux=permissive' > /sdcard/.velocity_settings
-	print "Permissive has been set. Choice saved to /sdcard/.velocity_settings"
+	if [ $first_time = 1 ]; then
+		echo 'selinux=permissive' > /sdcard/.velocity_settings
+		print "Permissive has been set. Choice saved to /sdcard/.velocity_settings"
+	else
+		print "Setting SELinux to permissive..."
+	fi
 fi
 
 chown media_rw:media_rw /sdcard/.velocity_settings
