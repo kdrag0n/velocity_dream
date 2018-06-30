@@ -92,7 +92,6 @@ find_boot() {
 
 # dump boot and unpack the android boot image
 dump_boot() {
-	print "Dumping & unpacking original boot image..."
 	cd "$tmp"
 	if $use_dd; then
 		dd if="$boot_block" of=boot.img
@@ -116,7 +115,6 @@ determine_ramdisk_format() {
 		fd37) rdformat=xz; decompress="xz -dc" ;;
 		*) abort "Unknown ramdisk compression format ($magicbytes)" ;;
 	esac
-	print "Detected ramdisk compression format: $rdformat"
 	command -v $decompress || abort "Unable to find archiver for $rdformat"
 
 	[ "$ramdisk_compression" ] && rdformat=$ramdisk_compression
@@ -179,7 +177,6 @@ build_embedded_ramdisk() {
 
 # build the new ramdisk
 build_ramdisk() {
-	print "Building new ramdisk ($rdformat)..."
 	cd "$ramdisk"
 	echo "Listing ramdisk contents by size:"
 	find -type f -exec du -a "{}" + | sort -n | awk '{ total += $1; print } END { print "Total size: "total }'
@@ -189,7 +186,6 @@ build_ramdisk() {
 # build the new boot image
 build_boot() {
 	cd "$tmp"
-	print "Building new boot image..."
 	kernel=
 	rd=
 	dtb=
@@ -253,7 +249,6 @@ backup_boot() {
 
 # verify that the boot image exists and can fit the partition
 verify_size() {
-	print "Verifying boot image size..."
 	cd "$tmp"
 	[ -s boot-new.img ] || abort "New boot image not found!"
 	old_sz=$(wc -c < boot.img)

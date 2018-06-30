@@ -2,7 +2,7 @@
 
 . "$env"
 
-print "Disabling and removing Samsung security..."
+print "Disabling Samsung security..."
 setprop ro.config.tima 0
 setprop ro.securestorage.support false
 setprop ro.boottime.secure_storage false

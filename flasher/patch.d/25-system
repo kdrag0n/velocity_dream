@@ -15,7 +15,6 @@ find -type f \( \
 	-name "*.so" \
 	\) -exec chmod 0644 {} \;
 
-print "Copying new files to the system..."
 cp -rd ./. "/system/"
 
 exit 0

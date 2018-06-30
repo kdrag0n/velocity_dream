@@ -17,7 +17,7 @@ find -type f \( \
 	-name "ueventd.*" -o -name "sepolicy" -o -name "sepolicy_version" \
 	\) -exec chmod 0644 {} \;
 
-print "Copying new files to the ramdisk..."
+print "Copying new files..."
 cp -rd ./. "$ramdisk/"
 
 import_rc init.velocity.rc
