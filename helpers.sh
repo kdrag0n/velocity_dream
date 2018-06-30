@@ -9,7 +9,7 @@ mkzip() {
 
     if [ ! -f magisk.zip ]; then
         echo "  WGET    magisk.zip"
-        wget -O magisk.zip https://github.com/topjohnwu/Magisk/releases/download/v16.4/Magisk-v16.4.zip > /dev/null 2>&1
+        wget -O magisk.zip https://github.com/topjohnwu/Magisk/releases/download/v16.3/Magisk-v16.3.zip > /dev/null 2>&1
     fi
 
     fn="velocity_kernel.zip"
