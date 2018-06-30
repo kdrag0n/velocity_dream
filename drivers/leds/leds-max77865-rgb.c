@@ -107,7 +107,7 @@ static unsigned int octa_color = 0x0;
 
 unsigned int led_enable_fade = 1;
 unsigned int led_fade_time_up = 800;
-unsigned int led_fade_time_down = 800;
+unsigned int led_fade_time_down = 900;
 
 enum max77865_led_color {
 	WHITE,
