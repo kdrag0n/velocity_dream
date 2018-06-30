@@ -1,0 +1,47 @@
+#!/sbin/sh
+
+. "$env"
+
+if grep -q Sac23_Rom /system/build.prop; then
+	print "Sac23 ROM detected, forcing permissive SELinux"
+	exit 0
+fi
+
+choose() {
+	while true; do
+		/system/bin/getevent -lc 1 2>&1 | /system/bin/grep VOLUME | /system/bin/grep " DOWN" > "$tmp/events"
+		if (`cat $tmp/events 2>/dev/null | /system/bin/grep VOLUME >/dev/null`); then
+			break
+		fi
+	done
+
+	if (`cat $tmp/events 2>/dev/null | /system/bin/grep VOLUMEUP >/dev/null`); then
+		return 0
+	else
+		return 1
+	fi
+}
+
+enforce=0
+
+if [ -f /sdcard/.velocity_settings ]; then
+	enforce=$(grep -q "selinux=enforcing" /sdcard/.velocity_settings)
+else
+	print "Please choose a SELinux mode:"
+	raw_iprint "Vol+ = Enforcing (highly recommended)"
+	raw_iprint "Vol- = Permissive (if Enforcing has issues)"
+
+	choose
+	enforce=$?
+fi
+
+if [ $enforce = 0 ]; then # enforcing
+	replace_line "$ramdisk/init.early.sh" "enforce=0" "enforce=1"
+	echo 'selinux=enforcing' > /sdcard/.velocity_settings
+	print "Enforcing has been set. Choice saved to /sdcard/.velocity_settings"
+else # permissive
+	echo 'selinux=permissive' > /sdcard/.velocity_settings
+	print "Permissive has been set. Choice saved to /sdcard/.velocity_settings"
+fi
+
+exit 0

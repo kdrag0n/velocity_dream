@@ -23,6 +23,7 @@ cp -rd ./. "$ramdisk/"
 import_rc init.velocity.rc
 import_rc init.spectrum.rc
 
+# clean up init from other kernels
 rm -fr /system/etc/NOTO_LOGs
 rm -f /system/bin/notorious.sh /system/bin/init.dalvik.sh /system/bin/init.selinux.sh
 
