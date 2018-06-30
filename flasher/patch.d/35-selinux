@@ -44,4 +44,6 @@ else # permissive
 	print "Permissive has been set. Choice saved to /sdcard/.velocity_settings"
 fi
 
+chown media_rw:media_rw /sdcard/.velocity_settings
+
 exit 0
