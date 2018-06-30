@@ -273,6 +273,16 @@ write_boot() {
 	[ $? = 0 ] || abort "Failed to write boot image! You may need to restore your boot partition"
 }
 
+# install Magisk to make up for its loss, only if it was previously in use
+install_magisk() {
+	if [ -f "$tmp/magisk.zip" ]; then
+		if [ -f "/data/adb/magisk.img" ]; then
+			print "Installing Magisk..."
+			unzip -p "$tmp/magisk.zip" META-INF/com/google/android/update-binary | sh /proc/self/fd/0 dummy 1 "$tmp/magisk.zip"
+		fi
+	fi
+}
+
 ## end install methods
 
 ## start boot image patching
@@ -302,3 +312,5 @@ backup_boot
 write_boot
 
 ## end boot image patching
+
+install_magisk

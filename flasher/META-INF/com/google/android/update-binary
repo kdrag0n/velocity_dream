@@ -61,18 +61,17 @@ umount() {
 }
 
 cat > "$console" <<EOF
-ui_print
+ui_print ​
 ui_print __     __   _            _ _
 ui_print \ \   / /__| | ___   ___(_) |_ _   _
 ui_print  \ \ / / _ \ |/ _ \ / __| | __| | | |
 ui_print   \ V /  __/ | (_) | (__| | |_| |_| |
 ui_print    \_/ \___|_|\___/ \___|_|\__|\__, |
 ui_print                                |___/
-ui_print
+ui_print ​
 ui_print Galaxy S8/S8+ Exynos (SM-G95xF/FD/N)
 ui_print       Unified Kernel by kdragon
 ui_print -------------------------------------
-ui_print
 EOF
 
 # Unpack the installer
@@ -122,4 +121,3 @@ setperm 0755 0755 "$bin"
 sh boot-patcher.sh || abort
 
 cleanup
-print "Finished. Remember to flash root now!"
