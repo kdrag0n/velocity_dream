@@ -31,7 +31,7 @@ if [ -f /sdcard/.velocity_settings ]; then
 	first_time=0
 else
 	print "Please choose a SELinux mode:"
-	raw_iprint "Vol+ = Enforcing (highly recommended)"
+	raw_iprint "Vol+ = Enforcing (highly recommended, secure)"
 	raw_iprint "Vol- = Permissive (if Enforcing has issues)"
 
 	choose
