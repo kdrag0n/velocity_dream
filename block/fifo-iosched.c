@@ -31,28 +31,15 @@ static void fifo_add_request(struct request_queue *q, struct request *req)
 	list_add_tail(&req->queuelist, &fifo_d->queue);
 }
 
-static int fifo_init_queue(struct request_queue *q, struct elevator_type *e)
+static void *fifo_init_queue(struct request_queue *q)
 {
 	struct fifo_data *fifo_d;
-	struct elevator_queue *eq;
-
-	eq = elevator_alloc(q, e);
-	if (!eq)
-		return -ENOMEM;
 
 	fifo_d = kmalloc_node(sizeof(*fifo_d), GFP_KERNEL, q->node);
-	if (!fifo_d) {
-		kobject_put(&eq->kobj);
-		return -ENOMEM;
-	}
-	eq->elevator_data = fifo_d;
-
+	if (!fifo_d)
+		return NULL;
 	INIT_LIST_HEAD(&fifo_d->queue);
-
-	spin_lock_irq(q->queue_lock);
-	q->elevator = eq;
-	spin_unlock_irq(q->queue_lock);
-	return 0;
+	return fifo_d;
 }
 
 static void fifo_exit_queue(struct elevator_queue *e)
@@ -83,7 +70,8 @@ static struct elevator_type elevator_fifo = {
 
 static int __init fifo_init(void)
 {
-	return elv_register(&elevator_fifo);
+	elv_register(&elevator_fifo);
+	return 0;
 }
 
 static void __exit fifo_exit(void)
