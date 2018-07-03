@@ -29,10 +29,6 @@ extern const struct cpu_operations smp_spin_table_ops;
 extern const struct cpu_operations cpu_psci_ops;
 
 const struct cpu_operations *cpu_ops[NR_CPUS] __ro_after_init;
-extern struct of_cpu_method __cpu_method_of_table[];
-static const struct of_cpu_method __cpu_method_of_table_sentinel
-	__used __section(__cpu_method_of_table_end);
->>>>>>> f9745425ead5... BACKPORT: arm64: apply __ro_after_init to some objects
 
 static const struct cpu_operations *supported_cpu_ops[] __initconst = {
 	&smp_spin_table_ops,
