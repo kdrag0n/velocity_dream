@@ -115,7 +115,11 @@ static int __init vdso_init(void)
 {
 	int i;
 
+#ifdef CONFIG_FORTIFY_SOURCE
+	if (__memcmp_noerr(&vdso_start, "\177ELF", 4)) {
+#else
 	if (memcmp(&vdso_start, "\177ELF", 4)) {
+#endif
 		pr_err("vDSO is not a valid ELF object!\n");
 		return -EINVAL;
 	}

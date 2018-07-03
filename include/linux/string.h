@@ -364,6 +364,15 @@ __FORTIFY_INLINE int memcmp(const void *p, const void *q, __kernel_size_t size)
 	return __builtin_memcmp(p, q, size);
 }
 
+__FORTIFY_INLINE int __memcmp_noerr(const void *p, const void *q, __kernel_size_t size)
+{
+	size_t p_size = __builtin_object_size(p, 0);
+	size_t q_size = __builtin_object_size(q, 0);
+	if (p_size < size || q_size < size)
+		fortify_panic(__func__);
+	return __builtin_memcmp(p, q, size);
+}
+
 __FORTIFY_INLINE void *memchr(const void *p, int c, __kernel_size_t size)
 {
 	size_t p_size = __builtin_object_size(p, 0);
