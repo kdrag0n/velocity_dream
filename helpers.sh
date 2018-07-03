@@ -98,3 +98,7 @@ test() {
 inc() {
     incbuild $@ && test
 }
+
+dc() {
+    diff arch/arm64/configs/velocity_defconfig .config
+}
