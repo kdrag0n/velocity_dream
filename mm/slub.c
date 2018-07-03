@@ -3101,6 +3101,7 @@ static __always_inline void slab_free(struct kmem_cache *s, struct page *page,
 				      unsigned long addr)
 {
 	void *tail_obj = tail ? : head;
+	void **object = (void *)tail_obj;
 	struct kmem_cache_cpu *c;
 	unsigned long tid;
 
@@ -3111,9 +3112,9 @@ static __always_inline void slab_free(struct kmem_cache *s, struct page *page,
 
 	if (!(s->flags & (SLAB_DESTROY_BY_RCU | SLAB_POISON))) {
 		size_t offset = s->offset ? 0 : sizeof(void *);
-		memset(x + offset, 0, s->object_size - offset);
+		memset(tail_obj + offset, 0, s->object_size - offset);
 		if (s->ctor)
-			s->ctor(x);
+			s->ctor(tail_obj);
 	}
 
 redo:
