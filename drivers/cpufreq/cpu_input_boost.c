@@ -74,9 +74,9 @@ static int set_input_boost_freq(const char *buf, const struct kernel_param *kp)
 		if (sscanf(cp, "%u:%u", &cpu, &val) != 2)
 			return -EINVAL;
 		
-		if (cpu == 0)
+		if (cpu < 4)
 			input_boost_freq_lp = val;
-		else if (cpu == 4)
+		else if (cpu < 7) // last CPU, 7, is bugged in EXKM: always 0
 			input_boost_freq_perf = val;
 		else
 			return -EINVAL;
@@ -90,8 +90,10 @@ static int set_input_boost_freq(const char *buf, const struct kernel_param *kp)
 
 static int get_input_boost_freq(char *buf, const struct kernel_param *kp)
 {
-	return snprintf(buf, PAGE_SIZE, "0:%u 4:%u\n",
-			input_boost_freq_lp, input_boost_freq_perf);
+	return snprintf(buf, PAGE_SIZE, "0:%u 1:%u 2:%u 3:%u 4:%u 5:%u 6:%u 7:%u \n",
+			input_boost_freq_lp, input_boost_freq_lp, input_boost_freq_lp,
+			input_boost_freq_lp, input_boost_freq_perf, input_boost_freq_perf,
+			input_boost_freq_perf, input_boost_freq_perf);
 }
 
 static const struct kernel_param_ops param_ops_input_boost_freq = {
