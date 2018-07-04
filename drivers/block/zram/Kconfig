@@ -17,6 +17,13 @@ config ZRAM
 
 if ZRAM
 
+config ZRAM_DEFAULT_COMPRESSOR
+	string "Default page compressor"
+	default "lzo"
+	help
+	  Select the default compressor used by zram to compress incoming
+	  pages.
+
 config ZRAM_DEFAULT_ALLOCATOR
 	string "Default compressed page allocator"
 	default "zsmalloc"
