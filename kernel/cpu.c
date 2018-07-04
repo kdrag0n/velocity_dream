@@ -23,6 +23,7 @@
 #include <linux/tick.h>
 #include <linux/irq.h>
 #include <linux/cpuidle.h>
+#include <linux/interrupt.h>
 #include <trace/events/power.h>
 
 #include <trace/events/sched.h>
