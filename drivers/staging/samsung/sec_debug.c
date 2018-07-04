@@ -575,6 +575,12 @@ module_param_call(force_error, sec_debug_force_error, NULL, NULL, 0644);
 
 static struct sec_debug_shared_info *sec_debug_info;
 
+#ifndef CONFIG_KALLSYMS
+inline void sec_debug_set_kallsyms_info(struct sec_debug_shared_info *sec_debug_info)
+{
+}
+#endif
+
 static void sec_debug_init_base_buffer(unsigned long base, unsigned long size)
 {
 	sec_debug_info = (struct sec_debug_shared_info *)phys_to_virt(base);
