@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm64 4.4.138 Kernel Configuration
+# Linux/arm64 4.4.139 Kernel Configuration
 #
 CONFIG_ARM64=y
 CONFIG_64BIT=y
@@ -2032,6 +2032,7 @@ CONFIG_GLOVE_TOUCH=y
 CONFIG_INPUT_KEYCOMBO=y
 CONFIG_HALL=y
 CONFIG_CERTIFY_HALL=y
+# CONFIG_INPUT_BOOSTER is not set
 
 #
 # Input Device Drivers
