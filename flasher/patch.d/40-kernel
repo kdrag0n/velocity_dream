@@ -3,6 +3,6 @@
 . "$env"
 cd "$tmp"
 
-xz -dck Image.xz > Image
+xz -dc Image.xz > Image
 
 exit 0
