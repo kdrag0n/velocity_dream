@@ -255,7 +255,7 @@ verify_size() {
 	new_sz=$(wc -c < boot-new.img)
 	if [ "$new_sz" -gt "$old_sz" ]; then
 		size_diff=$((new_sz - old_sz))
-		print " Partition size: $old_sz bytes"
+		print "Partition size: $old_sz bytes"
 		print "Boot image size: $new_sz bytes"
 		abort "Boot image is $size_diff bytes too large for partition"
 	fi
