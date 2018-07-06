@@ -1,26 +1,17 @@
 #!/sbin/sh
 
 . "$env"
+[ -f $fstab ] || { print "Unable to find fstab!"; exit 1; }
 
-if grep -q quota /fstab.samsungexynos8895; then
+sed -i "
+	s/\b\(forceencrypt\|forcefdeorfbe\)=/encryptable=/g
+" $fstab
+
+if grep -q quota /$fstab; then
 	print "Modified TWRP detected, enabling quota"
-fi
-
-found_fstab=false
-
-for fstab in fstab.*; do
-	[ -f "$fstab" ] || continue
-	sed -i "
-		s/\b\(forceencrypt\|forcefdeorfbe\)=/encryptable=/g
-	" "$fstab"
-
-	if ! grep -q quota /fstab.samsungexynos8895; then
-		sed -i "s/,quota//g" "$fstab"
+	if ! grep -q quota /$fstab; then
+		sed -i "s/,quota//g" $fstab
 	fi
-
-	found_fstab=true
-done
-
-$found_fstab || print "Unable to find the fstab!"
+fi
 
 exit 0

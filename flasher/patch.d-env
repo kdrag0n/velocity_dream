@@ -13,6 +13,7 @@ default_prop=$ramdisk/default.prop
 build_prop=/system/build.prop
 ueventd=$ramdisk/ueventd.rc
 file_contexts=$ramdisk/file_contexts
+fstab=fstab.samsungexynos8895
 
 found_prop=false
 [ -f "$default_prop" ] && found_prop=true
