@@ -3412,6 +3412,8 @@ static int sd_remove(struct device *dev)
 #endif
 	async_synchronize_full_domain(&scsi_sd_pm_domain);
 	async_synchronize_full_domain(&scsi_sd_probe_domain);
+
+	remove_iosched_switcher(sdkp->device->request_queue);
 	device_del(&sdkp->dev);
 	del_gendisk(sdkp->disk);
 	sd_shutdown(dev);
