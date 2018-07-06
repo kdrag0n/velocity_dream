@@ -56,13 +56,12 @@ mount_partitions() {
   find_dtbo_image
   [ -z $SLOT ] || ui_print "- A/B partition detected, current slot: $SLOT"
 
-  ui_print "- Mounting /system, /vendor"
   is_mounted /system || [ -f /system/build.prop ] || mount -o ro /system 2>/dev/null
   if ! is_mounted /system && ! [ -f /system/build.prop ]; then
     SYSTEMBLOCK=`find /dev/block -iname system$SLOT | head -n 1`
     mount -t ext4 -o ro $SYSTEMBLOCK /system
   fi
-  is_mounted /system || [ -f /system/build.prop ] || abort "! Cannot mount /system"
+  is_mounted /system || [ -f /system/build.prop ] || abort " ! Cannot mount /system"
   cat /proc/mounts | grep -E '/dev/root|/system_root' >/dev/null && SKIP_INITRAMFS=true || SKIP_INITRAMFS=false
   if [ -f /system/init.rc ]; then
     SKIP_INITRAMFS=true
@@ -159,7 +158,7 @@ flash_boot_image() {
   esac
   case "$2" in
     /dev/block/*)
-      ui_print "- Flashing new boot image"
+      ui_print " • Flashing new boot image"
       eval $COMMAND | cat - /dev/zero 2>/dev/null | dd of="$2" bs=4096 2>/dev/null
       ;;
     *)
@@ -283,7 +282,7 @@ recovery_cleanup() {
   mv /sbin_tmp /sbin 2>/dev/null
   export LD_LIBRARY_PATH=$OLD_LD_PATH
   [ -z $OLD_PATH ] || export PATH=$OLD_PATH
-  ui_print "- Unmounting partitions"
+  ui_print " • Cleaning up"
   umount -l /system_root 2>/dev/null
   umount -l /system 2>/dev/null
   umount -l /vendor 2>/dev/null
