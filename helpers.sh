@@ -2,7 +2,8 @@ _RELEASE=0
 
 mkzip() {
     build_dtb
-    cp arch/arm64/boot/Image flasher/
+    echo "  XZ      Image.xz"
+    pxz -kzcT $(($(cat /proc/cpuinfo|grep 'processor'|wc -l)-1)) arch/arm64/boot/Image > flasher/Image.xz
     [ $_RELEASE -eq 0 ] && rm -f flasher/.rel
     [ $_RELEASE -eq 1 ] && touch flasher/.rel
     cd flasher
