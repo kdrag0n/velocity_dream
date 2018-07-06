@@ -2890,6 +2890,8 @@ static void mmc_blk_remove_req(struct mmc_blk_data *md)
 	struct mmc_card *card;
 
 	if (md) {
+		remove_iosched_switcher(md->queue.queue);
+
 		/*
 		 * Flush remaining requests and free queues. It
 		 * is freeing the queue that stops new requests
