@@ -40,7 +40,7 @@ static DEFINE_MUTEX(zram_index_mutex);
 
 static int zram_major;
 static const char *default_compressor = CONFIG_ZRAM_DEFAULT_COMPRESSOR;
-static char *default_zpool_type = CONFIG_ZRAM_DEFAULT_ALLOCATOR;
+static char *default_zpool_type = "zsmalloc";
 
 /* Module params (documentation at end) */
 static unsigned int num_devices = 1;
