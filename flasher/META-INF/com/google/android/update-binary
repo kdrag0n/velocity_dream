@@ -15,9 +15,9 @@ fi
 
 print() {
 	if [ "$1" ]; then
-		echo "ui_print  • $1" > "$console"
+		echo -e "ui_print  • $1\nui_print" > "$console"
 	else
-		echo "ui_print  " > "$console"
+		echo -e "ui_print  \nui_print" > "$console"
 	fi
 	echo
 }
@@ -62,16 +62,27 @@ umount() {
 
 cat > "$console" <<EOF
 ui_print ​
+ui_print
 ui_print __     __   _            _ _
+ui_print
 ui_print \ \   / /__| | ___   ___(_) |_ _   _
+ui_print
 ui_print  \ \ / / _ \ |/ _ \ / __| | __| | | |
+ui_print
 ui_print   \ V /  __/ | (_) | (__| | |_| |_| |
+ui_print
 ui_print    \_/ \___|_|\___/ \___|_|\__|\__, |
+ui_print
 ui_print                                |___/
+ui_print
 ui_print ​
+ui_print
 ui_print Galaxy S8/S8+ Exynos (SM-G95xF/FD/N)
+ui_print
 ui_print       Unified Kernel by kdragon
+ui_print
 ui_print -------------------------------------
+ui_print
 EOF
 
 # Unpack the installer
