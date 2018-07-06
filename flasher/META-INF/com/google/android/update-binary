@@ -101,6 +101,7 @@ cd "$tmp"
 	[ $match != 1 ] && abort "Unsupported device"
 }
 
+xz -dc Image.xz > Image
 verstr="$(strings Image|grep ' SMP PREEMPT '|sed -E '/.+\#([0-9]+).+/d')"
 ver="$(echo $verstr|awk '{print $1}'|tr -d '#')"
 build="$(echo $verstr|awk '{print $4 " " $5 " " $6 ", " $9}')"

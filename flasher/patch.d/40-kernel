@@ -1,8 +1,0 @@
-#!/sbin/sh
-
-. "$env"
-cd "$tmp"
-
-xz -dc Image.xz > Image
-
-exit 0
