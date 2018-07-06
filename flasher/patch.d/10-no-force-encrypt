@@ -3,7 +3,7 @@
 . "$env"
 
 if grep -q quota /fstab.samsungexynos8895; then
-	print "Modified TWRP detected, enabling quota..."
+	print "Modified TWRP detected, enabling quota"
 fi
 
 found_fstab=false

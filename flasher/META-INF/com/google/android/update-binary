@@ -25,7 +25,7 @@ print() {
 abort() {
 	[ "$1" ] && {
 		print "Error: $1"
-		print "Aborting..."
+		print "Aborting"
 	}
 	cleanup
 	print "Failed to patch boot image!"
@@ -76,7 +76,7 @@ EOF
 
 # Unpack the installer
 [ "$zip" ] && {
-	print "Unpacking installer..."
+	print "Unpacking installer"
 	extract "$zip" "$tmp"
 }
 cd "$tmp"

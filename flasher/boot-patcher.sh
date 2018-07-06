@@ -25,7 +25,7 @@ print() {
 abort() {
 	[ "$1" ] && {
 		print "Error: $1!"
-		print "Aborting..."
+		print "Aborting"
 	}
 	exit 1
 }
@@ -168,7 +168,7 @@ patch_ramdisk() {
 # if we moved the parent ramdisk, we should rebuild the embedded one
 build_embedded_ramdisk() {
 	[ -d "$ramdisk-root" ] || return
-	print "Building new embedded boot ramdisk..."
+	print "Building new embedded boot ramdisk"
 	cd "$ramdisk"
 	find | cpio -o -H newc > "$ramdisk-root/sbin/ramdisk.cpio"
 	rm -rf "$ramdisk"
@@ -223,7 +223,7 @@ samsung_tag() {
 # sign the boot image with futility if it was a ChromeOS boot image
 sign_chromeos() {
 	[ -f "$split_img/boot.img-chromeos" ] || return
-	print "Signing ChromeOS boot image..."
+	print "Signing ChromeOS boot image"
 	cd "$tmp"
 	mv boot-new.img boot-new-unsigned.img
 	echo " " > empty
@@ -241,7 +241,7 @@ sign_chromeos() {
 # backup old boot image
 backup_boot() {
 	[ "$boot_backup" ] || return
-	print "Backing up original boot image to $boot_backup..."
+	print "Backing up original boot image to $boot_backup"
 	cd "$tmp"
 	mkdir -p "$(dirname "$boot_backup")"
 	cp -f boot.img "$boot_backup"
@@ -263,7 +263,7 @@ verify_size() {
 
 # write the new boot image to boot block
 write_boot() {
-	print "Writing new boot image..."
+	print "Writing new boot image"
 	cd "$tmp"
 	if $use_dd; then
 		dd if=boot-new.img of="$boot_block"
@@ -276,7 +276,7 @@ write_boot() {
 # install Magisk to make up for its loss, only if it was previously in use
 install_magisk() {
 	if [ -f "/data/adb/magisk.img" ]; then
-		print "Installing Magisk..."
+		print "Installing Magisk"
 		sh "$tmp/magisk/META-INF/com/google/android/update-binary" 0 1
 	fi
 }

@@ -44,14 +44,14 @@ if [ $enforce = 0 ]; then # enforcing
 		echo 'selinux=enforcing' > /sdcard/.velocity_settings
 		print "Enforcing has been set. Choice saved to /sdcard/.velocity_settings"
 	else
-		print "Setting SELinux to enforcing..."
+		print "Setting SELinux to enforcing"
 	fi
 else # permissive
 	if [ $first_time = 1 ]; then
 		echo 'selinux=permissive' > /sdcard/.velocity_settings
 		print "Permissive has been set. Choice saved to /sdcard/.velocity_settings"
 	else
-		print "Setting SELinux to permissive..."
+		print "Setting SELinux to permissive"
 	fi
 fi
 
