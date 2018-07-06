@@ -1,0 +1,11 @@
+#!/sbin/sh
+TMPDIR=/dev/tmp
+INSTALLER=/tmp/vflash/magisk; BBDIR=$TMPDIR/bin
+BBBIN=$BBDIR/busybox
+rm -rf $TMPDIR
+mkdir -p $BBDIR
+cp $INSTALLER/busybox $BBBIN
+chmod 755 $BBBIN
+$BBBIN --install -s $TMPDIR/bin
+export PATH=$BBDIR:$PATH
+exec sh $INSTALLER/META-INF/com/google/android/updater-script $@

@@ -275,11 +275,9 @@ write_boot() {
 
 # install Magisk to make up for its loss, only if it was previously in use
 install_magisk() {
-	if [ -f "$tmp/magisk.zip" ]; then
-		if [ -f "/data/adb/magisk.img" ]; then
-			print "Installing Magisk..."
-			unzip -p "$tmp/magisk.zip" META-INF/com/google/android/update-binary | sh /proc/self/fd/0 dummy 1 "$tmp/magisk.zip"
-		fi
+	if [ -f "/data/adb/magisk.img" ]; then
+		print "Installing Magisk..."
+		sh "$tmp/magisk/META-INF/com/google/android/update-binary" 0 1
 	fi
 }
 

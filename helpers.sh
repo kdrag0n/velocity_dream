@@ -8,11 +8,6 @@ mkzip() {
     [ $_RELEASE -eq 1 ] && touch flasher/.rel
     cd flasher
 
-    if [ ! -f magisk.zip ]; then
-        echo "  WGET    magisk.zip"
-        wget -O magisk.zip https://github.com/topjohnwu/Magisk/releases/download/v16.3/Magisk-v16.3.zip > /dev/null 2>&1
-    fi
-
     fn="velocity_kernel.zip"
     [ "x$1" != "x" ] && fn="$1"
     rm -f "../$fn"
