@@ -5,7 +5,7 @@ on init
 	write /sys/block/sda/queue/read_ahead_kb 2048
 	write /sys/block/sda/queue/scheduler bfq
 	write /sys/block/sda/queue/iosched/slice_idle 0
-	write /sys/block/sda/queue/nr_requests 256
+	write /sys/block/sda/queue/nr_requests 512
 
 on boot
 	# ZRAM
@@ -35,10 +35,10 @@ on property:sys.boot_completed=1
 	write /sys/block/sda/queue/read_ahead_kb 1024
 	write /sys/block/sda/queue/iosched/slice_idle 8
 	write /sys/block/sda/queue/nr_requests 512
-	write /sys/block/sda/queue/scheduler noop
+	write /sys/block/sda/queue/scheduler deadline
 	write /sys/block/mmcblk0/queue/iostats 0
-	write /sys/block/mmcblk0/queue/nr_requests 256
-	write /sys/block/mmcblk0/queue/scheduler maple
+	write /sys/block/mmcblk0/queue/nr_requests 512
+	write /sys/block/mmcblk0/queue/scheduler deadline
 
 	chmod 644 /sys/block/mmcblk0/queue/read_ahead_kb
 	write /sys/block/mmcblk0/queue/read_ahead_kb 1024
