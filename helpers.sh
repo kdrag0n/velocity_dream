@@ -86,7 +86,7 @@ dzip() {
 }
 
 test() {
-    adb wait-for-any && \
+    adb wait-for-any
     adb shell ls '/init.recovery*' > /dev/null 2>&1
     if [ $? -eq 1 ]; then
         adb reboot recovery
@@ -94,13 +94,23 @@ test() {
 
     fn="velocity_kernel.zip"
     [ "x$1" != "x" ] && fn="$1"
-    adb wait-for-usb-recovery && \
-    adb push velocity_kernel.zip /tmp && \
-    adb shell "twrp install /tmp/velocity_kernel.zip && reboot"
+    adb wait-for-usb-recovery
+    while [ ! -f .vtest.zip ]; do
+        sleep 0.05
+    done
+    adb push $fn /tmp/kernel.zip && \
+    adb shell "twrp install /tmp/kernel.zip && reboot"
+    rm -f .vtest.zip
 }
 
 inc() {
-    incbuild $@ && test
+    make "${MAKEFLAGS[@]}" -j$jobs $@ && \
+    {
+        rm -f .vtest.zip
+        test .vtest.zip &
+        mkzip .vtest.zip
+        rm -f velocity_kernel.zip
+    }
 }
 
 dc() {
