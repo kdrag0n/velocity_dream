@@ -2,18 +2,25 @@ _RELEASE=0
 
 mkzip() {
     build_dtb
-    echo "  XZ      Image.xz"
-    xz -kzc -T 6 arch/arm64/boot/Image >| flasher/Image.xz
+    cp arch/arm64/boot/Image flasher
     [ $_RELEASE -eq 0 ] && rm -f flasher/.rel
     [ $_RELEASE -eq 1 ] && touch flasher/.rel
-    cd flasher
 
     fn="velocity_kernel.zip"
     [ "x$1" != "x" ] && fn="$1"
-    rm -f "../$fn"
+    rm -f "$fn"
+    rm -fr /tmp/velozip
+    mkdir /tmp/velozip
+    cp -r flasher/META-INF /tmp/velozip
+    echo "  XZ      arc.xz"
+    cd flasher
+    tar c --owner=0 --group=0 * | xz -zcT $(($(cat /proc/cpuinfo|grep processor|wc -l)-2)) > /tmp/velozip/arc.xz
+    cd -
     echo "  ZIP     $fn"
-    zip -r9 "../$fn" . > /dev/null
-    cd ..
+    prpath="$(pwd)"
+    cd /tmp/velozip
+    zip -0qr "$prpath/$fn" .
+    cd -
 }
 
 build_dtb() {

@@ -105,17 +105,7 @@ dump_boot() {
 
 # determine the format the ramdisk was compressed in
 determine_ramdisk_format() {
-	magicbytes=$(hexdump -vn2 -e '2/1 "%.2x"' "$split_img/boot.img-ramdisk")
-	case "$magicbytes" in
-		425a) rdformat=bzip2; decompress="bzip2 -dc" ;;
-		1f8b|1f9e) rdformat=gzip; decompress="gzip -dc" ;;
-		0422) rdformat=lz4; decompress="$bin/lz4 -d" ;;
-		894c) rdformat=lzo; decompress="lzop -dc" ;;
-		5d00) rdformat=lzma; decompress="lzma -dc" ;;
-		fd37) rdformat=xz; decompress="xz -dc" ;;
-		*) abort "Unknown ramdisk compression format ($magicbytes)" ;;
-	esac
-	command -v $decompress || abort "Unable to find archiver for $rdformat"
+	rdformat=gzip
 
 	[ "$ramdisk_compression" ] && rdformat=$ramdisk_compression
 	case "$rdformat" in

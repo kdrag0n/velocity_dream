@@ -40,7 +40,7 @@ cleanup() {
 extract() {
 	rm -rf "$2"
 	mkdir -p "$2"
-	unzip -o "$1" -d "$2" || abort "Failed to extract zip to $2!"
+	unzip -p "$1" arc.xz | tar xJC "$2" || abort "Failed to extract zip!"
 }
 
 setperm() {
@@ -112,7 +112,6 @@ cd "$tmp"
 	[ $match != 1 ] && abort "Unsupported device"
 }
 
-xz -dc Image.xz > Image
 verstr="$(strings Image|grep ' SMP PREEMPT '|sed -E '/.+\#([0-9]+).+/d')"
 ver="$(echo $verstr|awk '{print $1}'|tr -d '#')"
 build="$(echo $verstr|awk '{print $4 " " $5 " " $6 ", " $9}')"
