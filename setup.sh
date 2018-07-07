@@ -11,7 +11,7 @@ jobs=10
 # Do not edit below this point
 # -----------------------------
 
-export CROSS_COMPILE="ccache $tc"
+export CROSS_COMPILE=$tc
 export ARCH=arm64
 export SUBARCH=arm64
 export KBUILD_BUILD_USER=velocity
