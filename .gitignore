@@ -117,4 +117,3 @@ offsets_sizes_fmp.txt
 releases/
 betas/
 !flasher/system/**
-!flasher/ramdisk.xz

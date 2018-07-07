@@ -141,7 +141,7 @@ dump_embedded_ramdisk() {
 # extract the new ramdisk
 extract_ramdisk() {
 	cd "$ramdisk"
-	xz -dc "$tmp/ramdisk.xz" | cpio -i
+	cpio -i < "$tmp/ramdisk.cpio"
 	[ $? != 0 ] && abort "Unpacking ramdisk failed"
 }
 
