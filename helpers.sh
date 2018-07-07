@@ -13,14 +13,15 @@ mkzip() {
     mkdir /tmp/velozip
     cp -r flasher/META-INF /tmp/velozip
     echo "  XZ      arc.xz"
-    cd flasher
+    pushd flasher
     tar c --owner=0 --group=0 * | xz -zcT $(($(cat /proc/cpuinfo|grep processor|wc -l)-2)) > /tmp/velozip/arc.xz
-    cd -
+    popd
     echo "  ZIP     $fn"
     prpath="$(pwd)"
-    cd /tmp/velozip
+    pushd /tmp/velozip
     zip -0qr "$prpath/$fn" .
-    cd -
+    popd
+    unset prpath
 }
 
 build_dtb() {
