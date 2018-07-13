@@ -789,7 +789,7 @@ static int wl_android_get_rssi(struct net_device *net, char *command, int total_
 		memcpy(command, ssid.SSID, ssid.SSID_len);
 		bytes_written = ssid.SSID_len;
 	}
-	if ((total_len - bytes_written) < (DSTRLEN(" rssi -XXX") + 1))
+	if ((total_len - bytes_written) < (strlen(" rssi -XXX") + 1))
 		return -ENOMEM;
 
 	bytes_written += scnprintf(&command[bytes_written], total_len - bytes_written,
@@ -2012,7 +2012,7 @@ wl_android_set_pmk(struct net_device *dev, char *command, int total_len)
 #endif
 
 	bzero(pmk, sizeof(pmk));
-	memcpy((char *)pmk, command + DSTRLEN("SET_PMK "), 32);
+	memcpy((char *)pmk, command + strlen("SET_PMK "), 32);
 	error = wldev_iovar_setbuf(dev, "okc_info_pmk", pmk, 32, smbuf, sizeof(smbuf), NULL);
 	if (error) {
 		DHD_ERROR(("Failed to set PMK for OKC, error = %d\n", error));
@@ -2553,7 +2553,7 @@ wl_android_set_cckm_krk(struct net_device *dev, char *command, int total_len)
 
 	WL_TRACE(("%s: wl_iw_set_cckm_krk\n", dev->name));
 
-	skip_len = DSTRLEN("set cckm_krk")+1;
+	skip_len = strlen("set cckm_krk")+1;
 
 	if (total_len < (skip_len + CCKM_KRK_LEN)) {
 		return BCME_BADLEN;
@@ -5379,9 +5379,9 @@ wl_cfg80211_p2plo_offload(struct net_device *dev, char *cmd, char* buf, int len)
 
 	WL_ERR(("Entry cmd:%s arg_len:%d \n", cmd, len));
 
-	if (strncmp(cmd, "P2P_LO_START", DSTRLEN("P2P_LO_START")) == 0) {
+	if (strncmp(cmd, "P2P_LO_START", strlen("P2P_LO_START")) == 0) {
 		ret = wl_cfg80211_p2plo_listen_start(dev, buf, len);
-	} else if (strncmp(cmd, "P2P_LO_STOP", DSTRLEN("P2P_LO_STOP")) == 0) {
+	} else if (strncmp(cmd, "P2P_LO_STOP", strlen("P2P_LO_STOP")) == 0) {
 		ret = wl_cfg80211_p2plo_listen_stop(dev);
 	} else {
 		WL_ERR(("Request for Unsupported CMD:%s \n", buf));
@@ -5867,6 +5867,8 @@ static int wl_android_get_lqcm_report(
 	lqcm_enable = lqcm_report & LQCM_ENAB_MASK;
 	tx_lqcm_idx = (lqcm_report & LQCM_TX_INDEX_MASK) >> LQCM_TX_INDEX_SHIFT;
 	rx_lqcm_idx = (lqcm_report & LQCM_RX_INDEX_MASK) >> LQCM_RX_INDEX_SHIFT;
+
+	WL_ERR(("lqcm report EN:%d, TX:%d, RX:%d\n", lqcm_enable, tx_lqcm_idx, rx_lqcm_idx));
 
 	bytes_written = snprintf(command, total_len, "%s %d",
 		CMD_GET_LQCM_REPORT, lqcm_report);

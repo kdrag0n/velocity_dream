@@ -2176,7 +2176,7 @@ wl_cfgvendor_get_ndev(struct bcm_cfg80211 *cfg, struct wireless_dev *wdev,
 	/* check whether ifname=<ifname> is provided in the command */
 	pos = strstr(data, "ifname=");
 	if (pos) {
-		pos += DSTRLEN("ifname=");
+		pos += strlen("ifname=");
 		pos1 = strstr(pos, " ");
 		if (!pos1) {
 			WL_ERR(("command format error \n"));
@@ -2277,7 +2277,7 @@ wl_cfgvendor_priv_bcm_handler(struct wiphy *wiphy,
 			WL_DBG(("bytes_written: %d \n", bytes_written));
 			if (bytes_written == 0) {
 				snprintf(reply_buf, reply_len, "%s", "OK");
-				data_len = DSTRLEN("OK");
+				data_len = strlen("OK");
 			} else if (bytes_written > 0) {
 				data_len = bytes_written > reply_len ?
 					reply_len : bytes_written;

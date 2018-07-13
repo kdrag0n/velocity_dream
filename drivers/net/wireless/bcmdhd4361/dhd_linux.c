@@ -3214,7 +3214,9 @@ dhd_enable_packet_filter(int value, dhd_pub_t *dhd)
 {
 	int i;
 
+	DHD_ERROR(("%s: enter, value = %d\n", __FUNCTION__, value));
 	if ((dhd->op_mode & DHD_FLAG_HOSTAP_MODE) && value) {
+		DHD_ERROR(("%s: DHD_FLAG_HOSTAP_MODE\n", __FUNCTION__));
 		return;
 	}
 	/* 1 - Enable packet filter, only allow unicast packet to send up */
@@ -3226,6 +3228,9 @@ dhd_enable_packet_filter(int value, dhd_pub_t *dhd)
 #ifndef GAN_LITE_NAT_KEEPALIVE_FILTER
 			if (value && (i == DHD_ARP_FILTER_NUM) &&
 				!_turn_on_arp_filter(dhd, dhd->op_mode)) {
+				DHD_TRACE(("Do not turn on ARP white list pkt filter:"
+					"val %d, cnt %d, op_mode 0x%x\n",
+					value, i, dhd->op_mode));
 				continue;
 			}
 #endif /* !GAN_LITE_NAT_KEEPALIVE_FILTER */
@@ -3368,6 +3373,9 @@ static int dhd_set_suspend(int value, dhd_pub_t *dhd)
 	dhdinfo = dhd->info;
 #endif /* PASS_ALL_MCAST_PKTS */
 
+	DHD_TRACE(("%s: enter, value = %d in_suspend=%d\n",
+		__FUNCTION__, value, dhd->in_suspend));
+
 	dhd_suspend_lock(dhd);
 
 #ifdef CUSTOM_SET_CPUCORE
@@ -3380,6 +3388,8 @@ static int dhd_set_suspend(int value, dhd_pub_t *dhd)
 #ifdef PKT_FILTER_SUPPORT
 				dhd->early_suspended = 1;
 #endif
+				/* Kernel suspended */
+				DHD_ERROR(("%s: force extra suspend setting \n", __FUNCTION__));
 
 #ifndef SUPPORT_PM2_ONLY
 				dhd_wl_ioctl_cmd(dhd, WLC_SET_PM, (char *)&power_mode,
@@ -3540,6 +3550,8 @@ static int dhd_set_suspend(int value, dhd_pub_t *dhd)
 #ifdef PKT_FILTER_SUPPORT
 				dhd->early_suspended = 0;
 #endif
+				/* Kernel resumed  */
+				DHD_ERROR(("%s: Remove extra suspend setting \n", __FUNCTION__));
 
 #ifdef SUPPORT_SENSORHUB
 				shub_ctl.enable = 1;
@@ -3943,7 +3955,7 @@ _dhd_set_multicast_list(dhd_info_t *dhd, int ifidx)
 
 	strncpy(bufp, "mcast_list", buflen - 1);
 	bufp[buflen - 1] = '\0';
-	bufp += DSTRLEN("mcast_list") + 1;
+	bufp += strlen("mcast_list") + 1;
 
 	cnt = htol32(cnt);
 	memcpy(bufp, &cnt, sizeof(cnt));
@@ -4076,60 +4088,9 @@ _dhd_set_multicast_list(dhd_info_t *dhd, int ifidx)
 	}
 }
 
-static int randomize_mac = 0;
-
-static struct ctl_table randomize_mac_table[] =
-{
-	{
-		.procname		= "randomize_mac",
-		.data			= &randomize_mac,
-		.maxlen			= sizeof(int),
-		.mode			= 0600,
-		.proc_handler	= proc_dointvec
-	},
-	{}
-};
-
-static struct ctl_table cnss_table[] =
-{
-	{
-		.procname		= "cnss",
-		.maxlen			= 0,
-		.mode			= 0555,
-		.child			= randomize_mac_table
-	},
-	{}
-};
-
-static struct ctl_table dev_table[] =
-{
-	{
-		.procname		= "dev",
-		.maxlen			= 0,
-		.mode			= 0555,
-		.child			= cnss_table
-	},
-	{}
-};
-
-static int __init init_randomize_mac(void)
-{
-	register_sysctl_table(dev_table);
-	return 0;
-}
-late_initcall(init_randomize_mac);
-
 int
 _dhd_set_mac_address(dhd_info_t *dhd, int ifidx, uint8 *addr)
 {
-	u8 addr_random[ETHER_ADDR_LEN];
-
-	if (randomize_mac) {
-		memcpy(addr_random, addr, ETHER_ADDR_LEN);
-		get_random_bytes(&addr_random[3], 3);
-		addr = addr_random;
-	}
-
 	int ret;
 
 	ret = dhd_iovar(&dhd->pub, ifidx, "cur_etheraddr", (char *)addr,
@@ -4892,6 +4853,8 @@ dhd_start_xmit(struct sk_buff *skb, struct net_device *net)
 	int ifidx;
 	unsigned long flags;
 	uint8 htsfdlystat_sz = 0;
+
+	DHD_TRACE(("%s: Enter\n", __FUNCTION__));
 
 	if (dhd_query_bus_erros(&dhd->pub)) {
 		return -ENODEV;
@@ -6203,12 +6166,14 @@ void dhd_runtime_pm_disable(dhd_pub_t *dhdp)
 {
 	dhd_os_runtimepm_timer(dhdp, 0);
 	dhdpcie_runtime_bus_wake(dhdp, TRUE, __builtin_return_address(0));
+	DHD_ERROR(("DHD Runtime PM Disabled \n"));
 }
 
 void dhd_runtime_pm_enable(dhd_pub_t *dhdp)
 {
 	if (dhd_get_idletime(dhdp)) {
 		dhd_os_runtimepm_timer(dhdp, dhd_runtimepm_ms);
+		DHD_ERROR(("DHD Runtime PM Enabled \n"));
 	}
 }
 
@@ -11361,7 +11326,7 @@ dhd_preinit_ioctls(dhd_pub_t *dhd)
 		if ((clmver_temp_buf = bcmstrstr(buf, "Data:")) == NULL) {
 			DHD_ERROR(("Couldn't find \"Data:\"\n"));
 		} else {
-			ptr = (clmver_temp_buf + DSTRLEN("Data:"));
+			ptr = (clmver_temp_buf + strlen("Data:"));
 			if ((clmver_temp_buf = bcmstrtok(&ptr, "\n", 0)) == NULL) {
 				DHD_ERROR(("Couldn't find New line character\n"));
 			} else {
@@ -16360,6 +16325,9 @@ dhd_os_check_wakelock_all(dhd_pub_t *pub)
 
 	/* Indicate to the Host to avoid going to suspend if internal locks are up */
 	if (lock_active) {
+		DHD_ERROR(("%s wakelock c-%d wl-%d wd-%d rx-%d "
+			"ctl-%d intr-%d scan-%d evt-%d, pm-%d, txfl-%d\n",
+			__FUNCTION__, c, l1, l2, l3, l4, l5, l6, l7, l8, l9));
 		return 1;
 	}
 #elif defined(BCMSDIO) && (LINUX_VERSION_CODE > KERNEL_VERSION(2, 6, 36))
@@ -18920,7 +18888,7 @@ dhd_set_blob_support(dhd_pub_t *dhdp, char *fw_path)
 		DHD_ERROR(("%s: ----- blob file exist -----\n", __FUNCTION__));
 		dhdp->is_blob = TRUE;
 #if defined(CONCATE_BLOB)
-		strncat(fw_path, "_blob", DSTRLEN("_blob"));
+		strncat(fw_path, "_blob", strlen("_blob"));
 #else
 		BCM_REFERENCE(fw_path);
 #endif /* SKIP_CONCATE_BLOB */

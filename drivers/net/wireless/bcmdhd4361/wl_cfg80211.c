@@ -1,7 +1,7 @@
 /*
  * Linux cfg80211 driver
  *
- * Copyright (C) 1999-2018, Broadcom Corporation
+ * Copyright (C) 1999-2017, Broadcom Corporation
  * 
  *      Unless you and Broadcom execute a separate written software license
  * agreement governing use of this software, this software is licensed to you
@@ -24,7 +24,7 @@
  *
  * <<Broadcom-WL-IPTag/Open:>>
  *
- * $Id: wl_cfg80211.c 742436 2018-01-22 08:33:32Z $
+ * $Id: wl_cfg80211.c 736724 2017-12-18 08:39:54Z $
  */
 /* */
 #include <typedefs.h>
@@ -2797,6 +2797,8 @@ wl_run_escan(struct bcm_cfg80211 *cfg, struct net_device *ndev,
 	}
 	if (!cfg->p2p_supported || !p2p_scan(cfg)) {
 		/* LEGACY SCAN TRIGGER */
+		WL_SCAN((" LEGACY E-SCAN START\n"));
+
 #if defined(USE_INITIAL_2G_SCAN) || defined(USE_INITIAL_SHORT_DWELL_TIME)
 		if (!request) {
 			err = -EINVAL;
@@ -2896,6 +2898,7 @@ wl_run_escan(struct bcm_cfg80211 *cfg, struct net_device *ndev,
 
 		err = wldev_iovar_setbuf(ndev, "escan", params, params_size,
 			cfg->escan_ioctl_buf, WLC_IOCTL_MEDLEN, NULL);
+		WL_ERR(("LEGACY_SCAN sync ID: %d, bssidx: %d\n", params->sync_id, bssidx));
 		if (unlikely(err)) {
 			if (err == BCME_EPERM)
 				/* Scan Not permitted at this point of time */
@@ -3139,26 +3142,33 @@ __wl_cfg80211_scan(struct wiphy *wiphy, struct net_device *ndev,
 	 * scan. Hence return scan success.
 	 */
 	if (request && (scan_req_iftype(request) == NL80211_IFTYPE_AP)) {
+		WL_INFORM(("Scan Command on SoftAP Interface. Ignoring...\n"));
 		return 0;
 	}
 
 	ndev = ndev_to_wlc_ndev(ndev, cfg);
 
 	if (WL_DRV_STATUS_SENDING_AF_FRM_EXT(cfg)) {
+		WL_ERR(("Sending Action Frames. Try it again.\n"));
 		return -EAGAIN;
 	}
 
+	WL_DBG(("Enter wiphy (%p)\n", wiphy));
 	if (wl_get_drv_status_all(cfg, SCANNING)) {
 		if (cfg->scan_request == NULL) {
 			wl_clr_drv_status_all(cfg, SCANNING);
+			WL_DBG(("<<<<<<<<<<<Force Clear Scanning Status>>>>>>>>>>>\n"));
 		} else {
+			WL_ERR(("Scanning already\n"));
 			return -EAGAIN;
 		}
 	}
 	if (wl_get_drv_status(cfg, SCAN_ABORTING, ndev)) {
+		WL_ERR(("Scanning being aborted\n"));
 		return -EAGAIN;
 	}
 	if (request && request->n_ssids > WL_SCAN_PARAMS_SSID_MAX) {
+		WL_ERR(("request null or n_ssids > WL_SCAN_PARAMS_SSID_MAX\n"));
 		return -EOPNOTSUPP;
 	}
 
@@ -3188,6 +3198,7 @@ __wl_cfg80211_scan(struct wiphy *wiphy, struct net_device *ndev,
 	} else {
 		scan_timer_interval_ms = WL_SCAN_TIMER_INTERVAL_MS;
 	}
+	WL_TRACE_HW4(("scan_timer_interval_ms %d\n", scan_timer_interval_ms));
 #endif /* CUSTOMER_SCAN_TIMEOUT_SETTING */
 #endif /* WES_SUPPORT */
 
@@ -3292,6 +3303,7 @@ __wl_cfg80211_scan(struct wiphy *wiphy, struct net_device *ndev,
 	}
 
 	if (request && cfg->p2p_supported) {
+		WL_TRACE_HW4(("START SCAN\n"));
 		DHD_OS_SCAN_WAKE_LOCK_TIMEOUT((dhd_pub_t *)(cfg->pub),
 			SCAN_WAKE_LOCK_TIMEOUT);
 		DHD_DISABLE_RUNTIME_PM((dhd_pub_t *)(cfg->pub));
@@ -11239,9 +11251,8 @@ static s32 wl_inform_bss(struct bcm_cfg80211 *cfg)
 		add_roam_cache(cfg, bi);
 #endif /* ROAM_CHANNEL_CACHE */
 		err = wl_inform_single_bss(cfg, bi, false);
-		if (unlikely(err)) {
-			WL_ERR(("bss inform failed\n"));
-		}
+		if (unlikely(err))
+			break;
 	}
 	preempt_enable();
 #ifdef ROAM_CHANNEL_CACHE
@@ -11358,8 +11369,7 @@ static s32 wl_inform_single_bss(struct bcm_cfg80211 *cfg, struct wl_bss_info *bi
 	cbss = cfg80211_inform_bss_frame(wiphy, channel, mgmt,
 		le16_to_cpu(notif_bss_info->frame_len), signal, aflags);
 	if (unlikely(!cbss)) {
-		WL_ERR(("cfg80211_inform_bss_frame error bssid " MACDBG " channel %d \n",
-			MAC2STRDBG((u8*)(&bi->BSSID)), notif_bss_info->channel));
+		WL_ERR(("cfg80211_inform_bss_frame error\n"));
 		err = -EINVAL;
 		goto out_err;
 	}
@@ -12861,7 +12871,7 @@ wl_check_pmstatus(struct bcm_cfg80211 *cfg, bcm_struct_cfgdev *cfgdev,
 	}
 
 	err = wldev_iovar_getbuf_bsscfg(ndev, "dump",
-		"pm", DSTRLEN("pm"), pbuf, WLC_IOCTL_MEDLEN, 0, &cfg->ioctl_buf_sync);
+		"pm", strlen("pm"), pbuf, WLC_IOCTL_MEDLEN, 0, &cfg->ioctl_buf_sync);
 
 	if (err) {
 		WL_ERR(("dump ioctl err = %d", err));
@@ -15432,6 +15442,9 @@ static s32 wl_escan_handler(struct bcm_cfg80211 *cfg, bcm_struct_cfgdev *cfgdev,
 	u32 i;
 #endif /* WL_DRV_AVOID_SCANCACHE */
 
+	WL_DBG((" enter event type : %d, status : %d \n",
+		ntoh32(e->event_type), ntoh32(e->status)));
+
 	ndev = cfgdev_to_wlc_ndev(cfgdev, cfg);
 
 	mutex_lock(&cfg->usr_sync);
@@ -15453,6 +15466,7 @@ static s32 wl_escan_handler(struct bcm_cfg80211 *cfg, bcm_struct_cfgdev *cfgdev,
 
 #ifndef WL_DRV_AVOID_SCANCACHE
 	if (status == WLC_E_STATUS_PARTIAL) {
+		WL_INFORM(("WLC_E_STATUS_PARTIAL \n"));
 		DBG_EVENT_LOG((dhd_pub_t *)cfg->pub, WIFI_EVENT_DRIVER_SCAN_RESULT_FOUND);
 		if (!escan_result) {
 			WL_ERR(("Invalid escan result (NULL pointer)\n"));
@@ -15682,14 +15696,19 @@ static s32 wl_escan_handler(struct bcm_cfg80211 *cfg, bcm_struct_cfgdev *cfgdev,
 			escan_result->sync_id);
 
 		if (wl_get_drv_status_all(cfg, FINDING_COMMON_CHANNEL)) {
+			WL_INFORM(("ACTION FRAME SCAN DONE\n"));
 			wl_clr_p2p_status(cfg, SCANNING);
 			wl_clr_drv_status(cfg, SCANNING, cfg->afx_hdl->dev);
 			if (cfg->afx_hdl->peer_chan == WL_INVALID)
 				complete(&cfg->act_frm_scan);
 		} else if ((likely(cfg->scan_request)) || (cfg->sched_scan_running)) {
+			WL_INFORM(("ESCAN COMPLETED\n"));
 			DBG_EVENT_LOG((dhd_pub_t *)cfg->pub, WIFI_EVENT_DRIVER_SCAN_COMPLETE);
 			cfg->bss_list = wl_escan_get_buf(cfg, FALSE);
-			scan_req_match(cfg);
+			if (!scan_req_match(cfg)) {
+				WL_TRACE_HW4(("SCAN COMPLETED: scanned AP count=%d\n",
+					cfg->bss_list->count));
+			}
 			wl_inform_bss(cfg);
 			wl_notify_escan_complete(cfg, ndev, false, false);
 		}
@@ -15761,13 +15780,18 @@ static s32 wl_escan_handler(struct bcm_cfg80211 *cfg, bcm_struct_cfgdev *cfgdev,
 		wl_escan_print_sync_id(status, escan_result->sync_id,
 			cfg->escan_info.cur_sync_id);
 		if (wl_get_drv_status_all(cfg, FINDING_COMMON_CHANNEL)) {
+			WL_INFORM(("ACTION FRAME SCAN DONE\n"));
 			wl_clr_p2p_status(cfg, SCANNING);
 			wl_clr_drv_status(cfg, SCANNING, cfg->afx_hdl->dev);
 			if (cfg->afx_hdl->peer_chan == WL_INVALID)
 				complete(&cfg->act_frm_scan);
 		} else if ((likely(cfg->scan_request)) || (cfg->sched_scan_running)) {
 			cfg->bss_list = wl_escan_get_buf(cfg, TRUE);
-			scan_req_match(cfg);
+			if (!scan_req_match(cfg)) {
+				WL_TRACE_HW4(("SCAN ABORTED(UNEXPECTED): "
+					"scanned AP count=%d\n",
+					cfg->bss_list->count));
+			}
 			wl_inform_bss(cfg);
 			wl_notify_escan_complete(cfg, ndev, true, false);
 		}
@@ -16437,15 +16461,20 @@ wl_cfg80211_event(struct net_device *ndev, const wl_event_msg_t * e, void *data)
 	struct bcm_cfg80211 *cfg = wl_get_cfg(ndev);
 	struct net_info *netinfo;
 
+	WL_DBG(("event_type (%d): %s\n", event_type, bcmevent_get_name(event_type)));
+
 	if ((cfg == NULL) || (cfg->p2p_supported && cfg->p2p == NULL)) {
+		WL_ERR(("Stale event ignored\n"));
 		return;
 	}
 
 	if (cfg->event_workq == NULL) {
+		WL_ERR(("Event handler is not created\n"));
 		return;
 	}
 
 	if (wl_get_p2p_status(cfg, IF_CHANGING) || wl_get_p2p_status(cfg, IF_ADDING)) {
+		WL_ERR(("during IF change, ignore event %d\n", event_type));
 		return;
 	}
 
@@ -16455,7 +16484,15 @@ wl_cfg80211_event(struct net_device *ndev, const wl_event_msg_t * e, void *data)
 		 * created via cfg80211 interface. so the event is not of interest
 		 * to the cfg80211 layer.
 		 */
+		WL_ERR(("ignore event %d, not interested\n", event_type));
 		return;
+	}
+
+	if (event_type == WLC_E_PFN_NET_FOUND) {
+		WL_DBG((" PNOEVENT: PNO_NET_FOUND\n"));
+	}
+	else if (event_type == WLC_E_PFN_NET_LOST) {
+		WL_DBG((" PNOEVENT: PNO_NET_LOST\n"));
 	}
 
 	if (likely(!wl_enq_event(cfg, ndev, event_type, e, data))) {
@@ -17504,15 +17541,12 @@ int wl_cfg80211_hang(struct net_device *dev, u16 reason)
 s32 wl_cfg80211_down(struct net_device *dev)
 {
 	struct bcm_cfg80211 *cfg = wl_get_cfg(dev);
-	s32 err = BCME_ERROR;
+	s32 err;
 
 	WL_DBG(("In\n"));
-
-	if (cfg) {
-		mutex_lock(&cfg->usr_sync);
-		err = __wl_cfg80211_down(cfg);
-		mutex_unlock(&cfg->usr_sync);
-	}
+	mutex_lock(&cfg->usr_sync);
+	err = __wl_cfg80211_down(cfg);
+	mutex_unlock(&cfg->usr_sync);
 
 	return err;
 }
@@ -21609,8 +21643,8 @@ wl_update_ap_rps_params(struct net_device *dev, ap_rps_info_t* rps, char *ifname
 	if (rps->quiet_time < RADIO_PWRSAVE_QUIETTIME_MIN)
 		return BCME_BADARG;
 
-	if ((int)rps->sta_assoc_check > RADIO_PWRSAVE_ASSOCCHECK_MAX ||
-		(int)rps->sta_assoc_check < RADIO_PWRSAVE_ASSOCCHECK_MIN)
+	if (rps->sta_assoc_check > RADIO_PWRSAVE_ASSOCCHECK_MAX ||
+		rps->sta_assoc_check < RADIO_PWRSAVE_ASSOCCHECK_MIN)
 		return BCME_BADARG;
 
 	cfg->ap_rps_info.pps = rps->pps;

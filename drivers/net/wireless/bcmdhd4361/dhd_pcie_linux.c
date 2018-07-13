@@ -557,6 +557,7 @@ static int dhdpcie_suspend_dev(struct pci_dev *dev)
 		return BCME_ERROR;
 	}
 #endif /* OEM_ANDROID && LINUX_VERSION_CODE >= KERNEL_VERSION(3, 0, 0) */
+	DHD_TRACE_HW4(("%s: Enter\n", __FUNCTION__));
 #if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 0, 0))
 	dhd_dpc_tasklet_kill(bus->dhd);
 #endif /* OEM_ANDROID && LINUX_VERSION_CODE >= KERNEL_VERSION(3, 0, 0) */
@@ -611,6 +612,7 @@ static int dhdpcie_resume_dev(struct pci_dev *dev)
 	dhdpcie_info_t *pch = pci_get_drvdata(dev);
 	pci_load_and_free_saved_state(dev, &pch->state);
 #endif /* OEM_ANDROID && LINUX_VERSION_CODE >= KERNEL_VERSION(3, 0, 0) */
+	DHD_TRACE_HW4(("%s: Enter\n", __FUNCTION__));
 	dev->state_saved = TRUE;
 	pci_restore_state(dev);
 	err = pci_enable_device(dev);
@@ -1463,7 +1465,9 @@ dhdpcie_isr(int irq, void *arg)
 {
 	dhd_bus_t *bus = (dhd_bus_t*)arg;
 
-	dhdpcie_bus_isr(bus);
+	if (!dhdpcie_bus_isr(bus)) {
+		DHD_ERROR(("%s: dhdpcie_bus_isr returns with FALSE\n", __FUNCTION__));
+	}
 	return IRQ_HANDLED;
 }
 
@@ -2093,6 +2097,8 @@ bool dhd_runtimepm_state(dhd_pub_t *dhd)
 			/* stop all interface network queue. */
 			dhd_bus_stop_queue(bus);
 			DHD_GENERAL_UNLOCK(dhd, flags);
+			DHD_ERROR(("%s: DHD Idle state!! -  idletime :%d, wdtick :%d \n",
+					__FUNCTION__, bus->idletime, dhd_runtimepm_ms));
 			/* RPM suspend is failed, return FALSE then re-trying */
 			if (dhdpcie_set_suspend_resume(bus, TRUE)) {
 				DHD_ERROR(("%s: exit with wakelock \n", __FUNCTION__));
@@ -2135,6 +2141,7 @@ bool dhd_runtimepm_state(dhd_pub_t *dhd)
 
 			smp_wmb();
 			wake_up_interruptible(&bus->rpm_queue);
+			DHD_ERROR(("%s : runtime resume ended \n", __FUNCTION__));
 			return TRUE;
 		} else {
 			DHD_GENERAL_UNLOCK(dhd, flags);
@@ -2175,6 +2182,7 @@ bool dhd_runtime_bus_wake(dhd_bus_t *bus, bool wait, void *func_addr)
 
 			DHD_GENERAL_UNLOCK(bus->dhd, flags);
 
+			DHD_ERROR(("Runtime Resume is called in %pf\n", func_addr));
 			smp_wmb();
 			wake_up_interruptible(&bus->rpm_queue);
 		/* No need to wake up the RPM state thread */

@@ -1590,7 +1590,7 @@ wl_android_stat_report_get_next_mode_item(void *net, char *cmd, int tot_len)
 
 finished:
 	cmd[bytes_written] = '\0';
-	memcpy(cmd, "LAST", DSTRLEN("LAST"));
+	memcpy(cmd, "LAST", strlen("LAST"));
 	wsr_free_lock_idx(wsr_info);
 	WL_ERR(("(len=%d) %s\n", bytes_written, cmd));
 	return bytes_written;

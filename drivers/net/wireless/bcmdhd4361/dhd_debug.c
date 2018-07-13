@@ -851,6 +851,30 @@ dhd_dbg_verboselog_printf(dhd_pub_t *dhdp, event_log_hdr_t *hdr,
 
 	/* print the message out in a logprint  */
 	if (!(raw_event->fmts) || hdr->fmt_num == 0xffff) {
+		if (dhdp->dbg) {
+			log_level = dhdp->dbg->dbg_rings[FW_VERBOSE_RING_ID].log_level;
+			for (id = 0; id < ARRAYSIZE(fw_verbose_level_map); id++) {
+				if ((fw_verbose_level_map[id].tag == hdr->tag) &&
+					(fw_verbose_level_map[id].log_level > log_level))
+					return;
+			}
+		}
+
+		DHD_EVENT(("%d.%d EL:tag=%d len=%d fmt=0x%x",
+			(uint32)verboselog_ts_saved / 1000,
+			(uint32)verboselog_ts_saved % 1000,
+			hdr->tag,
+			hdr->count,
+			hdr->fmt_num));
+
+		for (count = 0; count < (hdr->count-1); count++) {
+			if (count % 8 == 0)
+				DHD_EVENT(("\n\t%08x", log_ptr[count]));
+			else
+				DHD_EVENT((" %08x", log_ptr[count]));
+		}
+		DHD_EVENT(("\n"));
+
 		return;
 	}
 
@@ -993,6 +1017,9 @@ dhd_dbg_msgtrace_log_parser(dhd_pub_t *dhdp, void *event_data,
 	 * event log buffer. Refer to event log buffer structure in
 	 * event_log.h
 	 */
+	DHD_MSGTRACE_LOG(("EVENT_LOG_HDR[0x%x]: Set: 0x%08x length = %d\n",
+		ltoh16(*((uint16 *)(data+2))), ltoh32(*((uint32 *)(data + 4))),
+		ltoh16(*((uint16 *)(data)))));
 	data += EVENT_LOG_BLOCK_HDRLEN;
 	datalen -= EVENT_LOG_BLOCK_HDRLEN;
 

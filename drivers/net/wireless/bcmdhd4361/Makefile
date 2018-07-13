@@ -1,12 +1,12 @@
 #
 # Copyright (C) 1999-2017, Broadcom Corporation
-#
+# 
 #      Unless you and Broadcom execute a separate written software license
 # agreement governing use of this software, this software is licensed to you
 # under the terms of the GNU General Public License version 2 (the "GPL"),
 # available at http://www.broadcom.com/licenses/GPLv2.php, with the
 # following added to such license:
-#
+# 
 #      As a special exception, the copyright holders of this software give you
 # permission to link this software with independent modules, and to copy and
 # distribute the resulting executable under terms of your choice, provided that
@@ -14,7 +14,7 @@
 # the license of that module.  An independent module is a module which is not
 # derived from this software.  The special exception does not apply to any
 # modifications of the software.
-#
+# 
 #      Notwithstanding the above, under no circumstances may you combine this
 # software in any way with any other Broadcom software provided under a license
 # other than the GPL, without Broadcom's express prior written consent.
@@ -29,7 +29,7 @@
 
 DHDCFLAGS += -Wall -Wstrict-prototypes -Dlinux -DLINUX -DBCMDRIVER      \
         -DBCMDONGLEHOST -DUNRELEASEDCHIP -DBCMDMA32 -DBCMFILEIMAGE      \
-        -DDHDTHREAD -DDHD_BCMEVENTS -DWLP2P      \
+        -DDHDTHREAD -DDHD_BCMEVENTS -DSHOW_EVENTS -DBCMDBG -DWLP2P      \
         -DWIFI_ACT_FRAME -DARP_OFFLOAD_SUPPORT -DKEEP_ALIVE -DCSCAN     \
         -DPKT_FILTER_SUPPORT -DEMBEDDED_PLATFORM -DPNO_SUPPORT          \
         -DSEC_ENHANCEMENT
@@ -62,6 +62,8 @@ endif
 	# Enable PROP_TXSTATUS
 	DHDCFLAGS += -DPROP_TXSTATUS -DLIMIT_BORROW
 	DHDCFLAGS += -DSUPPORT_P2P_GO_PS
+	# Debug for DPC Thread watchdog bark
+	DHDCFLAGS += -DDEBUG_DPC_THREAD_WATCHDOG
 	# KSO Attempts count
 	DHDCFLAGS += -DCUSTOM_MAX_KSO_ATTEMPTS=64
 endif
@@ -89,8 +91,10 @@ endif
 	DHDCFLAGS += -DSUPPORT_LINKDOWN_RECOVERY
 	# Enable Dongle Isolation
 	DHDCFLAGS += -DDONGLE_ENABLE_ISOLATION
-  # Enable PKTID AUDIT
-  DHDCFLAGS += -DDHD_PKTID_AUDIT_ENABLED
+	# Enable Firmware Coredump
+	DHDCFLAGS += -DDHD_FW_COREDUMP
+        # Enable PKTID AUDIT
+        DHDCFLAGS += -DDHD_PKTID_AUDIT_ENABLED
 	# Enable Load Balancing support by default.
 	# DHD_LB_RXP - Perform RX Packet processing in parallel
 	# DHD_LB_STATS - To display the Load Blancing statistics
@@ -114,7 +118,7 @@ endif
 # Common feature
 #################
 
-DHDCFLAGS += -DCUSTOMER_HW4 -DCUSTOMER_HW4_PRIVATE_CMD
+DHDCFLAGS += -DCUSTOMER_HW4 -DCUSTOMER_HW4_DEBUG -DCUSTOMER_HW4_PRIVATE_CMD
 DHDCFLAGS += -DWL_CFG80211
 #DHDCFLAGS += -DDHD_INIT_DEFAULT_MEMDUMP
 
@@ -124,10 +128,30 @@ DHDCFLAGS := $(filter-out -DBCMDMA32,$(DHDCFLAGS))
 DHDCFLAGS += -DBCMDMA64OSL
 endif
 
+# Debug
+DHDCFLAGS += -DSIMPLE_MAC_PRINT
+ifeq ($(CONFIG_DEBUG_FS),y)
+DHDCFLAGS += -DDEBUGFS_CFG80211
+endif
 # Enable wakelock for legacy scan
 DHDCFLAGS += -DDHD_USE_SCAN_WAKELOCK
+# Enable wakelock debug function
+DHDCFLAGS += -DDHD_TRACE_WAKE_LOCK
+# Print out kernel panic point of file and line info when assertion happened
+DHDCFLAGS += -DBCMASSERT_LOG
+# Collect Current Assoc/Reject Status for Big Data logging
+DHDCFLAGS += -DDHD_ENABLE_BIGDATA_LOGGING
 # Enable SI utility error log
 DHDCFLAGS += -DSI_ERROR_ENFORCE
+
+# Print 8021X
+DHDCFLAGS += -DDHD_8021X_DUMP
+
+# Print DHCP
+DHDCFLAGS += -DDHD_DHCP_DUMP
+
+# Print ICMP
+DHDCFLAGS += -DDHD_ICMP_DUMP
 
 # VSDB
 DHDCFLAGS += -DVSDB
@@ -226,7 +250,7 @@ DHDCFLAGS += -DPKTPRIO_OVERRIDE
 # Prevent rx thread monopolize
 DHDCFLAGS += -DWAIT_DEQUEUE
 
-# Control PM related value for MFG process(Read from file)
+# Control PM related value for MFG process(Read from file) 
 DHDCFLAGS += -DDHD_PM_CONTROL_FROM_FILE
 
 # Use Android wake lock mechanism
@@ -279,6 +303,15 @@ ifeq ($(CONFIG_WLAN_VHTDISABLE),y)
 DHDCFLAGS += -DDHD_DISABLE_VHTMODE
 endif
 
+# Platform version
+PLATFORM_VERSION=8.0
+
+# Android Version Check from Platform source
+ifneq ($(PLATFORM_VERSION),)
+MAJOR_VERSION := $(shell echo $(PLATFORM_VERSION) | cut -d "." -f 1)
+DHDCFLAGS += -DANDROID_PLATFORM_VERSION=$(MAJOR_VERSION)
+endif
+
 ##############################
 # Android Platform Definition
 ##############################
@@ -321,6 +354,9 @@ DHDCFLAGS += -DAPF
 #Get valid channels on SoftAP
 DHDCFLAGS += -DDHD_GET_VALID_CHANNELS
 
+#Debugaility
+DHDCFLAGS += -DDNGL_EVENT_SUPPORT
+
 # GN4 platform still disabled Lollipop features
 ifeq ($(filter y,$(CONFIG_MACH_UNIVERSAL5433) $(CONFIG_ARCH_APQ8084)),y)
 DHD_ANDROID_OFILES :=$(filter-out wl_cfgvendor.o,$(DHD_ANDROID_OFILES))
@@ -349,6 +385,7 @@ ifneq ($(CONFIG_BCM4361),)
  DHDCFLAGS += -DENABLE_BCN_LI_BCN_WAKEUP
  DHDCFLAGS += -DCUSTOM_BCN_TIMEOUT=6
  DHDCFLAGS += -DSOFTAP_UAPSD_OFF
+ DHDCFLAGS += -DDHD_SSSR_DUMP
 # tput enhancement for common
  DHDCFLAGS += -DUSE_WL_TXBF
  DHDCFLAGS += -DUSE_WL_FRAMEBURST
@@ -395,6 +432,7 @@ endif
   DHDCFLAGS += -DDISABLE_PRUNED_SCAN
 # Remove common feature for BCM4361
   DHDCFLAGS :=$(filter-out -DDISABLE_11H_SOFTAP,$(DHDCFLAGS))
+  DHDCFLAGS += -DDHD_LOG_DUMP
 # Higher rate beacon transmission at softAP
   DHDCFLAGS += -DSUPPORT_AP_HIGHER_BEACONRATE
 # Enhanced radio power save with NOA at softAP
@@ -428,8 +466,22 @@ endif
 # Generate .softap.info
   DHDCFLAGS += -DGEN_SOFTAP_INFO_FILE
 
-  DREAM_NOS_DISCARD_FEATURES := y
+ifneq ($(PLATFORM_VERSION),)
+# DREAM Android N OS should not use below features
+ifeq ($(shell expr $(PLATFORM_VERSION) \< 8.0),1)
+ifneq ($(filter y,$(CONFIG_WLAN_GREAT) $(CONFIG_SEC_GREATQLTE_PROJECT)),y)
+ DREAM_NOS_DISCARD_FEATURES := y
+endif
+endif
 
+# Feature Set used for GREAT N OS and Android O OS
+ifneq ($(DREAM_NOS_DISCARD_FEATURES),y)
+# Debugaility
+  DHDCFLAGS += -DDEBUGABILITY
+  DHDCFLAGS += -DDHD_PKT_LOGGING
+# Debug Wakeup pkt reason
+  DHDCFLAGS += -DDHD_WAKE_STATUS -DDHD_WAKE_RX_STATUS -DDHD_WAKE_EVENT_STATUS
+  DHDCFLAGS += -DDHD_WAKEPKT_DUMP
 # To support CAC
   DHDCFLAGS += -DSUPPORT_SET_CAC
 # LAST ROAM EVENT LOG
@@ -438,19 +490,28 @@ endif
   DHDCFLAGS += -DDHD_USE_SINGLE_NVRAM_FILE
 #STAT REPORT
 #stat report shall be defined only if LINK STAT is defined
-#  DHDCFLAGS += -DSTAT_REPORT
+  DHDCFLAGS += -DSTAT_REPORT
 #define temp static only when SDK doesn't support static memory for STAT REPORT
 #  DHDCFLAGS += -DSTAT_REPORT_TEMP_STATIC
+endif
 
 # RSSI_SUM_REPORT is used over Android O OS only
+ifeq ($(shell expr $(PLATFORM_VERSION) \>= 8.0),1)
 # RSSI Logging
   DHDCFLAGS += -DSUPPORT_RSSI_SUM_REPORT
 # Enable NDO_CONFIG_SUPPORT in HAL
   DHDCFLAGS += -DNDO_CONFIG_SUPPORT
 # changed assoc timeout
   DHDCFLAGS += -DCUSTOM_ASSOC_TIMEOUT=20
+endif
+endif
 
+# Use Legacy dump path
+ifneq ($(USE_LEGACY_DUMP_PATH),)
+  DHDCFLAGS += -DDHD_COMMON_DUMP_PATH="\"/data/media/wifi/log/\""
+else
   DHDCFLAGS += -DDHD_COMMON_DUMP_PATH="\"/data/log/wifi/\""
+endif
 
 # For Samsung factory mode only
 ifeq ($(CONFIG_SEC_FACTORY),y)
@@ -522,6 +583,7 @@ endif
   DHDCFLAGS += -DAPSTA_BLOCK_ARP_DURING_DHCP
  # Use restricted channels on STA/SoftAP concurrent mode
   DHDCFLAGS += -DAPSTA_RESTRICTED_CHANNEL
+  DHDCFLAGS += -DDHD_LOG_DUMP
 # To support CAC
   DHDCFLAGS += -DSUPPORT_SET_CAC
 ifneq ($(CONFIG_WLAN_GRACE),)
@@ -778,6 +840,7 @@ ifeq ($(filter y,$(CONFIG_BCM43454) $(CONFIG_BCM43455) $(CONFIG_BCM43456)),y)
   DRIVER_TYPE = y
 endif
   DHDCFLAGS += -DCUSTOM_PSPRETEND_THR=30
+  DHDCFLAGS += -DDHD_LOG_DUMP
 
   # FCC power limit control on ch12/13.
   #   DHDCFLAGS += -DFCC_PWR_LIMIT_2G
@@ -789,6 +852,8 @@ endif
   DHDCFLAGS += -DMAX_DTIM_ALLOWED_INTERVAL=925
 
 ifneq ($(filter y,$(CONFIG_BCM43455) $(CONFIG_BCM43456)),$(filter m,$(CONFIG_BCM43455) $(CONFIG_BCM43456)))
+# Enable Firmware Coredump
+  DHDCFLAGS += -DDHD_FW_COREDUMP
 ifeq ($(CONFIG_BCMDHD_PREALLOC_MEMDUMP),y)
   DHDCFLAGS += -DDHD_USE_STATIC_MEMDUMP
 endif
@@ -820,6 +885,7 @@ ifneq ($(CONFIG_BCM4335),)
   DHDCFLAGS += -DCUSTOM_AMPDU_BA_WSIZE=64
   DHDCFLAGS += -DCUSTOM_DPC_CPUCORE=0
   DHDCFLAGS += -DPROP_TXSTATUS_VSDB
+# DHDCFLAGS += -DTPUT_DEBUG
 ifeq ($(CONFIG_MACH_JF),y)
   DHDCFLAGS += -DCUSTOM_DEF_TXGLOM_SIZE=32 -DDHD_TXBOUND=32
 endif
@@ -914,6 +980,7 @@ ifneq ($(CONFIG_BCM4343),)
   DHDCFLAGS += -DOKC_SUPPORT
   DHDCFLAGS += -DWLFBT
   DHDCFLAGS += -DWLTDLS -DWLTDLS_AUTO_ENABLE
+  DHDCFLAGS += -DDHD_LOG_DUMP
   DHDCFLAGS += -DDHD_UNSUPPORT_IF_CNTS
 ifeq ($(CONFIG_BCM4343),y)
   DHDCFLAGS += -DENABLE_INSMOD_NO_FW_LOAD
@@ -1126,6 +1193,15 @@ DHDCFLAGS += -DDHD_OF_SUPPORT
 endif
 endif #CONFIG_OF
 
+# DEBUG UART
+ifneq ($(CONFIG_WLAN_GRACE),)
+DHDCFLAGS += -DDHD_DEBUG_UART
+endif
+
+#ifneq ($(CONFIG_SOC_EXYNOS8895),)
+#DHDCFLAGS += -DDHD_DEBUG_UART
+#endif
+
 ifneq ($(CONFIG_ARCH_TEGRA),)
 DHDCFLAGS += -DBCMPCIE_OOB_HOST_WAKE
 DHDCFLAGS := $(filter-out -DDHD_ALLOC_COHERENT_MEM_FROM_ATOMIC_POOL,$(DHDCFLAGS))
@@ -1148,7 +1224,7 @@ DHDCFLAGS += -include "dhd_sec_feature.h"
 
 #EXTRA_LDFLAGS += --strip-debug
 
-EXTRA_CFLAGS += $(DHDCFLAGS)
+EXTRA_CFLAGS += $(DHDCFLAGS) -DDHD_DEBUG
 EXTRA_CFLAGS += -DSRCBASE=\"$(src)\"
 EXTRA_CFLAGS += -I$(src)/include/ -I$(src)/
 EXTRA_CFLAGS += $(call cc-option, -Wunused-but-set-variable)

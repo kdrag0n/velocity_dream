@@ -945,6 +945,8 @@ dhd_update_interface_flow_info(dhd_pub_t *dhdp, uint8 ifindex,
 	if (ifindex >= DHD_MAX_IFS)
 		return;
 
+	DHD_ERROR(("%s: ifindex %u op %u role is %u \n",
+	          __FUNCTION__, ifindex, op, role));
 	if (!dhdp->flowid_allocator) {
 		DHD_ERROR(("%s: Flow ring not intited yet  \n", __FUNCTION__));
 		return;
@@ -966,9 +968,13 @@ dhd_update_interface_flow_info(dhd_pub_t *dhdp, uint8 ifindex,
 			 * interfaces are handled uniformly.
 			 */
 			if_flow_lkup[ifindex].status = TRUE;
+			DHD_INFO(("%s: Mcast Flow ring for ifindex %d role is %d \n",
+			          __FUNCTION__, ifindex, role));
 		}
 	} else	if ((op == WLC_E_IF_DEL) && (role == WLC_E_IF_ROLE_WDS)) {
 		if_flow_lkup[ifindex].status = FALSE;
+		DHD_INFO(("%s: cleanup all Flow rings for ifindex %d role is %d \n",
+		          __FUNCTION__, ifindex, role));
 	}
 	DHD_FLOWID_UNLOCK(dhdp->flowid_lock, flags);
 }
