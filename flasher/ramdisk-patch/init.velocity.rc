@@ -1,6 +1,5 @@
 on init
 	# Boot speed optimization
-	chmod 644 /sys/block/sda/queue/read_ahead_kb
 	write /sys/block/sda/queue/iostats 0
 	write /sys/block/sda/queue/read_ahead_kb 2048
 	write /sys/block/sda/queue/scheduler bfq
@@ -39,8 +38,6 @@ on property:sys.boot_completed=1
 	write /sys/block/mmcblk0/queue/iostats 0
 	write /sys/block/mmcblk0/queue/nr_requests 512
 	write /sys/block/mmcblk0/queue/scheduler deadline
-
-	chmod 644 /sys/block/mmcblk0/queue/read_ahead_kb
 	write /sys/block/mmcblk0/queue/read_ahead_kb 1024
 
 	# Disable printk later to aid debugging during boot
