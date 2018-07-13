@@ -17,4 +17,8 @@ find -type f \( \
 
 cp -rd ./. "/system/"
 
+print "Removing dirty Wi-Fi fix"
+rm -fr "/system/etc/wifi"
+rm -f "/system/vendor/etc/wifi/nvram_mfg.txt_r02j_b0" "/system/vendor/etc/wifi/nvram_net.txt_r02j_b0"
+
 exit 0
