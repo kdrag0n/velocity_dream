@@ -1257,7 +1257,7 @@ cleanup_critical:
 	ni	__SIE_PROG0C+3(%r9),0xfe	# no longer in SIE
 	lctlg	%c1,%c1,__LC_USER_ASCE		# load primary asce
 	larl	%r9,sie_exit			# skip forward to sie_exit
-	BR_R11USE_R14
+	BR_EX	%r14,%r11
 #endif
 
 .Lcleanup_system_call:
