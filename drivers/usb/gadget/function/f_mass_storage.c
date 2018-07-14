@@ -2606,14 +2606,6 @@ static ssize_t file_show(struct device *dev, struct device_attribute *attr,
 	return fsg_show_file(curlun, filesem, buf);
 }
 
-static ssize_t cdrom_show(struct device *dev, struct device_attribute *attr,
-			  char *buf)
-{
-	struct fsg_lun		*curlun = fsg_lun_from_dev(dev);
-
-	return fsg_show_cdrom(curlun, buf);
-}
-
 static ssize_t ro_store(struct device *dev, struct device_attribute *attr,
 			const char *buf, size_t count)
 {
@@ -2640,17 +2632,7 @@ static ssize_t file_store(struct device *dev, struct device_attribute *attr,
 	return fsg_store_file(curlun, filesem, buf, count);
 }
 
-static ssize_t cdrom_store(struct device *dev, struct device_attribute *attr,
-			const char *buf, size_t count)
-{
-	struct fsg_lun		*curlun = fsg_lun_from_dev(dev);
-	struct rw_semaphore	*filesem = dev_get_drvdata(dev);
-
-	return fsg_store_cdrom(curlun, filesem, buf, count);
-}
-
 static DEVICE_ATTR_RW(nofua);
-static DEVICE_ATTR_RW(cdrom);
 /* mode wil be set in fsg_lun_attr_is_visible() */
 static DEVICE_ATTR(ro, 0, ro_show, ro_store);
 static DEVICE_ATTR(file, 0, file_show, file_store);
@@ -2837,7 +2819,6 @@ static struct attribute *fsg_lun_dev_attrs[] = {
 	&dev_attr_ro.attr,
 	&dev_attr_file.attr,
 	&dev_attr_nofua.attr,
-	&dev_attr_cdrom.attr,
 	NULL
 };
 
