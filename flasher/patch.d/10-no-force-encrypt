@@ -9,9 +9,8 @@ sed -i "
 
 if grep -q quota /$fstab; then
 	print "Modified TWRP detected, enabling quota"
-	if ! grep -q quota /$fstab; then
-		sed -i "s/,quota//g" $fstab
-	fi
+else
+	sed -i "s/,quota//g" $fstab
 fi
 
 exit 0
