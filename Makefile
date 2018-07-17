@@ -716,7 +716,7 @@ ifeq ($(cc-name),gcc)
 KBUILD_CFLAGS   += -Ofast
 KBUILD_CFLAGS   += -mtune=cortex-a73.cortex-a53 -mcpu=cortex-a73.cortex-a53+crypto+fp16+crc
 else
-KBUILD_CFLAGS   += -O3
+KBUILD_CFLAGS   += -O3 -fno-signed-zeros -freciprocal-math -ffp-contract=fast
 KBUILD_CFLAGS   += -mtune=cortex-a53 -mcpu=cortex-a53+crypto+fp16+crc
 endif
 endif
