@@ -4,15 +4,10 @@
 # Do not add /bin/... or anything.
 tc_clang=$HOME/code/android/gclang/clang-r328903
 
-# Whether the given clang toolchain is DragonTC.
-# Controls use of optimizations.
-# Value: true or false
-dragontc=false
-
 # Path to the root of the gcc toolchain.
 # Must be recent, or you may encounter problems.
 # Do not add /bin/... or anything.
-tc_gcc=$HOME/code/android/linaro641
+tc_gcc=$HOME/code/android/8tc
 
 # Number of parallel jobs to run
 # This should be set to the number of CPU cores on your system.
@@ -38,7 +33,6 @@ export CLANG_TCHAIN=$CLANG_PREBUILT_BIN/clang
 #export CLANG_VERSION="$(${CLANG_TCHAIN} --version|head -n1|cut -d'(' -f1,4|sed -e 's/[[:space:]]*$//'|sed 's/\(.+\)//')"
 export CLANG_VERSION="$(${CLANG_TCHAIN} --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
 export REAL_COMPILER=clang
-export DRAGONTC=$dragontc
 
 export CFLAGS=""
 export CXXFLAGS=""
