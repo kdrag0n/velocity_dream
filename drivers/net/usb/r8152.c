@@ -5775,7 +5775,8 @@ static int rtl8152_close(struct net_device *netdev)
 		netif_err(tp, drv, tp->netdev, "rtk diag isn't disabled\n");
 		rtk_disable_diag(tp);
 	}
-	napi_disable(&tp->napi);
+	if (!test_bit(RTL8152_UNPLUG, &tp->flags))
+		napi_disable(&tp->napi);
 	pr_info("%s : napi is disabled\n", __func__);
 
 	res = usb_autopm_get_interface(tp->intf);
