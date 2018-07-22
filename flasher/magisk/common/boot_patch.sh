@@ -4,18 +4,25 @@
 # Magisk Boot Image Patcher
 # by topjohnwu
 #
+# Usage: sh boot_patch.sh <bootimage>
+#
+# The following additional flags can be set in environment variables:
+# KEEPVERITY, KEEPFORCEENCRYPT, HIGHCOMP
+#
 # This script should be placed in a directory with the following files:
 #
-# File name       type      Description
+# File name          Type      Description
 #
-# boot_patch.sh   script    A script to patch boot. Expect path to boot image as parameter.
-#               (this file) The script will use binaries and files in its same directory
-#                           to complete the patching process
-# monogisk        binary    The monolithic binary to replace /init
-# magiskboot      binary    A tool to unpack boot image, decompress ramdisk, extract ramdisk
-#                           , and patch the ramdisk for Magisk support
-# chromeos        folder    This folder should store all the utilities and keys to sign
-#               (optional)  a chromeos device, used in the tablet Pixel C
+# boot_patch.sh      script    A script to patch boot. Expect path to boot image as parameter.
+#                  (this file) The script will use binaries and files in its same directory
+#                              to complete the patching process
+# util_functions.sh  script    A script which hosts all functions requires for this script
+#                              to work properly
+# magiskinit         binary    The binary to replace /init, which has the magisk binary embedded
+# magiskboot         binary    A tool to unpack boot image, decompress ramdisk, extract ramdisk,
+#                              and patch the ramdisk for Magisk support
+# chromeos           folder    This folder should store all the utilities and keys to sign
+#                  (optional)  a chromeos device. Used for Pixel C
 #
 # If the script is not running as root, then the input boot image should be a stock image
 # or have a backup included in ramdisk internally, since we cannot access the stock boot
@@ -27,21 +34,11 @@
 ##########################################################################################
 
 # Pure bash dirname implementation
-dirname_wrap() {
+getdir() {
   case "$1" in
-    */*)
-      dir=${1%/*}
-      [ -z $dir ] && echo "/" || echo $dir
-      ;;
-    *)
-      echo "."
-      ;;
+    */*) dir=${1%/*}; [ -z $dir ] && echo "/" || echo $dir ;;
+    *) echo "." ;;
   esac
-}
-
-# Pure bash basename implementation
-basename_wrap() {
-  echo ${1##*/}
 }
 
 ##########################################################################################
@@ -50,27 +47,18 @@ basename_wrap() {
 
 if [ -z $SOURCEDMODE ]; then
   # Switch to the location of the script file
-  cd "`dirname_wrap "${BASH_SOURCE:-$0}"`"
+  cd "`getdir "${BASH_SOURCE:-$0}"`"
   # Load utility functions
   . ./util_functions.sh
 fi
 
 BOOTIMAGE="$1"
-
 [ -e "$BOOTIMAGE" ] || abort "$BOOTIMAGE does not exist!"
 
-# Presets
+# Flags
 [ -z $KEEPVERITY ] && KEEPVERITY=false
+[ -z $KEEPFORCEENCRYPT ] && KEEPFORCEENCRYPT=false
 [ -z $HIGHCOMP ] && HIGHCOMP=false
-
-if [ -z $KEEPFORCEENCRYPT ]; then
-  if [ "`getprop ro.crypto.state`" = "encrypted" ]; then
-    KEEPFORCEENCRYPT=true
-    ui_print "- Encrypted data detected, keep forceencrypt"
-  else
-    KEEPFORCEENCRYPT=false
-  fi
-fi
 
 chmod -R 755 .
 
@@ -81,18 +69,21 @@ chmod -R 755 .
 # Unpack
 ##########################################################################################
 
+CHROMEOS=false
+
+ui_print "- Unpacking boot image"
 ./magiskboot --unpack "$BOOTIMAGE"
 
 case $? in
   1 )
-    abort " ! Unable to unpack boot image"
+    abort "! Unable to unpack boot image"
     ;;
   2 )
     HIGHCOMP=true
     ;;
   3 )
     ui_print "- ChromeOS boot image detected"
-    exit 1
+    CHROMEOS=true
     ;;
   4 )
     ui_print "! Sony ELF32 format detected"
@@ -108,10 +99,13 @@ esac
 ##########################################################################################
 
 # Test patch status and do restore, after this section, ramdisk.cpio.orig is guaranteed to exist
+ui_print "- Checking ramdisk status"
 MAGISK_PATCHED=false
 ./magiskboot --cpio ramdisk.cpio test
 case $? in
   0 )  # Stock boot
+    ui_print "- Stock boot image detected"
+    ui_print "- Backing up stock boot image"
     SHA1=`./magiskboot --sha1 "$BOOTIMAGE" 2>/dev/null`
     STOCKDUMP=stock_boot_${SHA1}.img.gz
     ./magiskboot --compress "$BOOTIMAGE" $STOCKDUMP
@@ -126,13 +120,13 @@ case $? in
     HIGHCOMP=true
     ;;
   3 ) # Other patched
-    ui_print " ! Boot image patched by other programs"
-    abort " ! Please restore stock boot image"
+    ui_print "! Boot image patched by other programs"
+    abort "! Please restore stock boot image"
     ;;
 esac
 
 if $MAGISK_PATCHED; then
-  ui_print " • Magisk patched image detected"
+  ui_print "- Magisk patched image detected"
   # Find SHA1 of stock boot image
   [ -z $SHA1 ] && SHA1=`./magiskboot --cpio ramdisk.cpio sha1 2>/dev/null`
   ./magiskboot --cpio ramdisk.cpio restore
@@ -140,18 +134,18 @@ if $MAGISK_PATCHED; then
 fi
 
 if $HIGHCOMP; then
-  ui_print " ! Insufficient boot partition size detected"
-  ui_print " • Enable high compression mode"
+  ui_print "! Insufficient boot partition size detected"
+  ui_print "- Enable high compression mode"
 fi
 
 ##########################################################################################
 # Ramdisk patches
 ##########################################################################################
 
-ui_print " • Patching ramdisk"
+ui_print "- Patching ramdisk"
 
 ./magiskboot --cpio ramdisk.cpio \
-'add 750 init magiskinit' \
+"add 750 init magiskinit" \
 "magisk ramdisk.cpio.orig $HIGHCOMP $KEEPVERITY $KEEPFORCEENCRYPT $SHA1"
 
 rm -f ramdisk.cpio.orig
@@ -160,8 +154,9 @@ rm -f ramdisk.cpio.orig
 # Binary patches
 ##########################################################################################
 
-if ! $KEEPVERITY && [ -f dtb ]; then
-  ./magiskboot --dtb-patch dtb && ui_print "- Patching fstab in dtb to remove dm-verity"
+if ! $KEEPVERITY; then
+  [ -f dtb ] && ./magiskboot --dtb-patch dtb && ui_print "- Removing dm(avb)-verity in dtb"
+  [ -f extra ] && ./magiskboot --dtb-patch extra && ui_print "- Removing dm(avb)-verity in extra-dtb"
 fi
 
 if [ -f kernel ]; then
@@ -180,6 +175,10 @@ fi
 # Repack and flash
 ##########################################################################################
 
-./magiskboot --repack "$BOOTIMAGE" || abort " ! Unable to repack boot image!"
+ui_print "- Repacking boot image"
+./magiskboot --repack "$BOOTIMAGE" || abort "! Unable to repack boot image!"
+
+# Sign chromeos boot
+$CHROMEOS && sign_chromeos
 
 ./magiskboot --cleanup
