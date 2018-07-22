@@ -108,7 +108,7 @@ mount_partitions() {
       VENDORBLOCK=`find_block vendor$SLOT`
       mount -t ext4 -o ro $VENDORBLOCK /vendor
     fi
-    is_mounted /vendor || abort "! Cannot mount /vendor"
+    is_mounted /vendor || abort " ! Cannot mount /vendor"
   fi
 }
 
@@ -241,7 +241,7 @@ is_mounted() {
 
 remove_system_su() {
   if [ -f /system/bin/su -o -f /system/xbin/su ] && [ ! -f /su/bin/su ]; then
-    ui_print "- Removing system installed root"
+    ui_print " • Removing system installed root"
     mount -o rw,remount /system
     # SuperSU
     if [ -e /system/bin/.ext/.su ]; then
@@ -384,7 +384,7 @@ check_filesystem() {
 
 mount_snippet() {
   MAGISKLOOP=`$MAGISKBIN/magisk imgtool mount $IMG $MOUNTPATH`
-  is_mounted $MOUNTPATH || abort "! $IMG mount failed..."
+  is_mounted $MOUNTPATH || abort " ! $IMG mount failed..."
 }
 
 mount_magisk_img() {

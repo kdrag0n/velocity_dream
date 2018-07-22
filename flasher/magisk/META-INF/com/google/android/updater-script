@@ -21,7 +21,7 @@ umask 022
 OUTFD=$2
 
 if [ ! -f $COMMONDIR/util_functions.sh ]; then
-  echo "! Unable to extract zip file!"
+  echo " ! Unable to extract zip file!"
   exit 1
 fi
 
@@ -36,7 +36,7 @@ setup_flashable
 
 ui_print " • Magisk v$MAGISK_VER Installer"
 
-is_mounted /data || mount /data || is_mounted /cache || mount /cache || abort "! Unable to mount partitions"
+is_mounted /data || mount /data || is_mounted /cache || mount /cache || abort " ! Unable to mount partitions"
 mount_partitions
 
 find_boot_image
@@ -44,13 +44,13 @@ find_dtbo_image
 
 get_flags
 
-[ -z $BOOTIMAGE ] && abort "! Unable to detect target image"
+[ -z $BOOTIMAGE ] && abort " ! Unable to detect target image"
 [ -z $DTBOIMAGE ] || ui_print "- DTBO image: $DTBOIMAGE"
 
 # Detect version and architecture
 api_level_arch_detect
 
-[ $API -lt 21 ] && abort "! Magisk is only for Lollipop and above (5.0+) (SDK 21+)"
+[ $API -lt 21 ] && abort " ! Magisk is only for Lollipop and above (5.0+) (SDK 21+)"
 
 BINDIR=$INSTALLER/$ARCH32
 chmod -R 755 $BINDIR
