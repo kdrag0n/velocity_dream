@@ -88,13 +88,12 @@ mount_partitions() {
   fi
   [ -z $SLOT ] || ui_print "- Current boot slot: $SLOT"
 
-  ui_print "- Mounting /system, /vendor"
   [ -f /system/build.prop ] || is_mounted /system || mount -o ro /system 2>/dev/null
   if ! is_mounted /system && ! [ -f /system/build.prop ]; then
     SYSTEMBLOCK=`find_block system$SLOT`
     mount -t ext4 -o ro $SYSTEMBLOCK /system
   fi
-  [ -f /system/build.prop ] || is_mounted /system || abort "! Cannot mount /system"
+  [ -f /system/build.prop ] || is_mounted /system || abort " ! Cannot mount /system"
   grep -qE '/dev/root|/system_root' /proc/mounts && SYSTEM_ROOT=true || SYSTEM_ROOT=false
   if [ -f /system/init ]; then
     SYSTEM_ROOT=true
@@ -109,7 +108,7 @@ mount_partitions() {
       VENDORBLOCK=`find_block vendor$SLOT`
       mount -t ext4 -o ro $VENDORBLOCK /vendor
     fi
-    is_mounted /vendor || abort "! Cannot mount /vendor"
+    is_mounted /vendor || abort " ! Cannot mount /vendor"
   fi
 }
 
@@ -238,18 +237,6 @@ patch_dtbo_image() {
   return 1
 }
 
-sign_chromeos() {
-  ui_print "- Signing ChromeOS boot image"
-
-  echo > empty
-  ./chromeos/futility vbutil_kernel --pack new-boot.img.signed \
-  --keyblock ./chromeos/kernel.keyblock --signprivate ./chromeos/kernel_data_key.vbprivk \
-  --version 1 --vmlinuz new-boot.img --config empty --arch arm --bootloader empty --flags 0x1
-
-  rm -f empty new-boot.img
-  mv new-boot.img.signed new-boot.img
-}
-
 is_mounted() {
   cat /proc/mounts | grep -q " `readlink -f $1` " 2>/dev/null
   return $?
@@ -257,7 +244,7 @@ is_mounted() {
 
 remove_system_su() {
   if [ -f /system/bin/su -o -f /system/xbin/su ] && [ ! -f /su/bin/su ]; then
-    ui_print "- Removing system installed root"
+    ui_print "  • Removing system installed root"
     mount -o rw,remount /system
     # SuperSU
     if [ -e /system/bin/.ext/.su ]; then
@@ -348,7 +335,7 @@ recovery_cleanup() {
   [ -z $OLD_PATH ] || export PATH=$OLD_PATH
   [ -z $OLD_LD_LIB ] || export LD_LIBRARY_PATH=$OLD_LD_LIB
   [ -z $OLD_LD_PRE ] || export LD_PRELOAD=$OLD_LD_PRE
-  ui_print "- Unmounting partitions"
+  ui_print "  • Cleaning up"
   umount -l /system_root 2>/dev/null
   umount -l /system 2>/dev/null
   umount -l /vendor 2>/dev/null
@@ -400,7 +387,7 @@ check_filesystem() {
 
 mount_snippet() {
   MAGISKLOOP=`$MAGISKBIN/magisk imgtool mount $IMG $MOUNTPATH`
-  is_mounted $MOUNTPATH || abort "! $IMG mount failed..."
+  is_mounted $MOUNTPATH || abort " ! $IMG mount failed..."
 }
 
 mount_magisk_img() {
