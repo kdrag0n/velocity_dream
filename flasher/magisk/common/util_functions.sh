@@ -20,9 +20,6 @@ MAGISKBIN=/data/adb/magisk
 [ -z $MOUNTPATH ] && MOUNTPATH=/sbin/.core/img
 [ -z $IMG ] && IMG=/data/adb/magisk.img
 
-BOOTSIGNER="/system/bin/dalvikvm -Xnodex2oat -Xnoimage-dex2oat -cp \$APK com.topjohnwu.magisk.utils.BootSigner"
-BOOTSIGNED=false
-
 get_outfd() {
   if [ -z $OUTFD ] || readlink /proc/$$/fd/$OUTFD | grep -q /tmp; then
     # We will have to manually find out OUTFD
@@ -76,13 +73,12 @@ mount_partitions() {
   fi
   [ -z $SLOT ] || ui_print "- Current boot slot: $SLOT"
 
-  ui_print "- Mounting /system, /vendor"
   [ -f /system/build.prop ] || is_mounted /system || mount -o ro /system 2>/dev/null
   if ! is_mounted /system && ! [ -f /system/build.prop ]; then
     SYSTEMBLOCK=`find_block system$SLOT`
     mount -t ext4 -o ro $SYSTEMBLOCK /system
   fi
-  [ -f /system/build.prop ] || is_mounted /system || abort "! Cannot mount /system"
+  [ -f /system/build.prop ] || is_mounted /system || abort " ! Cannot mount /system"
   cat /proc/mounts | grep -E '/dev/root|/system_root' >/dev/null && SYSTEM_ROOT=true || SYSTEM_ROOT=false
   if [ -f /system/init ]; then
     SYSTEM_ROOT=true
@@ -193,20 +189,14 @@ flash_boot_image() {
     *.gz) COMMAND="gzip -d < '$1'";;
     *)    COMMAND="cat '$1'";;
   esac
-  if $BOOTSIGNED; then
-    SIGNCOM="$BOOTSIGNER -sign"
-    ui_print "- Sign boot image with test keys"
-  else
-    SIGNCOM="cat -"
-  fi
   case "$2" in
     /dev/block/*)
-      ui_print "- Flashing new boot image"
-      eval $COMMAND | eval $SIGNCOM | cat - /dev/zero 2>/dev/null | dd of="$2" bs=4096 2>/dev/null
+      ui_print " • Flashing new boot image"
+      eval $COMMAND | cat - /dev/zero 2>/dev/null | dd of="$2" bs=4096 2>/dev/null
       ;;
     *)
       ui_print "- Storing new boot image"
-      eval $COMMAND | eval $SIGNCOM | dd of="$2" bs=4096 2>/dev/null
+      eval $COMMAND | dd of="$2" bs=4096 2>/dev/null
       ;;
   esac
 }
@@ -226,18 +216,6 @@ patch_dtbo_image() {
     fi
   fi
   return 1
-}
-
-sign_chromeos() {
-  ui_print "- Signing ChromeOS boot image"
-
-  echo > empty
-  ./chromeos/futility vbutil_kernel --pack new-boot.img.signed \
-  --keyblock ./chromeos/kernel.keyblock --signprivate ./chromeos/kernel_data_key.vbprivk \
-  --version 1 --vmlinuz new-boot.img --config empty --arch arm --bootloader empty --flags 0x1
-
-  rm -f empty new-boot.img
-  mv new-boot.img.signed new-boot.img
 }
 
 is_mounted() {
@@ -341,7 +319,7 @@ recovery_cleanup() {
   [ -z $OLD_PATH ] || export PATH=$OLD_PATH
   [ -z $OLD_LD_LIB ] || export LD_LIBRARY_PATH=$OLD_LD_LIB
   [ -z $OLD_LD_PRE ] || export LD_PRELOAD=$OLD_LD_PRE
-  ui_print "- Unmounting partitions"
+  ui_print " • Cleaning up"
   umount -l /system_root 2>/dev/null
   umount -l /system 2>/dev/null
   umount -l /vendor 2>/dev/null
