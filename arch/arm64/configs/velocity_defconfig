@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm64 4.4.140 Kernel Configuration
+# Linux/arm64 4.4.141 Kernel Configuration
 #
 CONFIG_ARM64=y
 CONFIG_64BIT=y
@@ -174,7 +174,7 @@ CONFIG_MULTIUSER=y
 # CONFIG_SGETMASK_SYSCALL is not set
 CONFIG_SYSFS_SYSCALL=y
 # CONFIG_SYSCTL_SYSCALL is not set
-# CONFIG_KALLSYMS is not set
+CONFIG_KALLSYMS=y
 CONFIG_PRINTK=y
 CONFIG_BUG=y
 # CONFIG_ELF_CORE is not set
