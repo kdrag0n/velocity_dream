@@ -7,7 +7,7 @@ tc_clang=$HOME/code/android/gclang/clang-r328903
 # Path to the root of the gcc toolchain.
 # Must be recent, or you may encounter problems.
 # Do not add /bin/... or anything.
-tc_gcc=$HOME/code/android/8tc
+tc_gcc=$HOME/code/android/gcc811
 
 # Number of parallel jobs to run
 # This should be set to the number of CPU cores on your system.
