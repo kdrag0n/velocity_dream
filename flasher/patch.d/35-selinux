@@ -2,7 +2,7 @@
 
 . "$env"
 
-if grep -q Sac23_Rom /system/build.prop; then
+if grep -q Sac23 /system/build.prop; then
 	print "Sac23 ROM detected, forcing permissive SELinux"
 	exit 0
 fi
