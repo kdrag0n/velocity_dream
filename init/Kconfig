@@ -1411,9 +1411,6 @@ endchoice
 
 config LTO_MENU
 	bool "Enable gcc link time optimization (LTO)"
-	# Only tested on X86 for now. For other architectures you likely
-	# have to fix some things first, like adding asmlinkages etc.
-	depends on X86
 	# lto does not support excluding flags for specific files
 	# right now. Can be removed if that is fixed.
 	depends on !FUNCTION_TRACER
