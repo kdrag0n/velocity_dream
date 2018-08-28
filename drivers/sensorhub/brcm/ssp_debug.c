@@ -222,6 +222,7 @@ int print_mcu_debug(char *pchRcvDataFrame, int *pDataIdx,
 		int iRcvDataFrameLength)
 {
 	int iLength = 0;
+	int cur = *pDataIdx;
 
 	memcpy(&iLength, pchRcvDataFrame + *pDataIdx, sizeof(u16));
 	*pDataIdx += sizeof(u16);

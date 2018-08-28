@@ -2490,6 +2490,7 @@ static int madera_jack_present(struct madera_extcon_info *info,
 static irqreturn_t madera_hpdet_handler(int irq, void *data)
 {
 	struct madera_extcon_info *info = data;
+	struct madera *madera = info->madera;
 	int ret;
 
 	madera_jds_cancel_timeout(info);
@@ -2532,6 +2533,7 @@ static void madera_micd_handler(struct work_struct *work)
 	struct madera_extcon_info *info =
 		container_of(work, struct madera_extcon_info,
 			     micd_detect_work.work);
+	struct madera *madera = info->madera;
 	enum madera_accdet_mode mode;
 	int ret;
 
@@ -2589,6 +2591,7 @@ spurious:
 static irqreturn_t madera_micdet(int irq, void *data)
 {
 	struct madera_extcon_info *info = data;
+	struct madera *madera = info->madera;
 	int debounce = info->pdata->micd_detect_debounce_ms;
 
 	cancel_delayed_work_sync(&info->micd_detect_work);

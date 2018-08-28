@@ -3,7 +3,6 @@
 #include <linux/platform_device.h>
 #include <linux/pm_qos.h>
 #include <linux/slab.h>
-#include <linux/sched.h>
 
 #include <soc/samsung/acpm_ipc_ctrl.h>
 #include <soc/samsung/tmu.h>
