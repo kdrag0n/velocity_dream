@@ -1,0 +1,52 @@
+on early-init
+	
+on init
+
+    mkdir /mnt/shell 0750 shell shell
+
+    mkdir /mnt/shell/privatemode 0700 system system
+    mkdir /mnt/shell/privatemode/default 0700 system system
+    mkdir /mnt/shell/privatemode/read 0700 system system
+    mkdir /mnt/shell/privatemode/write 0700 system system
+    
+    mkdir /mnt/shell/private_default 0700 system system
+    mkdir /mnt/shell/private_read 0700 system system
+    mkdir /mnt/shell/private_write 0700 system system
+    
+    # SDP USER 0, SECURE FS
+    mkdir /mnt/shell/enc_emulated 0700 system system
+    mkdir /mnt/shell/enc_media 0700 system system
+    mkdir /mnt/runtime/default/enc_emulated 0755 system system
+    mkdir /mnt/runtime/read/enc_emulated 0755 system system
+    mkdir /mnt/runtime/write/enc_emulated 0755 system system
+
+    chown system system /dev/dek_evt
+    chmod 600 /dev/dek_evt
+
+    chown system 8001 /dev/dek_req
+    chmod 660 /dev/dek_req
+
+    chown system 8001 /dev/dek_kek
+    chmod 660 /dev/dek_kek
+
+    chown system 8001 /dev/sdp_mm
+    chmod 660 /dev/sdp_mm
+
+    chown system 8001 /dev/sdp_dlp
+    chmod 660 /dev/sdp_dlp
+
+on post-fs-data
+
+    # SDP USER 0, SECURE FS
+    mkdir /data/enc_user 0771 system system
+
+    export ENC_EMULATED_STORAGE_TARGET /storage/enc_emulated
+
+on boot
+
+service sdp_cryptod /system/bin/sdp_cryptod
+    class main
+    socket sdp stream 0660 system system
+    user system
+    group system
+

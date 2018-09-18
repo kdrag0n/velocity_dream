@@ -2,6 +2,35 @@
 
 . "$env"
 
+if grep -qi GoogleWiz /system/build.prop; then
+	print "GoogleWiz ROM detected, applying patches"
+	cd "$tmp/minimal-patch"
+
+	# fix permissions of patch files
+	chmod -R 0755 .
+
+	find -type f \( \
+		-name "*.rc" ! -name "ueventd.*" \
+		\) -exec chmod 0750 {} \;
+
+	find -type f \( \
+		-name "*.xml" -o -name "*.do" -o -name "*.pem" -o -name "*.vtab" -o \
+		-name "fstab.*" -o -name "*.prop" -o -name "*_contexts" -o \
+		-name "ueventd.*" -o -name "sepolicy" -o -name "sepolicy_version" \
+		\) -exec chmod 0644 {} \;
+
+	# default.prop
+	setprop persist.security.ams.enforcing 1
+	# fstab.samsungexynos8895
+	sed -i '/HIDDEN/d' "$ramdisk/$fstab"
+	sed -i '/MISC/d' "$ramdisk/$fstab"
+	# init.container.rc, init.environ.rc, init.samsungexynos8895.rc
+	cp -rf ./. "$ramdisk/"
+	# init.samsungexynos8895.rc
+	remove_service umount_service
+	remove_service swapon
+fi
+
 cd "$ramdisk_patch" && [ "$(ls)" ] || exit 0
 
 # fix permissions of patch files
