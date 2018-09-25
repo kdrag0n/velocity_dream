@@ -128,3 +128,20 @@ mc() {
 cf() {
     make nconfig
 }
+
+# Because we don't have proper git commit history...
+upstream() {
+    curl https://cdn.kernel.org/pub/linux/kernel/v4.x/incr/patch-4.4.$(($1 - 1))-$1.xz | xz -d | git apply --reject
+    git add .
+    find . -type f -name '*.rej' -exec git reset HEAD {} \;
+
+    echo -n "$1" > .upstream_ver
+    echo 'Patch applied. When you are finished fixing conflicts (.rejs) and have verified'
+    echo 'that the kernel boots, run upsfinish.'
+}
+upsfinish() {
+    find . -type f -name '*.rej' -exec rm -f {} \;
+    git add .
+    git commit -sm "treewide: update to Linux 4.4.$(cat .upstream_ver)"
+    rm -f .upstream_ver
+}
