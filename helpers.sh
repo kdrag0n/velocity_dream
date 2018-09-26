@@ -1,8 +1,8 @@
 _RELEASE=0
 
 mkzip() {
-    build_dtb
-    cp arch/arm64/boot/Image flasher
+    cp -f arch/arm64/boot/dtb{,2}.img flasher/
+    cp -f arch/arm64/boot/Image flasher/
     [ $_RELEASE -eq 0 ] && rm -f flasher/.rel
     [ $_RELEASE -eq 1 ] && touch flasher/.rel
 
@@ -11,7 +11,7 @@ mkzip() {
     rm -f "$fn"
     rm -fr /tmp/velozip
     mkdir /tmp/velozip
-    cp -r flasher/META-INF /tmp/velozip
+    cp -fr flasher/META-INF /tmp/velozip
     echo "  XZ      arc.xz"
     pushd flasher
     tar c --owner=0 --group=0 * | xz -zcT $(($(cat /proc/cpuinfo|grep processor|wc -l)-2)) > /tmp/velozip/arc.xz
@@ -27,20 +27,6 @@ mkzip() {
 build_dtb() {
     do_dtb flasher/dtb.img dream/{09,10}
     do_dtb flasher/dtb2.img dream2/{09,10}
-}
-
-do_dtb() {
-    rm -fr /tmp/kdt{s,b}
-    mkdir /tmp/kdt{s,b}
-
-    echo "  DTB     $(dirname $2)"
-    for dt in ${@:2}; do
-        filename="$(dirname $dt)_$(basename $dt .dts)"
-        ${CROSS_COMPILE}cpp -nostdinc -undef -x assembler-with-cpp -I include arch/arm64/boot/dts/exynos/${dt}.dts > /tmp/kdts/${filename}.dts
-        scripts/dtc/dtc -p 0 -i arch/arm64/boot/dts/exynos -O dtb -o /tmp/kdtb/${filename}.dtb /tmp/kdts/${filename}.dts
-    done
-
-    scripts/dtbTool/dtbTool -o $1 -d /tmp/kdtb -s 2048 > /dev/null
 }
 
 rel() {

@@ -110,7 +110,7 @@ endif
 KBUILD_DTBS	:= dtbs
 
 ifeq ($(CONFIG_EXYNOS_DTBTOOL),y)
-KBUILD_DTBS	+= dtb.img
+KBUILD_DTBS	+= dtb.img dtb2.img
 endif
 
 all:	$(KBUILD_IMAGE) $(KBUILD_DTBS)
@@ -129,7 +129,7 @@ zinstall install: vmlinux
 %.dtb: scripts
 	$(Q)$(MAKE) $(build)=$(boot)/dts $(boot)/dts/$@
 
-PHONY += dtbs dtbs_install dtb.img
+PHONY += dtbs dtbs_install dtb.img dtb2.img
 
 dtbs: prepare scripts
 	$(Q)$(MAKE) $(build)=$(boot)/dts
@@ -137,7 +137,7 @@ dtbs: prepare scripts
 dtbs_install:
 	$(Q)$(MAKE) $(dtbinst)=$(boot)/dts
 
-dtb.img: prepare scripts dtbs
+dtb.img dtb2.img: prepare scripts dtbs
 	$(Q)$(MAKE) $(build)=$(boot) $(boot)/$@
 
 Image-dtb Image.gz-dtb: vmlinux scripts dtbs
@@ -156,6 +156,7 @@ define archhelp
   echo  '* Image.gz      - Compressed kernel image (arch/$(ARCH)/boot/Image.gz)'
   echo  '  Image         - Uncompressed kernel image (arch/$(ARCH)/boot/Image)'
   echo  '  dtb.img       - Build device tree image (arch/$(ARCH)/boot/dtb.img)'
+  echo  '  dtb2.img      - Build plus device tree image (arch/$(ARCH)/boot/dtb.img)'
   echo  '* dtbs          - Build device tree blobs for enabled boards'
   echo  '  dtbs_install  - Install dtbs to $(INSTALL_DTBS_PATH)'
   echo  '  install       - Install uncompressed kernel'
