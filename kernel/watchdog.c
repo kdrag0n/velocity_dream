@@ -360,6 +360,7 @@ static void watchdog_check_hardlockup_other_cpu(void)
 			return;
 
 		if (hardlockup_panic) {
+			exynos_ss_set_hardlockup(hardlockup_panic);
 			atomic_notifier_call_chain(&hardlockup_notifier_list, 0, (void *)&next_cpu);
 			panic("Watchdog detected hard LOCKUP on cpu %u", next_cpu);
 		} else {
@@ -388,8 +389,6 @@ static int is_softlockup(unsigned long touch_ts)
 }
 
 #ifdef CONFIG_HARDLOCKUP_DETECTOR_NMI
-
-static DEFINE_RAW_SPINLOCK(watchdog_output_lock);
 
 static struct perf_event_attr wd_hw_attr = {
 	.type		= PERF_TYPE_HARDWARE,
@@ -424,13 +423,6 @@ static void watchdog_overflow_callback(struct perf_event *event,
 		/* only print hardlockups once */
 		if (__this_cpu_read(hard_watchdog_warn) == true)
 			return;
-		/*
-		 * If early-printk is enabled then make sure we do not
-		 * lock up in printk() and kill console logging:
-		 */
-		printk_kill();
-
-		raw_spin_lock(&watchdog_output_lock);
 
 		pr_emerg("Watchdog detected hard LOCKUP on cpu %d", this_cpu);
 		print_modules();
@@ -448,9 +440,9 @@ static void watchdog_overflow_callback(struct perf_event *event,
 				!test_and_set_bit(0, &hardlockup_allcpu_dumped))
 			trigger_allbutself_cpu_backtrace();
 
-		raw_spin_unlock(&watchdog_output_lock);
 		if (hardlockup_panic) {
-			nmi_panic(regs, "Hard LOCKUP");
+			exynos_ss_set_hardlockup(hardlockup_panic);
+			panic("Hard LOCKUP");
 		}
 
 		__this_cpu_write(hard_watchdog_warn, true);
@@ -480,6 +472,9 @@ static enum hrtimer_restart watchdog_timer_fn(struct hrtimer *hrtimer)
 	struct pt_regs *regs = get_irq_regs();
 	int duration;
 	int softlockup_all_cpu_backtrace = sysctl_softlockup_all_cpu_backtrace;
+
+	/* try to enable log_kevent of exynos-snapshot if log_kevent was off because of rcu stall */
+	exynos_ss_try_enable("log_kevent", NSEC_PER_SEC * 15);
 
 	/* kick the hardlockup detector */
 	watchdog_interrupt_count();
@@ -607,7 +602,6 @@ static void watchdog_enable(unsigned int cpu)
 	/* kick off the timer for the hardlockup detector */
 	hrtimer_init(hrtimer, CLOCK_MONOTONIC, HRTIMER_MODE_REL);
 	hrtimer->function = watchdog_timer_fn;
-	hrtimer->irqsafe = 1;
 
 	/* Enable the perf event */
 	watchdog_nmi_enable(cpu);
