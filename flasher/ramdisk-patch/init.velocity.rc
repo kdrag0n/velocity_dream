@@ -31,6 +31,8 @@ on property:sys.boot_completed=1
 
 	# Virtual Memory
 	write /proc/sys/vm/vfs_cache_pressure 80
+	write /proc/sys/vm/dirty_ratio 10
+	write /proc/sys/vm/dirty_background_ratio 5
 
 	# Storage
 	write /sys/block/sda/queue/read_ahead_kb 512
