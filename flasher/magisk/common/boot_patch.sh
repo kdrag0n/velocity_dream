@@ -68,23 +68,26 @@ chmod -R 755 .
 # Unpack
 ##########################################################################################
 
+CHROMEOS=false
+
+ui_print "- Unpacking boot image"
 ./magiskboot --unpack "$BOOTIMAGE"
 
 case $? in
   1 )
-    abort " ! Unable to unpack boot image"
+    abort "! Unable to unpack boot image"
     ;;
   2 )
     ui_print "- ChromeOS boot image detected"
-    exit 1
+    CHROMEOS=true
     ;;
   3 )
-    ui_print " ! Sony ELF32 format detected"
-    abort " ! Please use BootBridge from @AdrianDC to flash Magisk"
+    ui_print "! Sony ELF32 format detected"
+    abort "! Please use BootBridge from @AdrianDC to flash Magisk"
     ;;
   4 )
-    ui_print " ! Sony ELF64 format detected"
-    abort " ! Stock kernel cannot be patched, please use a custom kernel"
+    ui_print "! Sony ELF64 format detected"
+    abort "! Stock kernel cannot be patched, please use a custom kernel"
 esac
 
 ##########################################################################################
@@ -92,25 +95,27 @@ esac
 ##########################################################################################
 
 # Test patch status and do restore, after this section, ramdisk.cpio.orig is guaranteed to exist
-MAGISK_PATCHED=false
+ui_print "- Checking ramdisk status"
 ./magiskboot --cpio ramdisk.cpio test
 case $? in
   0 )  # Stock boot
+    ui_print "- Stock boot image detected"
+    ui_print "- Backing up stock boot image"
     SHA1=`./magiskboot --sha1 "$BOOTIMAGE" 2>/dev/null`
     STOCKDUMP=stock_boot_${SHA1}.img.gz
     ./magiskboot --compress "$BOOTIMAGE" $STOCKDUMP
     cp -af ramdisk.cpio ramdisk.cpio.orig
     ;;
   1 )  # Magisk patched
-    ui_print ui_print " • Magisk patched image detected"
+    ui_print "- Magisk patched boot image detected"
     # Find SHA1 of stock boot image
     [ -z $SHA1 ] && SHA1=`./magiskboot --cpio ramdisk.cpio sha1 2>/dev/null`
     ./magiskboot --cpio ramdisk.cpio restore
     cp -af ramdisk.cpio ramdisk.cpio.orig
     ;;
   2 ) # Other patched
-    ui_print " ! Boot image patched by unsupported programs"
-    abort " ! Please restore stock boot image"
+    ui_print "! Boot image patched by unsupported programs"
+    abort "! Please restore stock boot image"
     ;;
 esac
 
@@ -118,7 +123,7 @@ esac
 # Ramdisk patches
 ##########################################################################################
 
-ui_print " • Patching ramdisk"
+ui_print "- Patching ramdisk"
 
 ./magiskboot --cpio ramdisk.cpio \
 "add 750 init magiskinit" \
@@ -161,6 +166,10 @@ fi
 # Repack and flash
 ##########################################################################################
 
-./magiskboot --repack "$BOOTIMAGE" || abort " ! Unable to repack boot image!"
+ui_print "- Repacking boot image"
+./magiskboot --repack "$BOOTIMAGE" || abort "! Unable to repack boot image!"
+
+# Sign chromeos boot
+$CHROMEOS && sign_chromeos
 
 ./magiskboot --cleanup
