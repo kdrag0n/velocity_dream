@@ -44,6 +44,8 @@ on property:persist.spectrum.profile=2
 	write /sys/devices/system/cpu/cpu4/cpufreq/scaling_governor cultivation
 	write /sys/devices/system/cpu/cpu4/cpufreq/scaling_min_freq 741000
 	write /sys/devices/system/cpu/cpu4/cpufreq/scaling_max_freq 1703000
+	write /sys/devices/system/cpu/cpu0/cultivation/powersave_bias 1
+	write /sys/devices/system/cpu/cpu4/cultivation/powersave_bias 1
 	write /sys/kernel/hmp/up_threshold 700
 	write /sys/kernel/hmp/down_threshold 256
 	write /sys/power/cpuhotplug/enabled 1
