@@ -398,6 +398,14 @@ config DST_CACHE
 	bool
 	default n
 
+config SYSCTL_NET_BUSY_READ
+	int "Default busy_read value"
+	default 0
+
+config SYSCTL_NET_BUSY_POLL
+	int "Default busy_poll value"
+	default 0
+
 endif   # if NET
 
 # Used by archs to tell that they support BPF_JIT
