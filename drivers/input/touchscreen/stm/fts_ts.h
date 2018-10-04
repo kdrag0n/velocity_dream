@@ -614,7 +614,7 @@ struct fts_ts_info {
 	struct clk *core_clk;
 	struct clk *iface_clk;
 #endif
-	struct mutex i2c_mutex;
+	struct rt_mutex i2c_mutex;
 	struct mutex device_mutex;
 	bool touch_stopped;
 	bool reinit_done;
