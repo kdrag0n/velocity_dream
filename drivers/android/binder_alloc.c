@@ -30,7 +30,7 @@
 #include "binder_alloc.h"
 #include "binder_trace.h"
 
-static DEFINE_MUTEX(binder_alloc_mmap_lock);
+static DEFINE_RT_MUTEX(binder_alloc_mmap_lock);
 
 enum {
 	BINDER_DEBUG_OPEN_CLOSE             = 1U << 1,
@@ -168,9 +168,9 @@ struct binder_buffer *binder_alloc_prepare_to_free(struct binder_alloc *alloc,
 {
 	struct binder_buffer *buffer;
 
-	mutex_lock(&alloc->mutex);
+	rt_mutex_lock(&alloc->mutex);
 	buffer = binder_alloc_prepare_to_free_locked(alloc, user_ptr);
-	mutex_unlock(&alloc->mutex);
+	rt_mutex_unlock(&alloc->mutex);
 	return buffer;
 }
 
@@ -445,10 +445,10 @@ struct binder_buffer *binder_alloc_new_buf(struct binder_alloc *alloc,
 {
 	struct binder_buffer *buffer;
 
-	mutex_lock(&alloc->mutex);
+	rt_mutex_lock(&alloc->mutex);
 	buffer = binder_alloc_new_buf_locked(alloc, data_size, offsets_size,
 					     extra_buffers_size, is_async);
-	mutex_unlock(&alloc->mutex);
+	rt_mutex_unlock(&alloc->mutex);
 	return buffer;
 }
 
@@ -575,9 +575,9 @@ static void binder_free_buf_locked(struct binder_alloc *alloc,
 void binder_alloc_free_buf(struct binder_alloc *alloc,
 			    struct binder_buffer *buffer)
 {
-	mutex_lock(&alloc->mutex);
+	rt_mutex_lock(&alloc->mutex);
 	binder_free_buf_locked(alloc, buffer);
-	mutex_unlock(&alloc->mutex);
+	rt_mutex_unlock(&alloc->mutex);
 }
 
 /**
@@ -601,7 +601,7 @@ int binder_alloc_mmap_handler(struct binder_alloc *alloc,
 	const char *failure_string;
 	struct binder_buffer *buffer;
 
-	mutex_lock(&binder_alloc_mmap_lock);
+	rt_mutex_lock(&binder_alloc_mmap_lock);
 	if (alloc->buffer) {
 		ret = -EBUSY;
 		failure_string = "already mapped";
@@ -617,7 +617,7 @@ int binder_alloc_mmap_handler(struct binder_alloc *alloc,
 	alloc->buffer = area->addr;
 	alloc->user_buffer_offset =
 		vma->vm_start - (uintptr_t)alloc->buffer;
-	mutex_unlock(&binder_alloc_mmap_lock);
+	rt_mutex_unlock(&binder_alloc_mmap_lock);
 
 #ifdef CONFIG_CPU_CACHE_VIPT
 	if (cache_is_vipt_aliasing()) {
@@ -662,12 +662,12 @@ err_alloc_small_buf_failed:
 	kfree(alloc->pages);
 	alloc->pages = NULL;
 err_alloc_pages_failed:
-	mutex_lock(&binder_alloc_mmap_lock);
+	rt_mutex_lock(&binder_alloc_mmap_lock);
 	vfree(alloc->buffer);
 	alloc->buffer = NULL;
 err_get_vm_area_failed:
 err_already_mapped:
-	mutex_unlock(&binder_alloc_mmap_lock);
+	rt_mutex_unlock(&binder_alloc_mmap_lock);
 	pr_err("%s: %d %lx-%lx %s failed %d\n", __func__,
 	       alloc->pid, vma->vm_start, vma->vm_end, failure_string, ret);
 	return ret;
@@ -682,7 +682,7 @@ void binder_alloc_deferred_release(struct binder_alloc *alloc)
 	BUG_ON(alloc->vma);
 
 	buffers = 0;
-	mutex_lock(&alloc->mutex);
+	rt_mutex_lock(&alloc->mutex);
 	while ((n = rb_first(&alloc->allocated_buffers))) {
 		struct binder_buffer *buffer;
 
@@ -716,7 +716,7 @@ void binder_alloc_deferred_release(struct binder_alloc *alloc)
 		kfree(alloc->pages);
 		vfree(alloc->buffer);
 	}
-	mutex_unlock(&alloc->mutex);
+	rt_mutex_unlock(&alloc->mutex);
 
 	binder_alloc_debug(BINDER_DEBUG_OPEN_CLOSE,
 		     "%s: %d buffers %d, pages %d\n",
@@ -746,11 +746,11 @@ void binder_alloc_print_allocated(struct seq_file *m,
 {
 	struct rb_node *n;
 
-	mutex_lock(&alloc->mutex);
+	rt_mutex_lock(&alloc->mutex);
 	for (n = rb_first(&alloc->allocated_buffers); n != NULL; n = rb_next(n))
 		print_binder_buffer(m, "  buffer",
 				    rb_entry(n, struct binder_buffer, rb_node));
-	mutex_unlock(&alloc->mutex);
+	rt_mutex_unlock(&alloc->mutex);
 }
 
 /**
@@ -764,10 +764,10 @@ int binder_alloc_get_allocated_count(struct binder_alloc *alloc)
 	struct rb_node *n;
 	int count = 0;
 
-	mutex_lock(&alloc->mutex);
+	rt_mutex_lock(&alloc->mutex);
 	for (n = rb_first(&alloc->allocated_buffers); n != NULL; n = rb_next(n))
 		count++;
-	mutex_unlock(&alloc->mutex);
+	rt_mutex_unlock(&alloc->mutex);
 	return count;
 }
 
@@ -797,6 +797,6 @@ void binder_alloc_init(struct binder_alloc *alloc)
 {
 	alloc->tsk = current->group_leader;
 	alloc->pid = current->group_leader->pid;
-	mutex_init(&alloc->mutex);
+	rt_mutex_init(&alloc->mutex);
 }
 
