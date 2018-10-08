@@ -2,8 +2,8 @@ on init
 	# Boot speed optimization
 	write /sys/block/sda/queue/iostats 0
 	write /sys/block/sda/queue/read_ahead_kb 1024
-	write /sys/block/sda/queue/scheduler bfq
-	write /sys/block/sda/queue/nr_requests 256
+	write /sys/block/sda/queue/scheduler cfq
+	write /sys/block/sda/queue/nr_requests 128
 
 	# USB mass storage
 	mkdir /sys/kernel/config/usb_gadget/g1/functions/mass_storage.0
