@@ -26,15 +26,6 @@
 #define WAKE_BOOST		(1U << 2)
 #define MAX_BOOST		(1U << 3)
 
-/*
- * This assumes that half of the CPUs are little and that they have lower
- * CPU numbers than the big CPUs (e.g., on an 8-core system, CPUs 0-3 would be
- * little and CPUs 4-7 would be big).
- */
-#define LITTLE_CPU_MASK	((1UL << (NR_CPUS / 2)) - 1)
-static const unsigned long little_cluster_cpus = LITTLE_CPU_MASK;
-const struct cpumask *const cpu_lp_mask = to_cpumask(&little_cluster_cpus);
-
 static __read_mostly unsigned int input_boost_freq_lp = CONFIG_INPUT_BOOST_FREQ_LP;
 static __read_mostly unsigned int input_boost_freq_perf = CONFIG_INPUT_BOOST_FREQ_PERF;
 
