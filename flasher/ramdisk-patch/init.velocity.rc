@@ -23,11 +23,6 @@ on boot
 on property:sys.boot_completed=1
 	# Base settings
 
-	# UKSM
-	write /sys/kernel/mm/uksm/cpu_governor medium
-	write /sys/kernel/mm/uksm/sleep_millisecs 150
-	write /sys/kernel/mm/uksm/max_cpu_percentage 90
-
 	# Virtual Memory
 	write /proc/sys/vm/vfs_cache_pressure 80
 	write /proc/sys/vm/dirty_ratio 10
