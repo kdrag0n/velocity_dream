@@ -5907,8 +5907,6 @@ static int wl_android_get_lqcm_report(
 	tx_lqcm_idx = (lqcm_report & LQCM_TX_INDEX_MASK) >> LQCM_TX_INDEX_SHIFT;
 	rx_lqcm_idx = (lqcm_report & LQCM_RX_INDEX_MASK) >> LQCM_RX_INDEX_SHIFT;
 
-	WL_ERR(("lqcm report EN:%d, TX:%d, RX:%d\n", lqcm_enable, tx_lqcm_idx, rx_lqcm_idx));
-
 	bytes_written = snprintf(command, total_len, "%s %d",
 		CMD_GET_LQCM_REPORT, lqcm_report);
 
