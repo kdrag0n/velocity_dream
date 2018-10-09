@@ -3027,13 +3027,6 @@ static void binder_transaction(struct binder_proc *proc,
 
 			tmp = thread->transaction_stack;
 			if (tmp->to_thread != thread) {
-				spin_lock(&tmp->lock);
-				binder_user_error("%d:%d got new transaction with bad transaction stack, transaction %d has target %d:%d\n",
-					proc->pid, thread->pid, tmp->debug_id,
-					tmp->to_proc ? tmp->to_proc->pid : 0,
-					tmp->to_thread ?
-					tmp->to_thread->pid : 0);
-				spin_unlock(&tmp->lock);
 				binder_inner_proc_unlock(proc);
 				return_error = BR_FAILED_REPLY;
 				return_error_param = -EPROTO;
