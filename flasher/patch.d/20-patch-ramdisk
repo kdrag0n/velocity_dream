@@ -29,6 +29,10 @@ if grep -qi GoogleWiz /system/build.prop; then
 	# init.samsungexynos8895.rc
 	remove_service umount_service
 	remove_service swapon
+
+	# zzzfoobar66.rc: interferes with our settings, overrides iosched to noop
+	# and more
+	rm -f /system/etc/init/zzzfoobar66.rc
 fi
 
 cd "$ramdisk_patch" && [ "$(ls)" ] || exit 0
