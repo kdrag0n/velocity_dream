@@ -5,6 +5,8 @@
 #include <linux/input/sec_cmd.h>
 #include <linux/wakelock.h>
 
+#define IRQ_FLAGS IRQF_TRIGGER_LOW | IRQF_ONESHOT | IRQF_PERF_CRITICAL
+
 #undef FTS_SUPPORT_TOUCH_KEY
 #define FTS_SUPPORT_PRESSURE_SENSOR
 #define FTS_SUPPORT_STRINGLIB
@@ -475,7 +477,6 @@ struct fts_i2c_platform_data {
 	int device_id;	/* Device id */
 
 	int irq_gpio;	/* Interrupt GPIO */
-	unsigned int irq_type;
 	u32	device_num;
 
 #ifdef FTS_SUPPORT_TOUCH_KEY
@@ -501,7 +502,6 @@ struct fts_ts_info {
 	struct input_dev *input_dev_touch;
 
 	int irq;
-	int irq_type;
 	bool irq_enabled;
 	bool force_release;
 	struct fts_i2c_platform_data *board;

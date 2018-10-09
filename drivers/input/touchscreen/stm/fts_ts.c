@@ -2212,7 +2212,7 @@ int fts_irq_enable(struct fts_ts_info *info,
 			return retval;
 
 		retval = request_threaded_irq(info->irq, NULL,
-				fts_interrupt_handler, info->board->irq_type,
+				fts_interrupt_handler, IRQ_FLAGS,
 				FTS_TS_DRV_NAME, info);
 		if (retval < 0) {
 			input_err(true, &info->client->dev,
@@ -2429,11 +2429,6 @@ static int fts_parse_dt(struct i2c_client *client)
 	}
 	client->irq = gpio_to_irq(pdata->irq_gpio);
 
-	if (of_property_read_u32(np, "stm,irq_type", &pdata->irq_type)) {
-		input_err(true, dev, "%s: Failed to get irq_type property\n", __func__);
-		return -EINVAL;
-	}
-
 	if (of_property_read_u32_array(np, "stm,max_coords", coords, 2)) {
 		input_err(true, dev, "%s: Failed to get max_coords property\n", __func__);
 		return -EINVAL;
@@ -2548,12 +2543,6 @@ static int fts_parse_dt(struct i2c_client *client)
 
 	pdata->panel_revision = ((lcdtype >> 8) & 0xFF) >> 4;
 
-	input_err(true, dev,
-		"%s: irq :%d, irq_type: 0x%04x, max[x,y]: [%d,%d], project/model_name: %s/%s, pat_function(%d), panel_revision: %d, gesture: %d, device_num: %d, dex: %d pressure:%s\n",
-		__func__, pdata->irq_gpio, pdata->irq_type, pdata->max_x, pdata->max_y,
-		pdata->project_name, pdata->model_name, pdata->pat_function, pdata->panel_revision,
-		pdata->support_sidegesture, pdata->device_num, pdata->support_dex, pdata->support_pressure);
-
 	return retval;
 }
 #endif
@@ -2624,7 +2613,6 @@ static int fts_setup_drv_data(struct i2c_client *client)
 	info->client = client;
 	info->board = pdata;
 	info->irq = client->irq;
-	info->irq_type = info->board->irq_type;
 	info->irq_enabled = false;
 	info->touch_stopped = false;
 	info->panel_revision = info->board->panel_revision;
