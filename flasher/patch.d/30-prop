@@ -16,5 +16,6 @@ sed -i '/init\.container\.rc/d' "$ramdisk/init.rc"
 rm -fr /system/vendor/app/mcRegistry/ffffffffd0000000000000000000000a.tlbin
 rm -fr /system/priv-app/Rlc
 rm -fr /system/app/SecurityLogAgent
+rm -f /system/etc/init/secure_storage_daemon.rc
 
 exit 0

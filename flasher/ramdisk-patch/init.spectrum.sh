@@ -9,9 +9,6 @@ fi
 
 # VELOCITY KERNEL
 
-# fix battery drain
-stop secure_storage
-
 # fix deep sleep (thanks to Chainfire)
 for i in $(ls /sys/class/scsi_disk/); do
 	cat /sys/class/scsi_disk/$i/write_protect 2>/dev/null | grep 1 >/dev/null
