@@ -886,11 +886,13 @@ static int ath9k_init_device(struct ath9k_htc_priv *priv,
 			goto err_world;
 	}
 
+#ifdef CONFIG_DEBUG_FS
 	error = ath9k_htc_init_debug(priv->ah);
 	if (error) {
 		ath_err(common, "Unable to create debugfs files\n");
 		goto err_world;
 	}
+#endif
 
 	ath_dbg(common, CONFIG,
 		"WMI:%d, BCN:%d, CAB:%d, UAPSD:%d, MGMT:%d, BE:%d, BK:%d, VI:%d, VO:%d\n",

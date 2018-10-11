@@ -262,8 +262,8 @@ void ath9k_get_et_stats(struct ieee80211_hw *hw,
 			struct ieee80211_vif *vif,
 			struct ethtool_stats *stats, u64 *data);
 void ath9k_get_et_strings(struct ieee80211_hw *hw,
-			  struct ieee80211_vif *vif,
-			  u32 sset, u8 *data);
+						  struct ieee80211_vif *vif,
+						  u32 sset, u8 *data);
 void ath9k_sta_add_debugfs(struct ieee80211_hw *hw,
 			   struct ieee80211_vif *vif,
 			   struct ieee80211_sta *sta,

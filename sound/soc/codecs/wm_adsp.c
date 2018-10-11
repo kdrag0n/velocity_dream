@@ -635,6 +635,7 @@ static void wm_adsp2_init_debugfs(struct wm_adsp *dsp,
 				&dsp->fw_id_version))
 		goto err;
 
+
 	switch (dsp->rev) {
 	case 0:
 	case 1:
@@ -4017,8 +4018,13 @@ int wm_adsp2_lock(struct wm_adsp *dsp, unsigned int lock_regions)
 		ret = regmap_update_bits(dsp->regmap,
 				 dsp->base + ADSP2_LOCK_REGION_CTRL,
 				 ADSP2_SLAVE_DBG_ENA_MASK,
+#ifdef CONFIG_DEBUG_FS
 				 dsp->slave_dbg_ena
-				 << ADSP2_SLAVE_DBG_ENA_SHIFT);
+				 << ADSP2_SLAVE_DBG_ENA_SHIFT
+#else
+				0
+#endif
+				 );
 		if (ret != 0)
 			return ret;
 		break;

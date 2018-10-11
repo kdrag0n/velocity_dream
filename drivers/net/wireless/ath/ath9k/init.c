@@ -967,11 +967,13 @@ int ath9k_init_device(u16 devid, struct ath_softc *sc,
 	if (error)
 		goto rx_cleanup;
 
+#ifdef CONFIG_DEBUG_FS
 	error = ath9k_init_debug(ah);
 	if (error) {
 		ath_err(common, "Unable to create debugfs files\n");
 		goto unregister;
 	}
+#endif
 
 	/* Handle world regulatory */
 	if (!ath_is_world_regd(reg)) {
