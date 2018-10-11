@@ -995,7 +995,6 @@
 			stm,regulator_avdd = "tsp_avdd";
 			stm,pat_function = <2>;
 			stm,project_name = "Dream2", "G955";
-			stm,firmware_name = "tsp_stm/fts8cd56_dream2_old.fw", "tsp_stm/fts8cd56_dream2_old.fw";
 			support_dex_mode;
 		};
 	};

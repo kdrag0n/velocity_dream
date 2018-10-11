@@ -1062,7 +1062,6 @@
 			sec,pat_function = <2>;
 			sec,afe_base = <0x0121>;
 			sec,project_name = "Dream1", "G950";
-			sec,firmware_name = "tsp_sec/y761_dream1_nosync.fw";
 			support_dex_mode;
 		};
 	};
