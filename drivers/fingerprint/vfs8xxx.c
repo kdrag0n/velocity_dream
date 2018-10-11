@@ -153,9 +153,6 @@ struct vfsspi_device_data {
 #ifdef CONFIG_SENSORS_FINGERPRINT_DUALIZATION
 	unsigned int vendor_pin; /* For checking vendor */
 #endif
-	struct work_struct work_debug;
-	struct workqueue_struct *wq_dbg;
-	struct timer_list dbg_timer;
 	struct pinctrl *p;
 	struct pinctrl_state *pins_sleep;
 	struct pinctrl_state *pins_idle;
@@ -192,8 +189,6 @@ static int vfsspi_send_drdy_signal(struct vfsspi_device_data *vfsspi_device)
 {
 	int ret = 0;
 
-	pr_debug("%s\n", __func__);
-
 	if (vfsspi_device->t) {
 		/* notify DRDY signal to user process */
 		ret = send_sig_info(vfsspi_device->signal_id,
@@ -215,8 +210,6 @@ static inline ssize_t vfsspi_writeSync(struct vfsspi_device_data *vfsspi_device,
 	struct spi_message m;
 	struct spi_transfer t;
 
-	pr_debug("%s\n", __func__);
-
 	spi_message_init(&m);
 	memset(&t, 0, sizeof(t));
 	if (len != (unsigned int)len)
@@ -235,7 +228,6 @@ static inline ssize_t vfsspi_writeSync(struct vfsspi_device_data *vfsspi_device,
 
 	if (status == 0)
 		status = m.actual_length;
-	pr_debug("%s vfsspi_writeSync,length=%d\n", __func__, m.actual_length);
 	return status;
 }
 
@@ -246,8 +238,6 @@ static inline ssize_t vfsspi_readSync(struct vfsspi_device_data *vfsspi_device,
 	int status = 0;
 	struct spi_message m;
 	struct spi_transfer t;
-
-	pr_debug("%s\n", __func__);
 
 	spi_message_init(&m);
 	memset(&t, 0x0, sizeof(t));
@@ -269,8 +259,6 @@ static inline ssize_t vfsspi_readSync(struct vfsspi_device_data *vfsspi_device,
 	if (status == 0)
 		status = len;
 
-	pr_debug("%s vfsspi_readSync,length=%ld\n", __func__, len);
-
 	return status;
 }
 
@@ -282,8 +270,6 @@ static ssize_t vfsspi_write(struct file *filp, const char __user *buf,
 #else
 	struct vfsspi_device_data *vfsspi_device = NULL;
 	ssize_t status = 0;
-
-	pr_debug("%s\n", __func__);
 
 	if (count > DEFAULT_BUFFER_SIZE || !count)
 		return -EMSGSIZE;
@@ -317,8 +303,6 @@ static ssize_t vfsspi_read(struct file *filp, char __user *buf,
 #else
 	struct vfsspi_device_data *vfsspi_device = NULL;
 	ssize_t status = 0;
-
-	pr_debug("%s\n", __func__);
 
 	if (count > DEFAULT_BUFFER_SIZE || !count)
 		return -EMSGSIZE;
@@ -361,8 +345,6 @@ static int vfsspi_xfer(struct vfsspi_device_data *vfsspi_device,
 #ifdef CONFIG_SENSORS_FINGERPRINT_32BITS_PLATFORM_ONLY
 	u64 tx_buffer = (u64) tr->tx_buffer, rx_buffer = (u64) tr->rx_buffer;
 #endif
-
-	pr_debug("%s\n", __func__);
 
 	if (vfsspi_device == NULL || tr == NULL)
 		return -EFAULT;
@@ -418,7 +400,6 @@ static int vfsspi_xfer(struct vfsspi_device_data *vfsspi_device,
 		}
 #endif
 	}
-	pr_debug("%s vfsspi_xfer,length=%d\n", __func__, tr->len);
 	return status;
 
 }				/* vfsspi_xfer */
@@ -563,7 +544,6 @@ static void vfsspi_pin_control(struct vfsspi_device_data *vfsspi_device,
 			if (status)
 				pr_err("%s: can't set pin default state\n",
 				       __func__);
-			pr_debug("%s idle\n", __func__);
 		}
 	} else {
 		if (!IS_ERR(vfsspi_device->pins_sleep)) {
@@ -571,7 +551,6 @@ static void vfsspi_pin_control(struct vfsspi_device_data *vfsspi_device,
 						      vfsspi_device->pins_sleep);
 			if (status)
 				pr_err("%s: can't set pin sleep state\n", __func__);
-			pr_debug("%s sleep\n", __func__);
 		}
 	}
 }
@@ -1444,29 +1423,6 @@ static struct device_attribute *fp_attrs[] = {
 	NULL,
 };
 
-static inline void vfsspi_work_func_debug(struct work_struct *work)
-{
-}
-
-static void vfsspi_enable_debug_timer(void)
-{
-	mod_timer(&g_data->dbg_timer,
-		  round_jiffies_up(jiffies + FPSENSOR_DEBUG_TIMER_SEC));
-}
-
-static void vfsspi_disable_debug_timer(void)
-{
-	del_timer_sync(&g_data->dbg_timer);
-	cancel_work_sync(&g_data->work_debug);
-}
-
-static void vfsspi_timer_func(unsigned long ptr)
-{
-	queue_work(g_data->wq_dbg, &g_data->work_debug);
-	mod_timer(&g_data->dbg_timer,
-		  round_jiffies_up(jiffies + FPSENSOR_DEBUG_TIMER_SEC));
-}
-
 #ifdef CONFIG_SENSORS_FINGERPRINT_DUALIZATION
 static int vfsspi_vendor_check(struct vfsspi_device_data *vfsspi_device)
 {
@@ -1721,19 +1677,6 @@ static int vfsspi_probe(struct spi_device *spi)
 		goto vfsspi_probe_failed;
 	}
 
-	/* debug polling function */
-	setup_timer(&vfsspi_device->dbg_timer,
-		    vfsspi_timer_func, (unsigned long)vfsspi_device);
-
-	vfsspi_device->wq_dbg =
-	    create_singlethread_workqueue("vfsspi_debug_wq");
-	if (!vfsspi_device->wq_dbg) {
-		status = -ENOMEM;
-		pr_err("%s: could not create workqueue\n", __func__);
-		goto vfsspi_sysfs_failed;
-	}
-	INIT_WORK(&vfsspi_device->work_debug, vfsspi_work_func_debug);
-
 #ifdef ENABLE_SENSORS_FPRINT_SECURE
 	vfsspi_device->sensortype = SENSOR_UNKNOWN;
 #else
@@ -1743,7 +1686,6 @@ static int vfsspi_probe(struct spi_device *spi)
 
 	disable_irq(gpio_irq);
 	vfsspi_pin_control(vfsspi_device, false);
-	vfsspi_enable_debug_timer();
 
 	pr_info("%s successful\n", __func__);
 	return 0;
@@ -1787,7 +1729,6 @@ static int vfsspi_remove(struct spi_device *spi)
 	vfsspi_device = spi_get_drvdata(spi);
 
 	if (vfsspi_device != NULL) {
-		vfsspi_disable_debug_timer();
 		spin_lock_irq(&vfsspi_device->vfs_spi_lock);
 		vfsspi_device->spi = NULL;
 		spi_set_drvdata(spi, NULL);
@@ -1816,20 +1757,10 @@ static int vfsspi_remove(struct spi_device *spi)
 	return status;
 }
 
-static void vfsspi_shutdown(struct spi_device *spi)
-{
-	if (g_data != NULL)
-		vfsspi_disable_debug_timer();
-
-	pr_info("%s\n", __func__);
-}
-
 static int vfsspi_pm_suspend(struct device *dev)
 {
-	pr_info("%s\n", __func__);
-	if (g_data != NULL) {
-		vfsspi_disable_debug_timer();
 #ifdef ENABLE_SENSORS_FPRINT_SECURE
+	if (g_data != NULL) {
 		fpsensor_goto_suspend = 1; /* used by pinctrl_samsung.c */
 		if (g_data->detect_mode &&
 				(atomic_read(&g_data->irq_enabled) == DRDY_IRQ_ENABLE)) {
@@ -1839,22 +1770,13 @@ static int vfsspi_pm_suspend(struct device *dev)
 			pr_info("%s: suspend smc ret=%d\n", __func__,
 					exynos_smc(MC_FC_FP_PM_SUSPEND, 0, 0, 0));
 		}
-#endif
 	}
-	return 0;
-}
-
-static int vfsspi_pm_resume(struct device *dev)
-{
-	pr_info("%s\n", __func__);
-	if (g_data != NULL)
-		vfsspi_enable_debug_timer();
+#endif
 	return 0;
 }
 
 static const struct dev_pm_ops vfsspi_pm_ops = {
-	.suspend = vfsspi_pm_suspend,
-	.resume = vfsspi_pm_resume
+	.suspend = vfsspi_pm_suspend
 };
 
 struct spi_driver vfsspi_spi = {
@@ -1866,7 +1788,6 @@ struct spi_driver vfsspi_spi = {
 		   },
 	.probe = vfsspi_probe,
 	.remove = vfsspi_remove,
-	.shutdown = vfsspi_shutdown,
 };
 
 static int __init vfsspi_init(void)

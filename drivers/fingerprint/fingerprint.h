@@ -22,9 +22,6 @@
 #include <linux/clk.h>
 #include "fingerprint_sysfs.h"
 
-/* fingerprint debug timer */
-#define FPSENSOR_DEBUG_TIMER_SEC (10 * HZ)
-
 /* For Sensor Type Check */
 enum {
 	SENSOR_OOO = -2,
