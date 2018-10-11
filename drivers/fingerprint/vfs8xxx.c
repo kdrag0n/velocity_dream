@@ -769,7 +769,7 @@ static irqreturn_t vfsspi_irq(int irq, void *context)
 			vfsspi_device->cnt_irq--;
 			spin_unlock(&vfsspi_device->irq_lock);
 			vfsspi_send_drdy_signal(vfsspi_device);
-			wake_lock_timeout(&vfsspi_device->fp_signal_lock, 3 * HZ);
+			wake_lock_timeout(&vfsspi_device->fp_signal_lock, msecs_to_jiffies(3000));
 		} else {
 			spin_unlock(&vfsspi_device->irq_lock);
 		}
