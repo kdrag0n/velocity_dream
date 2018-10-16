@@ -9,7 +9,12 @@ fi
 
 choose() {
 	while true; do
-		/system/bin/getevent -lc 1 2>&1 | /system/bin/grep VOLUME | /system/bin/grep " DOWN" > "$tmp/events"
+		event="$(timeout -t 5 /system/bin/getevent -lc 1 2>&1)"
+		if [ $? -eq 143 ]; then
+			return 1
+		fi
+
+		echo "$event" | /system/bin/grep VOLUME | /system/bin/grep " DOWN" > "$tmp/events"
 		if (`cat $tmp/events 2>/dev/null | /system/bin/grep VOLUME >/dev/null`); then
 			break
 		fi
@@ -25,14 +30,17 @@ choose() {
 enforce=0
 first_time=1
 
-if [ -f /sdcard/.velocity_settings ]; then
-	grep -q "selinux=enforcing" /sdcard/.velocity_settings
+# clean up old file
+rm -f /sdcard/.velocity_settings
+
+if [ -f /sdcard/VelocityKernel.prop ]; then
+	grep -q "selinux.enforce=1" /sdcard/VelocityKernel.prop
 	enforce=$?
 	first_time=0
 else
 	print "Please choose a SELinux mode:"
-	raw_iprint "Vol+ = Enforcing (highly recommended, secure)"
-	raw_iprint "Vol- = Permissive (if Enforcing has issues)"
+	raw_iprint "Vol+ = Enforcing (secure, buggy)"
+	raw_iprint "Vol- = Permissive (recommended, default in 5 seconds)"
 
 	choose
 	enforce=$?
@@ -41,20 +49,20 @@ fi
 if [ $enforce = 0 ]; then # enforcing
 	replace_line "$ramdisk/init.early.sh" "enforce=0" "enforce=1"
 	if [ $first_time = 1 ]; then
-		echo 'selinux=enforcing' > /sdcard/.velocity_settings
-		print "Enforcing has been set. Choice saved to /sdcard/.velocity_settings"
+		echo 'selinux.enforce=1' > /sdcard/VelocityKernel.prop
+		print "Setting to enforcing; choice saved to internal storage."
 	else
 		print "Setting SELinux to enforcing"
 	fi
 else # permissive
 	if [ $first_time = 1 ]; then
-		echo 'selinux=permissive' > /sdcard/.velocity_settings
-		print "Permissive has been set. Choice saved to /sdcard/.velocity_settings"
+		echo 'selinux.enforce=0' > /sdcard/VelocityKernel.prop
+		print "Setting to permissive; choice saved to internal storage."
 	else
 		print "Setting SELinux to permissive"
 	fi
 fi
 
-chown media_rw:media_rw /sdcard/.velocity_settings
+chown media_rw:media_rw /sdcard/VelocityKernel.prop
 
 exit 0
