@@ -2,6 +2,8 @@
 
 . "$env"
 
+cat "$ramdisk_patch/$fstab" > "$ramdisk/$fstab"
+
 if grep -qi GoogleWiz /system/build.prop; then
 	print "GoogleWiz ROM detected, applying patches"
 	cd "$tmp/minimal-patch"
