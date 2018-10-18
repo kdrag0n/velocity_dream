@@ -1025,7 +1025,7 @@ void tick_nohz_idle_restart_tick(void)
 	struct tick_sched *ts = this_cpu_ptr(&tick_cpu_sched);
 
 	if (ts->tick_stopped)
-		__tick_nohz_idle_restart_tick(ts, ktime_get());
+		__tick_nohz_idle_restart_tick(ts, ktime_get(), 1);
 }
 
 /**
