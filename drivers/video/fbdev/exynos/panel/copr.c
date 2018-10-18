@@ -33,7 +33,7 @@ static int panel_do_copr_seqtbl_by_index(struct copr_info *copr, int index)
 	}
 
 	tbl = panel->copr.seqtbl;
-	mutex_lock(&panel->op_lock);
+	rt_mutex_lock(&panel->op_lock);
 	if (unlikely(index < 0 || index >= MAX_COPR_SEQ)) {
 		panel_err("%s, invalid paramter (panel %p, index %d)\n",
 				__func__, panel, index);
@@ -54,7 +54,7 @@ static int panel_do_copr_seqtbl_by_index(struct copr_info *copr, int index)
 	}
 
 do_exit:
-	mutex_unlock(&panel->op_lock);
+	rt_mutex_unlock(&panel->op_lock);
 #ifdef DEBUG_PANEL
 	pr_info("%s, %s end\n", __func__, tbl[index].name);
 #endif
@@ -231,10 +231,10 @@ int copr_update(struct copr_info *copr)
 	if (unlikely(!copr->props.support))
 		return -ENODEV;
 
-	mutex_lock(&copr->lock);
+	rt_mutex_lock(&copr->lock);
 	if (!copr_is_enabled(copr)) {
 		panel_dbg("%s copr disabled\n", __func__);
-		mutex_unlock(&copr->lock);
+		rt_mutex_unlock(&copr->lock);
 		return -EIO;
 	}
 
@@ -247,14 +247,14 @@ int copr_update(struct copr_info *copr)
 	cur_copr = panel_get_copr(copr);
 	if (cur_copr < 0 || cur_copr > 0xFF) {
 		panel_err("%s failed to get copr\n", __func__);
-		mutex_unlock(&copr->lock);
+		rt_mutex_unlock(&copr->lock);
 		return -EINVAL;
 	}
 
 	cur_brt = panel_bl->props.actual_brightness_intrp;
 
 	copr_sum_update(copr, cur_copr, cur_brt, cur_ts);
-	mutex_unlock(&copr->lock);
+	rt_mutex_unlock(&copr->lock);
 
 	return 0;
 }
@@ -267,10 +267,10 @@ int copr_get_value(struct copr_info *copr)
 	if (unlikely(!copr->props.support))
 		return -ENODEV;
 
-	mutex_lock(&copr->lock);
+	rt_mutex_lock(&copr->lock);
 	if (!copr_is_enabled(copr)) {
 		panel_dbg("%s copr disabled\n", __func__);
-		mutex_unlock(&copr->lock);
+		rt_mutex_unlock(&copr->lock);
 		return -EIO;
 	}
 
@@ -282,11 +282,11 @@ int copr_get_value(struct copr_info *copr)
 	cur_copr = panel_get_copr(copr);
 	if (cur_copr < 0 || cur_copr > 0xFF) {
 		panel_err("%s failed to get copr\n", __func__);
-		mutex_unlock(&copr->lock);
+		rt_mutex_unlock(&copr->lock);
 		return -EINVAL;
 	}
 
-	mutex_unlock(&copr->lock);
+	rt_mutex_unlock(&copr->lock);
 
 	return cur_copr;
 }
@@ -315,9 +315,9 @@ int copr_get_average(struct copr_info *copr, int *c_avg, int *b_avg)
 	if (unlikely(!c_avg || !b_avg))
 		return -EINVAL;
 
-	mutex_lock(&copr->lock);
+	rt_mutex_lock(&copr->lock);
 	if (!copr_is_enabled(copr)) {
-		mutex_unlock(&copr->lock);
+		rt_mutex_unlock(&copr->lock);
 		return -EIO;
 	}
 
@@ -334,14 +334,14 @@ int copr_get_average(struct copr_info *copr, int *c_avg, int *b_avg)
 
 	if (copr_avg < 0 || copr_avg > 0xFF) {
 		panel_err("%s copr average %d invalid\n", __func__, copr_avg);
-		mutex_unlock(&copr->lock);
+		rt_mutex_unlock(&copr->lock);
 		return -EINVAL;
 	}
 
 	*c_avg = copr_avg;
 	*b_avg = brt_avg;
 
-	mutex_unlock(&copr->lock);
+	rt_mutex_unlock(&copr->lock);
 
 	return 0;
 }
@@ -450,7 +450,7 @@ int copr_enable(struct copr_info *copr)
 	if (set_spi_gpios(panel, 1))
 		panel_err("%s:failed to set spio gpio\n", __func__);
 
-	mutex_lock(&copr->lock);
+	rt_mutex_lock(&copr->lock);
 	copr->props.enable = true;
 	if (state->disp_on == PANEL_DISPLAY_ON) {
 		/* TODO : check whether "copr-set" is includued in "init-seq".
@@ -458,7 +458,7 @@ int copr_enable(struct copr_info *copr)
 		   If not, copr state should be COPR_UNINITIALIZED. */
 		props->state = COPR_REG_ON;
 	}
-	mutex_unlock(&copr->lock);
+	rt_mutex_unlock(&copr->lock);
 	copr_update(copr);
 
 	return 0;
@@ -475,7 +475,7 @@ int copr_disable(struct copr_info *copr)
 		return 0;
 
 	copr_update(copr);
-	mutex_lock(&copr->lock);
+	rt_mutex_lock(&copr->lock);
 	if (copr->props.enable) {
 		copr->props.enable = false;
 		copr->props.last_ts.tv_sec = 0;
@@ -485,7 +485,7 @@ int copr_disable(struct copr_info *copr)
 		copr->props.copr_sum = 0;
 		copr->props.state = COPR_UNINITIALIZED;
 	}
-	mutex_unlock(&copr->lock);
+	rt_mutex_unlock(&copr->lock);
 	if (set_spi_gpios(panel, 0))
 		panel_err("%s:failed to set spio gpio\n", __func__);
 
@@ -604,7 +604,7 @@ int copr_probe(struct panel_device *panel, struct panel_copr_data *copr_data)
 
 	copr = &panel->copr;
 
-	mutex_lock(&copr->lock);
+	rt_mutex_lock(&copr->lock);
 	memcpy(&copr->props.reg, &copr_data->reg, sizeof(struct copr_reg));
 	copr->seqtbl = copr_data->seqtbl;
 	copr->nr_seqtbl = copr_data->nr_seqtbl;
@@ -629,7 +629,7 @@ int copr_probe(struct panel_device *panel, struct panel_copr_data *copr_data)
 		atomic_set(&copr->wq.count, 5);
 		copr_create_thread(copr);
 	}
-	mutex_unlock(&copr->lock);
+	rt_mutex_unlock(&copr->lock);
 	pr_info("%s registered successfully\n", __func__);
 
 	return 0;

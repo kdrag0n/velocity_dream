@@ -32,7 +32,9 @@ static int dpp_runtime_resume(struct device *dev);
 static void dpp_check_data_glb_dma(u32 dump_en)
 {
 	static u32 checked = 0;
-	u32 data[40] = {0,};
+	u32 data[40] = {
+		0,
+	};
 	u32 sel[40] = {
 		0x00000001, 0x00010001, 0x00040001, 0x00050001, 0x00060001,
 		0x00080001, 0x00090001, 0x000a0001, 0x000b0001, 0x000c0001,
@@ -46,13 +48,15 @@ static void dpp_check_data_glb_dma(u32 dump_en)
 		0xc0010001};
 	int i;
 
-	if (checked) {
+	if (checked)
+	{
 		if (dump_en == 0)
 			return;
 	}
 
 	dpp_info("-< DPU_DMA_DATA >-\n");
-	for (i = 0; i < 40; i++) {
+	for (i = 0; i < 40; i++)
+	{
 		dma_com_write(0, DPU_DMA_GLB_CONTROL, sel[i]);
 		/* dummy dpp data read */
 		/* temp code */
@@ -66,14 +70,17 @@ static void dpp_check_data_glb_dma(u32 dump_en)
 
 static void dpp_check_data_g_ch(int id)
 {
-	u32 data[6] = {0,};
+	u32 data[6] = {
+		0,
+	};
 	u32 sel[6] = {
 		0x00000001, 0x00010001, 0x00040001, 0x10000001, 0x10010001,
 		0x10020001};
 	int i;
 
 	dpp_info("-< IDMA%d_G_CH_DATA >-\n", id);
-	for (i = 0; i < 6; i++) {
+	for (i = 0; i < 6; i++)
+	{
 		dma_write(id, IDMA_CHAN_CONTROL, sel[i]);
 		/* dummy dpp data read */
 		/* temp code */
@@ -86,7 +93,9 @@ static void dpp_check_data_g_ch(int id)
 
 static void dpp_check_data_vg_ch(int id)
 {
-	u32 data[12] = {0, };
+	u32 data[12] = {
+		0,
+	};
 	u32 sel[12] = {
 		0x00000001, 0x00010001, 0x00040001, 0x10000001, 0x10010001,
 		0x10020001,
@@ -95,7 +104,8 @@ static void dpp_check_data_vg_ch(int id)
 	int i;
 
 	dpp_info("-< IDMA%d_VG_CH_DATA >-\n", id);
-	for (i = 0; i < 12; i++) {
+	for (i = 0; i < 12; i++)
+	{
 		dma_write(id, IDMA_CHAN_CONTROL, sel[i]);
 		/* dummy dpp data read */
 		/* temp code */
@@ -108,7 +118,9 @@ static void dpp_check_data_vg_ch(int id)
 
 static void dpp_check_data_vgf_ch(int id)
 {
-	u32 data[30] = {0, };
+	u32 data[30] = {
+		0,
+	};
 	u32 sel[30] = {
 		0x00000001, 0x00010001, 0x00020001, 0x00030001, 0x000d0001,
 		0x00100001, 0x00110001, 0x00120001, 0x00140001, 0x00150001,
@@ -120,7 +132,8 @@ static void dpp_check_data_vgf_ch(int id)
 	int i;
 
 	dpp_info("-< IDMA%d_VGF_CH_DATA >-\n", id);
-	for (i = 0; i < 30; i++) {
+	for (i = 0; i < 30; i++)
+	{
 		dma_write(id, IDMA_CHAN_CONTROL, sel[i]);
 		/* dummy dpp data read */
 		/* temp code */
@@ -133,14 +146,26 @@ static void dpp_check_data_vgf_ch(int id)
 
 static void dpp_check_data_wb_ch(int id)
 {
-	u32 data[10] = {0, };
+	u32 data[10] = {
+		0,
+	};
 	u32 sel[10] = {
-		0x00000001, 0x00010001, 0x00040001, 0x10010001, 0x10020001,
-		0x40000001, 0x40010001, 0x40040001, 0x50010001, 0x50020001,};
+		0x00000001,
+		0x00010001,
+		0x00040001,
+		0x10010001,
+		0x10020001,
+		0x40000001,
+		0x40010001,
+		0x40040001,
+		0x50010001,
+		0x50020001,
+	};
 	int i;
 
 	dpp_info("-< ODMA%d_WB_CH_DATA >-\n", id);
-	for (i = 0; i < 10; i++) {
+	for (i = 0; i < 10; i++)
+	{
 		dma_write(id, ODMA_CHAN_CONTROL, sel[i]);
 		data[i] = dma_read(id, ODMA_CHAN_DATA);
 
@@ -152,7 +177,8 @@ static void dpp_dma_read_ch_data(int id)
 {
 	dpp_check_data_glb_dma(0);
 
-	switch (id) {
+	switch (id)
+	{
 	case IDMA_G0:
 	case IDMA_G1:
 		dpp_check_data_g_ch(id);
@@ -180,30 +206,35 @@ static void dpp_dma_read_ch_data(int id)
 static void dpp_dma_dump_registers(struct dpp_device *dpp, u32 dump_lv)
 {
 	dma_write(dpp->id, 0x0060, 0x1);
-	if (dpp->id == ODMA_WB) {
-		if (dump_lv == DPU_DUMP_LV0) {
+	if (dpp->id == ODMA_WB)
+	{
+		if (dump_lv == DPU_DUMP_LV0)
+		{
 			dpp_info("=== DPU_DMA%d SFR DUMP ===\n", dpp->id);
 			print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
-				dpp->res.dma_regs, 0xA0, false);
+						   dpp->res.dma_regs, 0xA0, false);
 			print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
-				dpp->res.dma_regs + 0x300, 0x78, false);
+						   dpp->res.dma_regs + 0x300, 0x78, false);
 		}
 
 		dpp_info("=== DPU_DMA%d SHADOW SFR DUMP ===\n", dpp->id);
 		print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
-				dpp->res.dma_regs + 0x800, 0x78, false);
+					   dpp->res.dma_regs + 0x800, 0x78, false);
 		print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
-				dpp->res.dma_regs + 0xB00, 0x78, false);
-	} else {
-		if (dump_lv == DPU_DUMP_LV0) {
+					   dpp->res.dma_regs + 0xB00, 0x78, false);
+	}
+	else
+	{
+		if (dump_lv == DPU_DUMP_LV0)
+		{
 			dpp_info("=== DPU_DMA%d SFR DUMP ===\n", dpp->id);
 			print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
-				dpp->res.dma_regs, 0x78, false);
+						   dpp->res.dma_regs, 0x78, false);
 		}
 
 		dpp_info("=== DPU_DMA%d SHADOW SFR DUMP ===\n", dpp->id);
 		print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
-				dpp->res.dma_regs + 0x800, 0x78, false);
+					   dpp->res.dma_regs + 0x800, 0x78, false);
 	}
 
 	dpp_dma_read_ch_data(dpp->id);
@@ -211,7 +242,9 @@ static void dpp_dma_dump_registers(struct dpp_device *dpp, u32 dump_lv)
 
 static void dpp_read_ch_data(int id)
 {
-	u32 data[17] = {0,};
+	u32 data[17] = {
+		0,
+	};
 	u32 sel[17] = {
 		0x00000000, 0x00000100, 0x00000200, 0x00000300, 0x00000400,
 		0x00000500,
@@ -221,7 +254,8 @@ static void dpp_read_ch_data(int id)
 	int i;
 
 	dpp_info("-< DPP%d_CH_DATA >-\n", id);
-	for (i = 0; i < 17; i++) {
+	for (i = 0; i < 17; i++)
+	{
 		dpp_write(id, DPP_CHAN_CONTROL, sel[i]);
 		data[i] = dpp_read(id, DPP_CHAN_DATA);
 
@@ -237,31 +271,35 @@ static void dpp_dump_registers(struct dpp_device *dpp, u32 dump_lv)
 	dpp_write(dpp->id, 0x0C00, 0x1);
 	dpp_info("=== DPP%d SFR DUMP ===\n", dpp->id);
 
-	if (dump_lv == DPU_DUMP_LV0) {
+	if (dump_lv == DPU_DUMP_LV0)
+	{
 		print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
-			dpp->res.regs, 0x58, false);
-		if (dpp->id == IDMA_VGF0 || dpp->id == IDMA_VGF1) {
+					   dpp->res.regs, 0x58, false);
+		if (dpp->id == IDMA_VGF0 || dpp->id == IDMA_VGF1)
+		{
 			print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
-				dpp->res.regs + 0x5B0, 0x10, false);
+						   dpp->res.regs + 0x5B0, 0x10, false);
 			print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
-				dpp->res.regs + 0xA0C, 0x10, false);
+						   dpp->res.regs + 0xA0C, 0x10, false);
 		}
 		print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
-			dpp->res.regs + 0xA54, 0x4, false);
+					   dpp->res.regs + 0xA54, 0x4, false);
 	}
 	print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
-			dpp->res.regs + 0xB00, 0x58, false);
+				   dpp->res.regs + 0xB00, 0x58, false);
 
-	if (dump_lv == DPU_DUMP_LV0) {
-		if (dpp->id == IDMA_VGF0 || dpp->id == IDMA_VGF0) {
+	if (dump_lv == DPU_DUMP_LV0)
+	{
+		if (dpp->id == IDMA_VGF0 || dpp->id == IDMA_VGF0)
+		{
 			print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
-				dpp->res.regs + 0xBB0, 0x10, false);
+						   dpp->res.regs + 0xBB0, 0x10, false);
 		}
 		print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
-			dpp->res.regs + 0xC00, 0x14, false);
+					   dpp->res.regs + 0xC00, 0x14, false);
 	}
 	print_hex_dump(KERN_INFO, "", DUMP_PREFIX_ADDRESS, 32, 4,
-			dpp->res.regs + 0xD00, 0xC, false);
+				   dpp->res.regs + 0xD00, 0xC, false);
 
 	dpp_read_ch_data(dpp->id);
 }
@@ -272,8 +310,7 @@ void dpp_op_timer_handler(unsigned long arg)
 
 	if (dpp->config->compression)
 		dpp_info("Compression Source is %s of DPP[%d]\n",
-			dpp->config->dpp_parm.comp_src == DPP_COMP_SRC_G2D ?
-			"G2D" : "GPU", dpp->id);
+				 dpp->config->dpp_parm.comp_src == DPP_COMP_SRC_G2D ? "G2D" : "GPU", dpp->id);
 
 	dpp_info("DPP[%d] irq hasn't been occured", dpp->id);
 }
@@ -283,12 +320,14 @@ static int dpp_wb_wait_for_framedone(struct dpp_device *dpp)
 	int ret;
 	int done_cnt;
 
-	if (dpp->id != ODMA_WB) {
+	if (dpp->id != ODMA_WB)
+	{
 		dpp_err("waiting for dpp's framedone is only for writeback\n");
 		return -EINVAL;
 	}
 
-	if (dpp->state == DPP_STATE_OFF) {
+	if (dpp->state == DPP_STATE_OFF)
+	{
 		dpp_err("dpp%d power is off state(%d)\n", dpp->id, dpp->state);
 		return -EPERM;
 	}
@@ -296,8 +335,9 @@ static int dpp_wb_wait_for_framedone(struct dpp_device *dpp)
 	done_cnt = dpp->d.done_count;
 	/* TODO: dma framedone should be wait */
 	ret = wait_event_interruptible_timeout(dpp->framedone_wq,
-			(done_cnt != dpp->d.done_count), msecs_to_jiffies(20));
-	if (ret == 0) {
+										   (done_cnt != dpp->d.done_count), msecs_to_jiffies(20));
+	if (ret == 0)
+	{
 		dpp_err("timeout of dpp%d framedone\n", dpp->id);
 		return -ETIMEDOUT;
 	}
@@ -358,21 +398,24 @@ static int dpp_check_size(struct dpp_device *dpp, struct dpp_img_format *vi)
 	dpp_constraints_params(&vc, vi);
 
 	if ((!check_align(src->x, src->y, vc.src_mul_x, vc.src_mul_y)) ||
-	   (!check_align(src->f_w, src->f_h, vc.src_mul_w, vc.src_mul_h)) ||
-	   (!check_align(src->w, src->h, vc.img_mul_w, vc.img_mul_h)) ||
-	   (!check_align(dst->w, dst->h, vc.sca_mul_w, vc.sca_mul_h))) {
+		(!check_align(src->f_w, src->f_h, vc.src_mul_w, vc.src_mul_h)) ||
+		(!check_align(src->w, src->h, vc.img_mul_w, vc.img_mul_h)) ||
+		(!check_align(dst->w, dst->h, vc.sca_mul_w, vc.sca_mul_h)))
+	{
 		dpp_err("Alignment error!\n");
 		goto err;
 	}
 
 	if (src->w > vc.src_w_max || src->w < vc.src_w_min ||
-		src->h > vc.src_h_max || src->h < vc.src_h_min) {
+		src->h > vc.src_h_max || src->h < vc.src_h_min)
+	{
 		dpp_err("Unsupported SRC size!\n");
 		goto err;
 	}
 
 	if (dst->w > vc.sca_w_max || dst->w < vc.sca_w_min ||
-		dst->h > vc.sca_h_max || dst->h < vc.sca_h_min) {
+		dst->h > vc.sca_h_max || dst->h < vc.sca_h_min)
+	{
 		dpp_err("Unsupported DST size!\n");
 		goto err;
 	}
@@ -388,7 +431,7 @@ err:
 	dpp_err("dst w : %d, dst h: %d\n", dst->w, dst->h);
 	dpp_err("sca_mul_w : %d, sca_mul_h : %d\n", vc.sca_mul_w, vc.sca_mul_h);
 	dpp_err("flip : %d, color_format : %d\n",
-				config->dpp_parm.flip, config->format);
+			config->dpp_parm.flip, config->format);
 
 	return -EINVAL;
 }
@@ -403,12 +446,14 @@ static int dpp_check_scale_ratio(struct dpp_params_info *p)
 	sc_up_min_w = (p->dst.w + 7) / 8;
 	sc_up_min_h = (p->dst.h + 7) / 8;
 
-	if (p->src.w > sc_down_max_w || p->src.h > sc_down_max_h) {
+	if (p->src.w > sc_down_max_w || p->src.h > sc_down_max_h)
+	{
 		dpp_err("Not support under 1/2x scale-down!\n");
 		goto err;
 	}
 
-	if (p->src.w < sc_up_min_w || p->src.h < sc_up_min_h) {
+	if (p->src.w < sc_up_min_w || p->src.h < sc_up_min_h)
+	{
 		dpp_err("Not support over 8x scale-up\n");
 		goto err;
 	}
@@ -423,26 +468,31 @@ err:
 static int dpp_check_format(struct dpp_device *dpp, struct dpp_params_info *p)
 {
 	if ((dpp->id == IDMA_G0 || dpp->id == IDMA_G1) &&
-			(p->format >= DECON_PIXEL_FORMAT_NV16)) {
+		(p->format >= DECON_PIXEL_FORMAT_NV16))
+	{
 		dpp_err("Not support YUV format(%d) in DPP%d - VG & VGF only!\n",
-			p->format, dpp->id);
+				p->format, dpp->id);
 		return -EINVAL;
 	}
 
-	if (dpp->id != IDMA_VGF0 && dpp->id != IDMA_VGF1) {
-		if (p->is_comp) {
+	if (dpp->id != IDMA_VGF0 && dpp->id != IDMA_VGF1)
+	{
+		if (p->is_comp)
+		{
 			dpp_err("Not support AFBC decoding in DPP%d - VGF only!\n",
-				dpp->id);
+					dpp->id);
 			return -EINVAL;
 		}
 
-		if (p->is_scale) {
+		if (p->is_scale)
+		{
 			dpp_err("Not support SCALING in DPP%d - VGF only!\n", dpp->id);
 			return -EINVAL;
 		}
 	}
 
-	switch (p->format) {
+	switch (p->format)
+	{
 	case DECON_PIXEL_FORMAT_ARGB_8888:
 	case DECON_PIXEL_FORMAT_ABGR_8888:
 	case DECON_PIXEL_FORMAT_RGBA_8888:
@@ -478,7 +528,8 @@ static int dpp_check_limitation(struct dpp_device *dpp, struct dpp_params_info *
 	struct dpp_img_format vi;
 
 	ret = dpp_check_scale_ratio(p);
-	if (ret) {
+	if (ret)
+	{
 		dpp_err("failed to set dpp%d scale information\n", dpp->id);
 		return -EINVAL;
 	}
@@ -489,40 +540,46 @@ static int dpp_check_limitation(struct dpp_device *dpp, struct dpp_params_info *
 	if (ret)
 		return -EINVAL;
 
-	if (p->is_comp && p->flip) {
+	if (p->is_comp && p->flip)
+	{
 		dpp_err("Not support [AFBC+FLIP] at the same time in DPP%d\n",
-			dpp->id);
+				dpp->id);
 		return -EINVAL;
 	}
 
-	if (p->is_comp && p->is_block) {
+	if (p->is_comp && p->is_block)
+	{
 		dpp_err("Not support [AFBC+BLOCK] at the same time in DPP%d\n",
-			dpp->id);
+				dpp->id);
 		return -EINVAL;
 	}
 
-	if (p->is_comp && vi.yuv420) {
+	if (p->is_comp && vi.yuv420)
+	{
 		dpp_err("Not support AFBC decoding for YUV format in DPP%d\n",
-			dpp->id);
+				dpp->id);
 		return -EINVAL;
 	}
 
-	if (p->is_block && p->is_scale) {
+	if (p->is_block && p->is_scale)
+	{
 		dpp_err("Not support [BLOCK+SCALE] at the same time in DPP%d\n",
-			dpp->id);
+				dpp->id);
 		return -EINVAL;
 	}
 
-	if (p->is_block && vi.yuv420) {
+	if (p->is_block && vi.yuv420)
+	{
 		dpp_err("Not support BLOCK Mode for YUV format in DPP%d\n",
-			dpp->id);
+				dpp->id);
 		return -EINVAL;
 	}
 
 	/* FIXME */
-	if (p->is_block && p->flip) {
+	if (p->is_block && p->flip)
+	{
 		dpp_err("Not support [BLOCK+FLIP] at the same time in DPP%d\n",
-			dpp->id);
+				dpp->id);
 		return -EINVAL;
 	}
 
@@ -538,7 +595,7 @@ static int dpp_set_config(struct dpp_device *dpp)
 	struct dpp_params_info params;
 	int ret = 0;
 
-	mutex_lock(&dpp->lock);
+	rt_mutex_lock(&dpp->lock);
 
 	/* parameters from decon driver are translated for dpp driver */
 	dpp_get_params(dpp, &params);
@@ -548,7 +605,8 @@ static int dpp_set_config(struct dpp_device *dpp)
 	if (ret)
 		goto err;
 
-	if (dpp->state == DPP_STATE_OFF) {
+	if (dpp->state == DPP_STATE_OFF)
+	{
 		dpp_dbg("dpp%d is started\n", dpp->id);
 #if defined(CONFIG_PM)
 		pm_runtime_get_sync(dpp->dev);
@@ -558,7 +616,8 @@ static int dpp_set_config(struct dpp_device *dpp)
 		dpp_reg_init(dpp->id);
 
 		enable_irq(dpp->res.dma_irq);
-		if (dpp->id != ODMA_WB) {
+		if (dpp->id != ODMA_WB)
+		{
 			enable_irq(dpp->res.irq);
 		}
 		/* DMA_debug sfrs enable */
@@ -583,7 +642,7 @@ static int dpp_set_config(struct dpp_device *dpp)
 
 	dpp->state = DPP_STATE_ON;
 err:
-	mutex_unlock(&dpp->lock);
+	rt_mutex_unlock(&dpp->lock);
 	return ret;
 }
 
@@ -591,9 +650,10 @@ static int dpp_stop(struct dpp_device *dpp, bool reset)
 {
 	int ret = 0;
 
-	mutex_lock(&dpp->lock);
+	rt_mutex_lock(&dpp->lock);
 
-	if (dpp->state == DPP_STATE_OFF) {
+	if (dpp->state == DPP_STATE_OFF)
+	{
 		dpp_warn("dpp%d is already disabled\n", dpp->id);
 		goto err;
 	}
@@ -601,7 +661,8 @@ static int dpp_stop(struct dpp_device *dpp, bool reset)
 	DPU_EVENT_LOG(DPU_EVT_DPP_STOP, &dpp->sd, ktime_set(0, 0));
 
 	disable_irq(dpp->res.dma_irq);
-	if (dpp->id != ODMA_WB) {
+	if (dpp->id != ODMA_WB)
+	{
 		disable_irq(dpp->res.irq);
 	}
 
@@ -617,7 +678,7 @@ static int dpp_stop(struct dpp_device *dpp, bool reset)
 
 	dpp->state = DPP_STATE_OFF;
 err:
-	mutex_unlock(&dpp->lock);
+	rt_mutex_unlock(&dpp->lock);
 	return ret;
 }
 
@@ -637,7 +698,8 @@ static long dpp_subdev_ioctl(struct v4l2_subdev *sd, unsigned int cmd, void *arg
 	unsigned long val;
 	int ret = 0;
 
-	switch (cmd) {
+	switch (cmd)
+	{
 	case DPP_WIN_CONFIG:
 		dpp->config = (struct decon_win_config *)arg;
 		ret = dpp_set_config(dpp);
@@ -660,7 +722,8 @@ static long dpp_subdev_ioctl(struct v4l2_subdev *sd, unsigned int cmd, void *arg
 		val = (unsigned long)arg;
 		dpp_dump_registers(dpp, (u32)val);
 
-		if (dpp->id == IDMA_VGF0 || dpp->id == IDMA_VGF1) {
+		if (dpp->id == IDMA_VGF0 || dpp->id == IDMA_VGF1)
+		{
 			dpp_info("=== DUMP : Current DMA Buffer :\n");
 			dpp_dump_buffer_data(dpp, 0);
 		}
@@ -737,7 +800,8 @@ static int dpp_dump_buffer_data(struct dpp_device *dpp, u32 smmu)
 	if (dpp->state != DPP_STATE_ON)
 		return 0;
 
-	for (i = 0; i < MAX_DECON_CNT; i++) {
+	for (i = 0; i < MAX_DECON_CNT; i++)
+	{
 		decon = get_decon_drvdata(i);
 		if (decon_reg_get_rsc_dma_info(i, dpp->id) != i)
 			continue;
@@ -750,7 +814,8 @@ static int dpp_dump_buffer_data(struct dpp_device *dpp, u32 smmu)
 		afbc_info = &decon->d.afbc_info[f_idx];
 
 		afbc_info->is_afbc[id_idx] = dma_reg_get_afbc_en(dpp->id);
-		if (!afbc_info->is_afbc[id_idx]) {
+		if (!afbc_info->is_afbc[id_idx])
+		{
 			dpp_info("%s is Non-AFBC format\n", id_str[id_idx]);
 			continue;
 		}
@@ -759,14 +824,14 @@ static int dpp_dump_buffer_data(struct dpp_device *dpp, u32 smmu)
 			continue;
 
 		dpp_info("Base(0x%p), KV(0x%p) gBuf(0x%p), size(%d), sgl(0x%p)\n",
-				(void *)afbc_info->dma_addr[id_idx],
-				afbc_info->v_addr[id_idx],
-				(void *)afbc_buf_data[f_idx][id_idx],
-				afbc_info->size[id_idx],
-				afbc_info->sgl[id_idx]);
+				 (void *)afbc_info->dma_addr[id_idx],
+				 afbc_info->v_addr[id_idx],
+				 (void *)afbc_buf_data[f_idx][id_idx],
+				 afbc_info->size[id_idx],
+				 afbc_info->sgl[id_idx]);
 
 		dpu_dump_data_to_console((void *)afbc_buf_data[f_idx][id_idx],
-				min(afbc_info->size[id_idx] / 16, BUF_DUMP_SIZE), dpp->id);
+								 min(afbc_info->size[id_idx] / 16, BUF_DUMP_SIZE), dpp->id);
 	}
 
 	return 0;
@@ -785,7 +850,8 @@ static irqreturn_t dpp_irq_handler(int irq, void *priv)
 
 	dpp_irq = dpp_reg_get_irq_status(dpp->id);
 	/* CFG_ERR_STATE SFR is cleared when clearing pending bits */
-	if (dpp_irq & DPP_CONFIG_ERROR) {
+	if (dpp_irq & DPP_CONFIG_ERROR)
+	{
 		cfg_err = dpp_read(dpp->id, DPP_CFG_ERR_STATE);
 		dpp_reg_clear_irq(dpp->id, dpp_irq);
 
@@ -824,10 +890,13 @@ static irqreturn_t dma_irq_handler(int irq, void *priv)
 
 	irqs = dma_reg_get_irq_status(dpp->id);
 	/* CFG_ERR_STATE SFR is cleared when clearing pending bits */
-	if (dpp->id == ODMA_WB) {
+	if (dpp->id == ODMA_WB)
+	{
 		reg_id = ODMA_CFG_ERR_STATE;
 		irq_pend = ODMA_CONFIG_ERROR;
-	} else {
+	}
+	else
+	{
 		reg_id = IDMA_CFG_ERR_STATE;
 		irq_pend = IDMA_CONFIG_ERROR;
 	}
@@ -835,8 +904,10 @@ static irqreturn_t dma_irq_handler(int irq, void *priv)
 		cfg_err = dma_read(dpp->id, reg_id);
 	dma_reg_clear_irq(dpp->id, irqs);
 
-	if (dpp->id == ODMA_WB) {
-		if (irqs & ODMA_CONFIG_ERROR) {
+	if (dpp->id == ODMA_WB)
+	{
+		if (irqs & ODMA_CONFIG_ERROR)
+		{
 			dpp_err("dma%d config error occur(0x%x)\n", dpp->id, irqs);
 			dpp_err("CFG_ERR_STATE = (0x%x)\n", cfg_err);
 			/* TODO: add to read config error information */
@@ -845,48 +916,55 @@ static irqreturn_t dma_irq_handler(int irq, void *priv)
 		}
 
 		if ((irqs & ODMA_WRITE_SLAVE_ERROR) ||
-			       (irqs & ODMA_STATUS_DEADLOCK_IRQ)) {
+			(irqs & ODMA_STATUS_DEADLOCK_IRQ))
+		{
 			dpp_err("dma%d error irq occur(0x%x)\n", dpp->id, irqs);
 			dpp_dump_registers(dpp, DPU_DUMP_LV0);
 			goto irq_end;
 		}
 
-		if (irqs & ODMA_STATUS_FRAMEDONE_IRQ) {
+		if (irqs & ODMA_STATUS_FRAMEDONE_IRQ)
+		{
 			dpp->d.done_count++;
 			if (dpp->id == ODMA_WB)
 				wake_up_interruptible_all(&dpp->framedone_wq);
 			DPU_EVENT_LOG(DPU_EVT_DPP_FRAMEDONE, &dpp->sd,
-					ktime_set(0, 0));
+						  ktime_set(0, 0));
 			goto irq_end;
 		}
-	} else {
-		if (irqs & IDMA_RECOVERY_START_IRQ) {
+	}
+	else
+	{
+		if (irqs & IDMA_RECOVERY_START_IRQ)
+		{
 			DPU_EVENT_LOG(DPU_EVT_DMA_RECOVERY, &dpp->sd,
-					ktime_set(0, 0));
+						  ktime_set(0, 0));
 			val = (u32)dpp->config->dpp_parm.comp_src;
 			dpp_info("dma%d recovery start(0x%x)...[src=%s]\n",
-				dpp->id, irqs,
-				val == DPP_COMP_SRC_G2D ? "G2D" : "GPU");
+					 dpp->id, irqs,
+					 val == DPP_COMP_SRC_G2D ? "G2D" : "GPU");
 			goto irq_end;
 		}
 
 		if ((irqs & IDMA_AFBC_TIMEOUT_IRQ) ||
-				(irqs & IDMA_READ_SLAVE_ERROR) ||
-				(irqs & IDMA_STATUS_DEADLOCK_IRQ)) {
+			(irqs & IDMA_READ_SLAVE_ERROR) ||
+			(irqs & IDMA_STATUS_DEADLOCK_IRQ))
+		{
 			dpp_err("dma%d error irq occur(0x%x)\n", dpp->id, irqs);
 			dpp_dump_registers(dpp, DPU_DUMP_LV0);
 			goto irq_end;
 		}
 
-		if (irqs & IDMA_CONFIG_ERROR) {
-			val = IDMA_CFG_ERR_IMG_HEIGHT
-				| IDMA_CFG_ERR_IMG_HEIGHT_ROTATION;
+		if (irqs & IDMA_CONFIG_ERROR)
+		{
+			val = IDMA_CFG_ERR_IMG_HEIGHT | IDMA_CFG_ERR_IMG_HEIGHT_ROTATION;
 			if (cfg_err & val)
 				dpp_err("dma%d config: img_height(0x%x)\n",
-					dpp->id, irqs);
-			else {
+						dpp->id, irqs);
+			else
+			{
 				dpp_err("dma%d config error occur(0x%x)\n",
-					dpp->id, irqs);
+						dpp->id, irqs);
 				dpp_err("CFG_ERR_STATE = (0x%x)\n", cfg_err);
 				/* TODO: add to read config error information */
 				/*
@@ -898,7 +976,8 @@ static irqreturn_t dma_irq_handler(int irq, void *priv)
 			goto irq_end;
 		}
 
-		if (irqs & IDMA_STATUS_FRAMEDONE_IRQ) {
+		if (irqs & IDMA_STATUS_FRAMEDONE_IRQ)
+		{
 			/*
 			 * TODO: Normally, DMA framedone occurs before
 			 * DPP framedone. But DMA framedone can occur in case
@@ -927,14 +1006,16 @@ static irqreturn_t dpp_irq_handler(int irq, void *priv)
 	dpp_reg_clear_irq(dpp->id, dpp_irq);
 
 	if ((dpp_irq & VG_IRQ_DEADLOCK_STATUS) ||
-			(dpp_irq & VG_IRQ_READ_SLAVE_ERROR)) {
+		(dpp_irq & VG_IRQ_READ_SLAVE_ERROR))
+	{
 		dpp_err("dpp%d error irq occur(0x%x)\n", dpp->id, dpp_irq);
 		dpp_dump_registers(dpp, DPU_DUMP_LV0);
 		exynos_sysmmu_show_status(dpp->dev);
 		goto irq_end;
 	}
 
-	if (dpp_irq & VG_IRQ_FRAMEDONE) {
+	if (dpp_irq & VG_IRQ_FRAMEDONE)
+	{
 		dpp->d.done_count++;
 		if (dpp->id == ODMA_WB)
 			wake_up_interruptible_all(&dpp->framedone_wq);
@@ -953,7 +1034,8 @@ static int dpp_get_clocks(struct dpp_device *dpp)
 	struct device *dev = dpp->dev;
 
 	dpp->res.gate = devm_clk_get(dev, "dpp_clk");
-	if (IS_ERR_OR_NULL(dpp->res.gate)) {
+	if (IS_ERR_OR_NULL(dpp->res.gate))
+	{
 		dpp_err("failed to get dpp%d clock\n", dpp->id);
 		return PTR_ERR(dpp->res.gate);
 	}
@@ -962,11 +1044,12 @@ static int dpp_get_clocks(struct dpp_device *dpp)
 }
 
 static int dpp_sysmmu_fault_handler(struct iommu_domain *domain,
-	struct device *dev, unsigned long iova, int flags, void *token)
+									struct device *dev, unsigned long iova, int flags, void *token)
 {
 	struct dpp_device *dpp = dev_get_drvdata(dev);
 
-	if (dpp->state == DPP_STATE_ON) {
+	if (dpp->state == DPP_STATE_ON)
+	{
 		dpp_info("dpp%d sysmmu fault handler\n", dpp->id);
 		dpp_dump_registers(dpp, DPU_DUMP_LV0);
 
@@ -990,48 +1073,55 @@ static int dpp_init_resources(struct dpp_device *dpp, struct platform_device *pd
 	int ret;
 
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
-	if (!res) {
+	if (!res)
+	{
 		dpp_err("failed to get mem resource\n");
 		return -ENOENT;
 	}
 	dpp_info("res: start(0x%x), end(0x%x)\n", (u32)res->start, (u32)res->end);
 
 	dpp->res.regs = devm_ioremap_resource(dpp->dev, res);
-	if (!dpp->res.regs) {
+	if (!dpp->res.regs)
+	{
 		dpp_err("failed to remap DPP SFR region\n");
 		return -EINVAL;
 	}
 
 #if defined(CONFIG_SOC_EXYNOS8895)
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 1);
-	if (!res) {
+	if (!res)
+	{
 		dpp_err("failed to get mem resource\n");
 		return -ENOENT;
 	}
 	dpp_info("dma res: start(0x%x), end(0x%x)\n", (u32)res->start, (u32)res->end);
 
 	dpp->res.dma_regs = devm_ioremap_resource(dpp->dev, res);
-	if (!dpp->res.dma_regs) {
+	if (!dpp->res.dma_regs)
+	{
 		dpp_err("failed to remap DPU_DMA SFR region\n");
 		return -EINVAL;
 	}
 
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 2);
-	if (!res) {
+	if (!res)
+	{
 		dpp_err("failed to get mem resource\n");
 		return -ENOENT;
 	}
 	dpp_info("dma common res: start(0x%x), end(0x%x)\n",
-			(u32)res->start, (u32)res->end);
+			 (u32)res->start, (u32)res->end);
 
 	dpp->res.dma_com_regs = devm_ioremap_resource(dpp->dev, res);
-	if (!dpp->res.dma_com_regs) {
+	if (!dpp->res.dma_com_regs)
+	{
 		dpp_err("failed to remap DPU_DMA COMMON SFR region\n");
 		return -EINVAL;
 	}
 #endif
 	res = platform_get_resource(pdev, IORESOURCE_IRQ, 0);
-	if (!res) {
+	if (!res)
+	{
 		dpp_err("failed to get dpu dma irq resource\n");
 		return -ENOENT;
 	}
@@ -1039,16 +1129,19 @@ static int dpp_init_resources(struct dpp_device *dpp, struct platform_device *pd
 
 	dpp->res.dma_irq = res->start;
 	ret = devm_request_irq(dpp->dev, res->start, dma_irq_handler, 0,
-			pdev->name, dpp);
-	if (ret) {
+						   pdev->name, dpp);
+	if (ret)
+	{
 		dpp_err("failed to install DPU DMA irq\n");
 		return -EINVAL;
 	}
 	disable_irq(dpp->res.dma_irq);
 #if defined(CONFIG_SOC_EXYNOS8895)
-	if (dpp->id != ODMA_WB) {
+	if (dpp->id != ODMA_WB)
+	{
 		res = platform_get_resource(pdev, IORESOURCE_IRQ, 1);
-		if (!res) {
+		if (!res)
+		{
 			dpp_err("failed to get dpp irq resource\n");
 			return -ENOENT;
 		}
@@ -1056,8 +1149,9 @@ static int dpp_init_resources(struct dpp_device *dpp, struct platform_device *pd
 
 		dpp->res.irq = res->start;
 		ret = devm_request_irq(dpp->dev, res->start, dpp_irq_handler, 0,
-				pdev->name, dpp);
-		if (ret) {
+							   pdev->name, dpp);
+		if (ret)
+		{
 			dpp_err("failed to install DPP irq\n");
 			return -EINVAL;
 		}
@@ -1075,7 +1169,8 @@ static int dpp_probe(struct platform_device *pdev)
 	int ret = 0;
 
 	dpp = devm_kzalloc(dev, sizeof(*dpp), GFP_KERNEL);
-	if (!dpp) {
+	if (!dpp)
+	{
 		dpp_err("failed to allocate dpp device.\n");
 		ret = -ENOMEM;
 		goto err;
@@ -1089,7 +1184,7 @@ static int dpp_probe(struct platform_device *pdev)
 
 	spin_lock_init(&dpp->slock);
 	spin_lock_init(&dpp->dma_slock);
-	mutex_init(&dpp->lock);
+	rt_mutex_init(&dpp->lock);
 	init_waitqueue_head(&dpp->framedone_wq);
 
 	ret = dpp_init_resources(dpp, pdev);
@@ -1103,7 +1198,8 @@ static int dpp_probe(struct platform_device *pdev)
 	pm_runtime_enable(dev);
 
 	ret = iovmm_activate(dev);
-	if (ret) {
+	if (ret)
+	{
 		dpp_err("failed to activate iovmm\n");
 		goto err_clk;
 	}
@@ -1154,7 +1250,8 @@ static int dpp_runtime_resume(struct device *dev)
 	dpp_dbg("%s(%d) +\n", __func__, dpp->id);
 #if !defined(CONFIG_SOC_EXYNOS8895)
 	ret = clk_prepare_enable(dpp->res.gate);
-	if (ret) {
+	if (ret)
+	{
 		dpp_err("failed to enable dpp%d gate clock\n", dpp->id);
 		return ret;
 	}
@@ -1165,27 +1262,26 @@ static int dpp_runtime_resume(struct device *dev)
 }
 
 static const struct of_device_id dpp_of_match[] = {
-	{ .compatible = "samsung,exynos8-dpp" },
+	{.compatible = "samsung,exynos8-dpp"},
 	{},
 };
 MODULE_DEVICE_TABLE(of, dpp_of_match);
 
 static const struct dev_pm_ops dpp_pm_ops = {
-	.runtime_suspend	= dpp_runtime_suspend,
-	.runtime_resume		= dpp_runtime_resume,
+	.runtime_suspend = dpp_runtime_suspend,
+	.runtime_resume = dpp_runtime_resume,
 };
 
 static struct platform_driver dpp_driver __refdata = {
-	.probe		= dpp_probe,
-	.remove		= dpp_remove,
+	.probe = dpp_probe,
+	.remove = dpp_remove,
 	.driver = {
-		.name	= DPP_MODULE_NAME,
-		.owner	= THIS_MODULE,
-		.pm	= &dpp_pm_ops,
+		.name = DPP_MODULE_NAME,
+		.owner = THIS_MODULE,
+		.pm = &dpp_pm_ops,
 		.of_match_table = of_match_ptr(dpp_of_match),
 		.suppress_bind_attrs = true,
-	}
-};
+	}};
 
 static int dpp_register(void)
 {

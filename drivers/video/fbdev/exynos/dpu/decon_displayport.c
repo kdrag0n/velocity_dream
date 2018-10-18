@@ -333,7 +333,7 @@ int decon_displayport_get_config(struct decon_device *decon,
 	if (displayport_sd == NULL)
 		return -EINVAL;
 
-	mutex_lock(&decon->lock);
+	rt_mutex_lock(&decon->lock);
 
 	switch (displayport_data->state) {
 	case EXYNOS_DISPLAYPORT_STATE_PRESET:
@@ -363,7 +363,7 @@ int decon_displayport_get_config(struct decon_device *decon,
 		break;
 	}
 
-	mutex_unlock(&decon->lock);
+	rt_mutex_unlock(&decon->lock);
 	return ret;
 }
 
@@ -379,7 +379,7 @@ int decon_displayport_set_config(struct decon_device *decon,
 	if (displayport_sd == NULL)
 		return -EINVAL;
 
-	mutex_lock(&decon->lock);
+	rt_mutex_lock(&decon->lock);
 
 	switch (displayport_data->state) {
 	case EXYNOS_DISPLAYPORT_STATE_PRESET:
@@ -412,6 +412,6 @@ int decon_displayport_set_config(struct decon_device *decon,
 		break;
 	}
 
-	mutex_unlock(&decon->lock);
+	rt_mutex_unlock(&decon->lock);
 	return ret;
 }

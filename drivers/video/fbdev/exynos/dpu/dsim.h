@@ -19,7 +19,6 @@
 #include <media/v4l2-subdev.h>
 #include <linux/debugfs.h>
 
-
 #if defined(CONFIG_SOC_EXYNOS8895)
 #include "regs-dsim.h"
 #else
@@ -31,65 +30,72 @@
 
 extern int dsim_log_level;
 
-#define DSIM_MODULE_NAME		"exynos-dsim"
-#define DSIM_DDI_ID_LEN			3
+#define DSIM_MODULE_NAME "exynos-dsim"
+#define DSIM_DDI_ID_LEN 3
 
 #if defined(CONFIG_SOC_EXYNOS8895)
-#define DSIM_PIXEL_FORMAT_RGB24		0x0
-#define DSIM_PIXEL_FORMAT_RGB18_PACKED	0x1
-#define DSIM_PIXEL_FORMAT_RGB18		0x2
+#define DSIM_PIXEL_FORMAT_RGB24 0x0
+#define DSIM_PIXEL_FORMAT_RGB18_PACKED 0x1
+#define DSIM_PIXEL_FORMAT_RGB18 0x2
 #else
-#define DSIM_PIXEL_FORMAT_RGB24		0x7
-#define DSIM_PIXEL_FORMAT_RGB18		0x6
-#define DSIM_PIXEL_FORMAT_RGB18_PACKED	0x5
+#define DSIM_PIXEL_FORMAT_RGB24 0x7
+#define DSIM_PIXEL_FORMAT_RGB18 0x6
+#define DSIM_PIXEL_FORMAT_RGB18_PACKED 0x5
 #endif
-#define DSIM_RX_FIFO_MAX_DEPTH		64
-#define MAX_DSIM_CNT			2
-#define MAX_DSIM_DATALANE_CNT		4
+#define DSIM_RX_FIFO_MAX_DEPTH 64
+#define MAX_DSIM_CNT 2
+#define MAX_DSIM_DATALANE_CNT 4
 
-#define MIPI_WR_TIMEOUT			msecs_to_jiffies(33)
-#define MIPI_RD_TIMEOUT			msecs_to_jiffies(100)
+#define MIPI_WR_TIMEOUT msecs_to_jiffies(33)
+#define MIPI_RD_TIMEOUT msecs_to_jiffies(100)
 // Only for Exynos8895 EVT 0
-#define DSIM_FIFO_SIZE  512
-#define MIPI_DSI_WRITE	0x00
+#define DSIM_FIFO_SIZE 512
+#define MIPI_DSI_WRITE 0x00
 #define MIPI_DSI_WR_MEM 0x99
 
-#define dsim_err(fmt, ...)							\
-	do {									\
-		if (dsim_log_level >= 3) {					\
-			pr_err(pr_fmt(fmt), ##__VA_ARGS__);			\
-			exynos_ss_printk(fmt, ##__VA_ARGS__);			\
-		}								\
+#define dsim_err(fmt, ...)                        \
+	do                                            \
+	{                                             \
+		if (dsim_log_level >= 3)                  \
+		{                                         \
+			pr_err(pr_fmt(fmt), ##__VA_ARGS__);   \
+			exynos_ss_printk(fmt, ##__VA_ARGS__); \
+		}                                         \
 	} while (0)
 
-#define dsim_warn(fmt, ...)							\
-	do {									\
-		if (dsim_log_level >= 4) {					\
-			pr_warn(pr_fmt(fmt), ##__VA_ARGS__);			\
-			exynos_ss_printk(fmt, ##__VA_ARGS__);			\
-		}								\
+#define dsim_warn(fmt, ...)                       \
+	do                                            \
+	{                                             \
+		if (dsim_log_level >= 4)                  \
+		{                                         \
+			pr_warn(pr_fmt(fmt), ##__VA_ARGS__);  \
+			exynos_ss_printk(fmt, ##__VA_ARGS__); \
+		}                                         \
 	} while (0)
 
-#define dsim_info(fmt, ...)							\
-	do {									\
-		if (dsim_log_level >= 6)					\
-			pr_info(pr_fmt(fmt), ##__VA_ARGS__);			\
+#define dsim_info(fmt, ...)                      \
+	do                                           \
+	{                                            \
+		if (dsim_log_level >= 6)                 \
+			pr_info(pr_fmt(fmt), ##__VA_ARGS__); \
 	} while (0)
 
-#define dsim_dbg(fmt, ...)							\
-	do {									\
-		if (dsim_log_level >= 7)					\
-			pr_info(pr_fmt(fmt), ##__VA_ARGS__);			\
+#define dsim_dbg(fmt, ...)                       \
+	do                                           \
+	{                                            \
+		if (dsim_log_level >= 7)                 \
+			pr_info(pr_fmt(fmt), ##__VA_ARGS__); \
 	} while (0)
 
-#define call_panel_ops(q, op, args...)				\
+#define call_panel_ops(q, op, args...) \
 	(((q)->mipi_drv->op) ? ((q)->mipi_drv->op(args)) : 0)
 
 extern struct dsim_device *dsim_drvdata[MAX_DSIM_CNT];
 
 #if defined(CONFIG_SOC_EXYNOS8895)
 /* define video timer interrupt */
-enum {
+enum
+{
 	DSIM_VBP = 0,
 	DSIM_VSYNC,
 	DSIM_V_ACTIVE,
@@ -97,7 +103,8 @@ enum {
 };
 
 /* define dsi bist pattern */
-enum {
+enum
+{
 	DSIM_COLOR_BAR = 0,
 	DSIM_GRAY_GRADATION,
 	DSIM_USER_DEFINED,
@@ -106,51 +113,55 @@ enum {
 #endif
 
 /* define DSI lane types. */
-enum {
-	DSIM_LANE_CLOCK	= (1 << 0),
-	DSIM_LANE_DATA0	= (1 << 1),
-	DSIM_LANE_DATA1	= (1 << 2),
-	DSIM_LANE_DATA2	= (1 << 3),
-	DSIM_LANE_DATA3	= (1 << 4),
+enum
+{
+	DSIM_LANE_CLOCK = (1 << 0),
+	DSIM_LANE_DATA0 = (1 << 1),
+	DSIM_LANE_DATA1 = (1 << 2),
+	DSIM_LANE_DATA2 = (1 << 3),
+	DSIM_LANE_DATA3 = (1 << 4),
 };
 
 /* DSI Error report bit definitions */
-enum {
-	MIPI_DSI_ERR_SOT			= (1 << 0),
-	MIPI_DSI_ERR_SOT_SYNC			= (1 << 1),
-	MIPI_DSI_ERR_EOT_SYNC			= (1 << 2),
-	MIPI_DSI_ERR_ESCAPE_MODE_ENTRY_CMD	= (1 << 3),
-	MIPI_DSI_ERR_LOW_POWER_TRANSMIT_SYNC	= (1 << 4),
-	MIPI_DSI_ERR_HS_RECEIVE_TIMEOUT		= (1 << 5),
-	MIPI_DSI_ERR_FALSE_CONTROL		= (1 << 6),
+enum
+{
+	MIPI_DSI_ERR_SOT = (1 << 0),
+	MIPI_DSI_ERR_SOT_SYNC = (1 << 1),
+	MIPI_DSI_ERR_EOT_SYNC = (1 << 2),
+	MIPI_DSI_ERR_ESCAPE_MODE_ENTRY_CMD = (1 << 3),
+	MIPI_DSI_ERR_LOW_POWER_TRANSMIT_SYNC = (1 << 4),
+	MIPI_DSI_ERR_HS_RECEIVE_TIMEOUT = (1 << 5),
+	MIPI_DSI_ERR_FALSE_CONTROL = (1 << 6),
 	/* Bit 7 is reserved */
-	MIPI_DSI_ERR_ECC_SINGLE_BIT		= (1 << 8),
-	MIPI_DSI_ERR_ECC_MULTI_BIT		= (1 << 9),
-	MIPI_DSI_ERR_CHECKSUM			= (1 << 10),
-	MIPI_DSI_ERR_DATA_TYPE_NOT_RECOGNIZED	= (1 << 11),
-	MIPI_DSI_ERR_VCHANNEL_ID_INVALID	= (1 << 12),
-	MIPI_DSI_ERR_INVALID_TRANSMIT_LENGTH	= (1 << 13),
+	MIPI_DSI_ERR_ECC_SINGLE_BIT = (1 << 8),
+	MIPI_DSI_ERR_ECC_MULTI_BIT = (1 << 9),
+	MIPI_DSI_ERR_CHECKSUM = (1 << 10),
+	MIPI_DSI_ERR_DATA_TYPE_NOT_RECOGNIZED = (1 << 11),
+	MIPI_DSI_ERR_VCHANNEL_ID_INVALID = (1 << 12),
+	MIPI_DSI_ERR_INVALID_TRANSMIT_LENGTH = (1 << 13),
 	/* Bit 14 is reserved */
-	MIPI_DSI_ERR_PROTOCAL_VIOLATION		= (1 << 15),
+	MIPI_DSI_ERR_PROTOCAL_VIOLATION = (1 << 15),
 	/* DSI_PROTOCAL_VIOLATION[15] is for protocol violation that is caused EoTp
 	 * missing So this bit is egnored because of not supportung @S.LSI AP */
 	/* FALSE_ERROR_CONTROL[6] is for detect invalid escape or turnaround sequence.
 	 * This bit is not supporting @S.LSI AP because of non standard
 	 * ULPS enter/exit sequence during power-gating */
 	/* Bit [14],[7] is reserved */
-	MIPI_DSI_ERR_BIT_MASK			= (0x3f3f), /* Error_Range[13:0] */
+	MIPI_DSI_ERR_BIT_MASK = (0x3f3f), /* Error_Range[13:0] */
 };
 
 /* operation state of dsim driver */
-enum dsim_state {
+enum dsim_state
+{
 	DSIM_STATE_INIT,
-	DSIM_STATE_ON,		/* HS clock was enabled. */
-	DSIM_STATE_ULPS,	/* DSIM was entered ULPS state */
-	DSIM_STATE_OFF		/* DSIM is suspend state */
+	DSIM_STATE_ON,   /* HS clock was enabled. */
+	DSIM_STATE_ULPS, /* DSIM was entered ULPS state */
+	DSIM_STATE_OFF   /* DSIM is suspend state */
 };
 
 #if defined(CONFIG_SOC_EXYNOS8895)
-enum dphy_charic_value {
+enum dphy_charic_value
+{
 	M_PLL_CTRL1,
 	M_PLL_CTRL2,
 	B_DPHY_CTRL2,
@@ -163,14 +174,16 @@ enum dphy_charic_value {
 };
 #endif
 
-struct dsim_pll_param {
+struct dsim_pll_param
+{
 	u32 p;
 	u32 m;
 	u32 s;
 	u32 pll_freq; /* in/out parameter: Mhz */
 };
 
-struct dsim_clks {
+struct dsim_clks
+{
 	u32 hs_clk;
 	u32 esc_clk;
 	u32 byte_clk;
@@ -179,7 +192,8 @@ struct dsim_clks {
 #endif
 };
 
-struct dphy_timing_value {
+struct dphy_timing_value
+{
 	u32 bps;
 	u32 clk_prepare;
 	u32 clk_zero;
@@ -193,7 +207,8 @@ struct dphy_timing_value {
 	u32 b_dphyctl;
 };
 
-struct dsim_resources {
+struct dsim_resources
+{
 	struct clk *pclk;
 	struct clk *dphy_esc;
 	struct clk *dphy_byte;
@@ -207,7 +222,8 @@ struct dsim_resources {
 	void __iomem *ver_regs;
 };
 
-struct panel_ops {
+struct panel_ops
+{
 	int (*early_probe)(struct dsim_device *dsim);
 	int (*probe)(struct dsim_device *dsim);
 	int (*suspend)(struct dsim_device *dsim);
@@ -216,7 +232,8 @@ struct panel_ops {
 	int (*dump)(struct dsim_device *dsim);
 };
 
-struct mipi_panel_drv {
+struct mipi_panel_drv
+{
 	struct panel_info *panel_info;
 	int (*probe)(struct dsim_device *dsim);
 	int (*suspend)(struct dsim_device *dsim);
@@ -225,10 +242,10 @@ struct mipi_panel_drv {
 	int (*dump)(struct dsim_device *dsim);
 };
 
+#define MAX_UNDERRUN_LIST 10
 
-#define MAX_UNDERRUN_LIST	10
-
-struct dsim_underrun_info {
+struct dsim_underrun_info
+{
 	ktime_t time;
 	unsigned long mif_freq;
 	unsigned long int_freq;
@@ -237,8 +254,8 @@ struct dsim_underrun_info {
 	unsigned int cur_bw;
 };
 
-
-struct dsim_device {
+struct dsim_device
+{
 	int id;
 	enum dsim_state state;
 	struct device *dev;
@@ -253,7 +270,7 @@ struct dsim_device {
 	struct dsim_clks clks;
 	struct timer_list cmd_timer;
 
-	struct mutex cmd_lock;
+	struct rt_mutex cmd_lock;
 
 	struct completion ph_wr_comp;
 	struct completion rd_comp;
@@ -267,13 +284,13 @@ struct dsim_device {
 
 	int total_underrun_cnt;
 	int version;
-//#ifdef CONFIG_DUMPSTATE_LOGGING
+	//#ifdef CONFIG_DUMPSTATE_LOGGING
 	struct dentry *debug_root;
 	struct dentry *debug_info;
 
 	int under_list_idx;
 	struct dsim_underrun_info under_list[MAX_UNDERRUN_LIST];
-//#endif
+	//#endif
 };
 
 int dsim_write_data(struct dsim_device *dsim, u8 id, u8 *cmd, u32 size);
@@ -284,7 +301,6 @@ static inline struct dsim_device *get_dsim_drvdata(u32 id)
 {
 	return dsim_drvdata[id];
 }
-
 
 static inline int dsim_wait_for_cmd_completion(u32 id)
 {
@@ -327,9 +343,9 @@ static inline void dsim_write_mask(u32 id, u32 reg_id, u32 val, u32 mask)
 
 /* CAL APIs list */
 int dsim_reg_init(u32 id, struct decon_lcd *lcd_info,
-			u32 data_lane_cnt, struct dsim_clks *clks);
+				  u32 data_lane_cnt, struct dsim_clks *clks);
 int dsim_reg_set_clocks(u32 id, struct dsim_clks *clks,
-			struct stdphy_pms *dphy_pms, u32 en);
+						struct stdphy_pms *dphy_pms, u32 en);
 int dsim_reg_set_lanes(u32 id, u32 lanes, u32 en);
 void dsim_reg_set_int(u32 id, u32 en);
 u32 dsim_reg_rx_fifo_is_empty(u32 id);
@@ -361,20 +377,19 @@ void dsim_reg_enable_word_clock(u32 id, u32 en);
 void dsim_reg_set_esc_clk_prescaler(u32 id, u32 en, u32 p);
 u32 dsim_reg_is_pll_stable(u32 id);
 
-
-#define DSIM_IOC_ENTER_ULPS		_IOW('D', 0, u32)
-#define DSIM_IOC_DUMP			_IOW('D', 8, u32)
-#define DSIM_IOC_GET_WCLK		_IOW('D', 9, u32)
-#define DSIM_IOC_FUNC_RST		_IOW('D', 12, u32)
-#define DSIM_IOC_CLEAR_IRQ		_IOW('D', 13, u32)
+#define DSIM_IOC_ENTER_ULPS _IOW('D', 0, u32)
+#define DSIM_IOC_DUMP _IOW('D', 8, u32)
+#define DSIM_IOC_GET_WCLK _IOW('D', 9, u32)
+#define DSIM_IOC_FUNC_RST _IOW('D', 12, u32)
+#define DSIM_IOC_CLEAR_IRQ _IOW('D', 13, u32)
 
 #ifdef CONFIG_SUPPORT_DOZE
-#define DSIM_IOC_DOZE			_IOW('D', 10, u32)
-#define DSIM_IOC_DOZE_SUSPEND	_IOW('D', 11, u32)
+#define DSIM_IOC_DOZE _IOW('D', 10, u32)
+#define DSIM_IOC_DOZE_SUSPEND _IOW('D', 11, u32)
 #endif
 
 #ifdef CONFIG_SUPPORT_DSU
-#define DSIM_IOC_SET_DSU		_IOW('D', 10, struct dsu_info *)
+#define DSIM_IOC_SET_DSU _IOW('D', 10, struct dsu_info *)
 void dsim_set_dsu_update(u32 id, struct decon_lcd *lcd_info);
 #endif
 #endif /* __SAMSUNG_DSIM_H__ */

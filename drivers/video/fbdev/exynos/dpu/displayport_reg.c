@@ -948,7 +948,7 @@ int displayport_reg_dpcd_write(u32 address, u32 length, u8 *data)
 	int retry_cnt = AUX_RETRY_COUNT;
 	struct displayport_device *displayport = get_displayport_drvdata();
 
-	mutex_lock(&displayport->aux_lock);
+	rt_mutex_lock(&displayport->aux_lock);
 	while(retry_cnt > 0) {
 		displayport_reg_aux_ch_buf_clr();
 		displayport_reg_aux_error_clr();
@@ -972,7 +972,7 @@ int displayport_reg_dpcd_write(u32 address, u32 length, u8 *data)
 		secdp_bigdata_inc_error_cnt(ERR_AUX);
 #endif
 
-	mutex_unlock(&displayport->aux_lock);
+	rt_mutex_unlock(&displayport->aux_lock);
 
 	return ret;
 }
@@ -983,7 +983,7 @@ int displayport_reg_dpcd_read(u32 address, u32 length, u8 *data)
 	struct displayport_device *displayport = get_displayport_drvdata();
 	int retry_cnt = AUX_RETRY_COUNT;
 
-	mutex_lock(&displayport->aux_lock);
+	rt_mutex_lock(&displayport->aux_lock);
 	while(retry_cnt > 0) {
 		displayport_reg_set_aux_ch_command(DPCD_READ);
 		displayport_reg_set_aux_ch_address(address);
@@ -1008,7 +1008,7 @@ int displayport_reg_dpcd_read(u32 address, u32 length, u8 *data)
 	else
 		secdp_bigdata_inc_error_cnt(ERR_AUX);
 #endif
-	mutex_unlock(&displayport->aux_lock);
+	rt_mutex_unlock(&displayport->aux_lock);
 
 	return ret;
 }
@@ -1071,7 +1071,7 @@ int displayport_reg_i2c_write(u32 address, u32 length, u8 *data)
 	struct displayport_device *displayport = get_displayport_drvdata();
 	int retry_cnt = AUX_RETRY_COUNT;
 
-	mutex_lock(&displayport->aux_lock);
+	rt_mutex_lock(&displayport->aux_lock);
 
 	while (retry_cnt > 0) {
 		displayport_reg_set_aux_ch_command(I2C_WRITE);
@@ -1105,7 +1105,7 @@ int displayport_reg_i2c_write(u32 address, u32 length, u8 *data)
 		retry_cnt--;
 	}
 
-	mutex_unlock(&displayport->aux_lock);
+	rt_mutex_unlock(&displayport->aux_lock);
 
 	return ret;
 }
@@ -1116,7 +1116,7 @@ int displayport_reg_i2c_read(u32 address, u32 length, u8 *data)
 	struct displayport_device *displayport = get_displayport_drvdata();
 	int retry_cnt = AUX_RETRY_COUNT;
 
-	mutex_lock(&displayport->aux_lock);
+	rt_mutex_lock(&displayport->aux_lock);
 	while (retry_cnt > 0) {
 		displayport_reg_set_aux_ch_command(I2C_READ);
 		displayport_reg_set_aux_ch_address(address);
@@ -1134,7 +1134,7 @@ int displayport_reg_i2c_read(u32 address, u32 length, u8 *data)
 	if (ret == 0)
 		displayport_reg_aux_ch_received_buf(data, length);
 
-	mutex_unlock(&displayport->aux_lock);
+	rt_mutex_unlock(&displayport->aux_lock);
 
 	return ret;
 }
@@ -1201,7 +1201,7 @@ int displayport_reg_edid_read(u8 edid_addr_offset, u32 length, u8 *data)
 	struct displayport_device *displayport = get_displayport_drvdata();
 	int retry_cnt = AUX_RETRY_COUNT;
 
-	mutex_lock(&displayport->aux_lock);
+	rt_mutex_lock(&displayport->aux_lock);
 
 	while(retry_cnt > 0) {
 		displayport_reg_set_aux_ch_command(I2C_WRITE);
@@ -1274,7 +1274,7 @@ int displayport_reg_edid_read(u8 edid_addr_offset, u32 length, u8 *data)
 		secdp_bigdata_inc_error_cnt(ERR_AUX);
 #endif
 
-	mutex_unlock(&displayport->aux_lock);
+	rt_mutex_unlock(&displayport->aux_lock);
 
 	return ret;
 }

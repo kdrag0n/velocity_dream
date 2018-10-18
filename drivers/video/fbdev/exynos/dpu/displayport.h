@@ -565,10 +565,10 @@ struct displayport_device {
 	struct delayed_work hdcp13_integrity_check_work;
 	int hdcp_ver;
 
-	struct mutex cmd_lock;
-	struct mutex hpd_lock;
-	struct mutex aux_lock;
-	struct mutex training_lock;
+	struct rt_mutex cmd_lock;
+	struct rt_mutex hpd_lock;
+	struct rt_mutex aux_lock;
+	struct rt_mutex training_lock;
 	wait_queue_head_t dp_wait;
 #if defined(CONFIG_USB_TYPEC_MANAGER_NOTIFIER)
 	struct delayed_work notifier_register_work;
