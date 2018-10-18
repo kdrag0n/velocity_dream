@@ -142,7 +142,7 @@ vr_merge(struct request_queue *q, struct request **rqp, struct bio *bio)
 	struct vr_data *vd = vr_get_data(q);
 	struct request *rq = elv_rb_find(&vd->sort_list, sector);
 
-	if (rq && elv_rq_merge_ok(rq, bio)) {
+	if (rq && elv_bio_merge_ok(rq, bio)) {
 		*rqp = rq;
 		return ELEVATOR_FRONT_MERGE;
 	}
