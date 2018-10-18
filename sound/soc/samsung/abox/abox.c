@@ -84,7 +84,7 @@ static void update_mask_value(void __iomem *sfr,
 #define AUD_PLL_RATE_HZ_BYPASS		(26000000)
 #define AUDIF_RATE_HZ			(24576000)
 #define CALLIOPE_ENABLE_TIMEOUT_MS	(1000)
-#define BOOT_DONE_TIMEOUT_MS		(10000)
+#define BOOT_DONE_TIMEOUT_MS		(4000)
 
 /* For only external static functions */
 static struct abox_data *p_abox_data;
