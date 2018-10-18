@@ -385,6 +385,8 @@ struct cfq_data {
 	unsigned int cfq_back_max;
 	unsigned int cfq_slice_async_rq;
 	unsigned int cfq_rt_idle_only;
+	unsigned int cfq_max_async_dispatch;
+	unsigned int cfq_latency;
 	u64 cfq_fifo_expire[2];
 	u64 cfq_slice[2];
 	u64 cfq_slice_idle;
@@ -4847,12 +4849,9 @@ static struct elv_fs_entry cfq_attrs[] = {
 	CFQ_ATTR(slice_async_us),
 	CFQ_ATTR(slice_async_rq),
 	CFQ_ATTR(slice_idle),
-<<<<<<< HEAD
+	CFQ_ATTR(slice_idle_us),
 	CFQ_ATTR(rt_idle_only),
 	CFQ_ATTR(max_async_dispatch),
-=======
-	CFQ_ATTR(slice_idle_us),
->>>>>>> 3108f645b01c... cfq-iosched: Expose microsecond interfaces
 	CFQ_ATTR(group_idle),
 	CFQ_ATTR(group_idle_us),
 	CFQ_ATTR(low_latency),
