@@ -1629,7 +1629,8 @@ static void change_pageblock_range(struct page *pageblock_page,
  * is worse than movable allocations stealing from unmovable and reclaimable
  * pageblocks.
  */
-static bool can_steal_fallback(unsigned int order, int start_mt)
+static bool can_steal_fallback(unsigned int current_order, unsigned int start_order,
+			       int start_mt, int fallback_mt)
 {
 	/*
 	 * Leaving this order check is intended, although there is
@@ -1638,13 +1639,17 @@ static bool can_steal_fallback(unsigned int order, int start_mt)
 	 * but, below check doesn't guarantee it and that is just heuristic
 	 * so could be changed anytime.
 	 */
-	if (order >= pageblock_order)
+	if (current_order >= pageblock_order)
 		return true;
 
-	if (order >= pageblock_order / 2 ||
+	/* don't let unmovable allocations cause migrations simply because of free pages */
+	if ((start_mt != MIGRATE_UNMOVABLE && current_order >= pageblock_order / 2) ||
+	        /* only steal reclaimable page blocks for unmovable allocations */
+	        (start_mt == MIGRATE_UNMOVABLE && fallback_mt != MIGRATE_MOVABLE && current_order >= pageblock_order / 2) ||
+	        /* reclaimable can steal aggressively */
 		start_mt == MIGRATE_RECLAIMABLE ||
-		start_mt == MIGRATE_UNMOVABLE ||
-		start_mt == MIGRATE_MOVABLE ||
+		/* allow unmovable allocs up to 64K without migrating blocks */
+		(start_mt == MIGRATE_UNMOVABLE && start_order >= 5) ||
 		page_group_by_mobility_disabled)
 		return true;
 
@@ -1685,8 +1690,9 @@ static void steal_suitable_fallback(struct zone *zone, struct page *page,
  * we can steal other freepages all together. This would help to reduce
  * fragmentation due to mixed migratetype pages in one pageblock.
  */
-int find_suitable_fallback(struct free_area *area, unsigned int order,
-			int migratetype, bool only_stealable, bool *can_steal)
+int find_suitable_fallback(struct free_area *area, unsigned int current_order,
+			   int migratetype, bool only_stealable,
+			   int start_order, bool *can_steal)
 {
 	int i;
 	int fallback_mt;
@@ -1703,7 +1709,7 @@ int find_suitable_fallback(struct free_area *area, unsigned int order,
 		if (list_empty(&area->free_list[fallback_mt]))
 			continue;
 
-		if (can_steal_fallback(order, migratetype))
+		if (can_steal_fallback(current_order, start_order, migratetype, fallback_mt))
 			*can_steal = true;
 
 		if (!only_stealable)
@@ -1839,7 +1845,7 @@ __rmqueue_fallback(struct zone *zone, unsigned int order, int start_migratetype)
 				--current_order) {
 		area = &(zone->free_area[current_order]);
 		fallback_mt = find_suitable_fallback(area, current_order,
-				start_migratetype, false, &can_steal);
+				start_migratetype, false, order, &can_steal);
 		if (fallback_mt == -1)
 			continue;
 
@@ -4525,72 +4531,6 @@ void __ref build_all_zonelists(pg_data_t *pgdat, struct zone *zone)
 }
 
 /*
- * Helper functions to size the waitqueue hash table.
- * Essentially these want to choose hash table sizes sufficiently
- * large so that collisions trying to wait on pages are rare.
- * But in fact, the number of active page waitqueues on typical
- * systems is ridiculously low, less than 200. So this is even
- * conservative, even though it seems large.
- *
- * The constant PAGES_PER_WAITQUEUE specifies the ratio of pages to
- * waitqueues, i.e. the size of the waitq table given the number of pages.
- */
-#define PAGES_PER_WAITQUEUE	256
-
-#ifndef CONFIG_MEMORY_HOTPLUG
-static inline unsigned long wait_table_hash_nr_entries(unsigned long pages)
-{
-	unsigned long size = 1;
-
-	pages /= PAGES_PER_WAITQUEUE;
-
-	while (size < pages)
-		size <<= 1;
-
-	/*
-	 * Once we have dozens or even hundreds of threads sleeping
-	 * on IO we've got bigger problems than wait queue collision.
-	 * Limit the size of the wait table to a reasonable size.
-	 */
-	size = min(size, 4096UL);
-
-	return max(size, 4UL);
-}
-#else
-/*
- * A zone's size might be changed by hot-add, so it is not possible to determine
- * a suitable size for its wait_table.  So we use the maximum size now.
- *
- * The max wait table size = 4096 x sizeof(wait_queue_head_t).   ie:
- *
- *    i386 (preemption config)    : 4096 x 16 = 64Kbyte.
- *    ia64, x86-64 (no preemption): 4096 x 20 = 80Kbyte.
- *    ia64, x86-64 (preemption)   : 4096 x 24 = 96Kbyte.
- *
- * The maximum entries are prepared when a zone's memory is (512K + 256) pages
- * or more by the traditional way. (See above).  It equals:
- *
- *    i386, x86-64, powerpc(4K page size) : =  ( 2G + 1M)byte.
- *    ia64(16K page size)                 : =  ( 8G + 4M)byte.
- *    powerpc (64K page size)             : =  (32G +16M)byte.
- */
-static inline unsigned long wait_table_hash_nr_entries(unsigned long pages)
-{
-	return 4096UL;
-}
-#endif
-
-/*
- * This is an integer logarithm so that shifts can be used later
- * to extract the more random high bits from the multiplicative
- * hash function before the remainder is taken.
- */
-static inline unsigned long wait_table_bits(unsigned long size)
-{
-	return ffz(~size);
-}
-
-/*
  * Initially all pages are reserved - free ones are freed
  * up by free_all_bootmem() once the early boot process is
  * done. Non-atomic initialization, single-pass.
@@ -4816,49 +4756,6 @@ void __init setup_per_cpu_pageset(void)
 		setup_zone_pageset(zone);
 }
 
-static noinline __init_refok
-int zone_wait_table_init(struct zone *zone, unsigned long zone_size_pages)
-{
-	int i;
-	size_t alloc_size;
-
-	/*
-	 * The per-page waitqueue mechanism uses hashed waitqueues
-	 * per zone.
-	 */
-	zone->wait_table_hash_nr_entries =
-		 wait_table_hash_nr_entries(zone_size_pages);
-	zone->wait_table_bits =
-		wait_table_bits(zone->wait_table_hash_nr_entries);
-	alloc_size = zone->wait_table_hash_nr_entries
-					* sizeof(wait_queue_head_t);
-
-	if (!slab_is_available()) {
-		zone->wait_table = (wait_queue_head_t *)
-			memblock_virt_alloc_node_nopanic(
-				alloc_size, zone->zone_pgdat->node_id);
-	} else {
-		/*
-		 * This case means that a zone whose size was 0 gets new memory
-		 * via memory hot-add.
-		 * But it may be the case that a new node was hot-added.  In
-		 * this case vmalloc() will not be able to use this new node's
-		 * memory - this wait_table must be initialized to use this new
-		 * node itself as well.
-		 * To use this new node's memory, further consideration will be
-		 * necessary.
-		 */
-		zone->wait_table = vmalloc(alloc_size);
-	}
-	if (!zone->wait_table)
-		return -ENOMEM;
-
-	for (i = 0; i < zone->wait_table_hash_nr_entries; ++i)
-		init_waitqueue_head(zone->wait_table + i);
-
-	return 0;
-}
-
 static __meminit void zone_pcp_init(struct zone *zone)
 {
 	/*
@@ -4879,10 +4776,7 @@ int __meminit init_currently_empty_zone(struct zone *zone,
 					unsigned long size)
 {
 	struct pglist_data *pgdat = zone->zone_pgdat;
-	int ret;
-	ret = zone_wait_table_init(zone, size);
-	if (ret)
-		return ret;
+
 	pgdat->nr_zones = zone_idx(zone) + 1;
 
 	zone->zone_start_pfn = zone_start_pfn;
@@ -4894,6 +4788,7 @@ int __meminit init_currently_empty_zone(struct zone *zone,
 			zone_start_pfn, (zone_start_pfn + size));
 
 	zone_init_free_lists(zone);
+	zone->initialized = 1;
 
 	return 0;
 }

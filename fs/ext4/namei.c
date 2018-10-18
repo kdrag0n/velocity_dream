@@ -35,6 +35,7 @@
 #include <linux/bio.h>
 #include <linux/namei.h>
 #include <linux/dcache.h>
+#include <linux/iversion.h>
 #include "ext4.h"
 #include "ext4_jbd2.h"
 
@@ -1705,13 +1706,15 @@ static struct dentry *ext4_lookup(struct inode *dir, struct dentry *dentry, unsi
 			int nokey = ext4_encrypted_inode(inode) &&
 				!ext4_encryption_info(inode);
 
-			iput(inode);
-			if (nokey)
+			if (nokey) {
+				iput(inode);
 				return ERR_PTR(-ENOKEY);
+			}
 			ext4_warning(inode->i_sb,
 				     "Inconsistent encryption contexts: %lu/%lu\n",
 				     (unsigned long) dir->i_ino,
 				     (unsigned long) inode->i_ino);
+			iput(inode);
 			return ERR_PTR(-EPERM);
 		}
 	}
@@ -2037,7 +2040,7 @@ static int add_dirent_to_buf(handle_t *handle, struct ext4_filename *fname,
 	 */
 	dir->i_mtime = dir->i_ctime = ext4_current_time(dir);
 	ext4_update_dx_flag(dir);
-	dir->i_version++;
+	inode_inc_iversion(dir);
 	ext4_mark_inode_dirty(handle, dir);
 	BUFFER_TRACE(bh, "call ext4_handle_dirty_metadata");
 	err = ext4_handle_dirty_dirent_node(handle, dir, bh);
@@ -2444,7 +2447,7 @@ int ext4_generic_delete_entry(handle_t *handle,
 					blocksize);
 			else
 				de->inode = 0;
-			dir->i_version++;
+			inode_inc_iversion(dir);
 			return 0;
 		}
 		i += ext4_rec_len_from_disk(de->rec_len, blocksize);
@@ -3074,7 +3077,7 @@ static int ext4_rmdir(struct inode *dir, struct dentry *dentry)
 			     "empty directory '%.*s' has too many links (%u)",
 			     dentry->d_name.len, dentry->d_name.name,
 			     inode->i_nlink);
-	inode->i_version++;
+	inode_inc_iversion(inode);
 	clear_nlink(inode);
 	/* There's no need to set i_disksize: the fact that i_nlink is
 	 * zero will ensure that the right thing happens during any
@@ -3151,15 +3154,6 @@ static int ext4_unlink(struct inode *dir, struct dentry *dentry)
 	if (!inode->i_nlink)
 		ext4_orphan_add(handle, inode);
 	inode->i_ctime = ext4_current_time(inode);
-	/* log unlinker's uid or first 4 bytes of comm
-	 * to ext4_inode->i_version_hi */
-	inode->i_version &= 0x00000000FFFFFFFF;
-	if(current_uid().val) {
-		inode->i_version |= (u64)current_uid().val << 32;
-	} else {
-		u32 *comm = (u32 *)current->comm;
-		inode->i_version |= (u64)(*comm) << 32;
-	}
 	ext4_mark_inode_dirty(handle, inode);
 
 end_unlink:
@@ -3477,7 +3471,7 @@ static int ext4_setent(handle_t *handle, struct ext4_renament *ent,
 	ent->de->inode = cpu_to_le32(ino);
 	if (ext4_has_feature_filetype(ent->dir->i_sb))
 		ent->de->file_type = file_type;
-	ent->dir->i_version++;
+	inode_inc_iversion(ent->dir);
 	ent->dir->i_ctime = ent->dir->i_mtime =
 		ext4_current_time(ent->dir);
 	ext4_mark_inode_dirty(handle, ent->dir);

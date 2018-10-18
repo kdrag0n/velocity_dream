@@ -516,6 +516,7 @@ static void _remove_devfreq(struct devfreq *devfreq)
 		devfreq->profile->exit(devfreq->dev.parent);
 
 	mutex_destroy(&devfreq->lock);
+	mutex_destroy(&devfreq->sysfs_lock);
 	kfree(devfreq);
 }
 
@@ -575,6 +576,7 @@ struct devfreq *devfreq_add_device(struct device *dev,
 	}
 
 	mutex_init(&devfreq->lock);
+	mutex_init(&devfreq->sysfs_lock);
 	mutex_lock(&devfreq->lock);
 	devfreq->dev.parent = dev;
 	devfreq->dev.class = devfreq_class;
@@ -633,12 +635,12 @@ struct devfreq *devfreq_add_device(struct device *dev,
 	return devfreq;
 err_init:
 	list_del(&devfreq->node);
+	mutex_unlock(&devfreq_list_lock);
 #ifdef CONFIG_EXYNOS_DVFS_MANAGER
 	unregister_exynos_dm_freq_scaler(dm_type);
 err_dm_scaler:
 err_dm_type:
 #endif
-	mutex_unlock(&devfreq_list_lock);
 
 	device_unregister(&devfreq->dev);
 	kfree(devfreq);
@@ -933,12 +935,13 @@ static ssize_t governor_store(struct device *dev, struct device_attribute *attr,
 		goto out;
 	}
 
+	mutex_lock(&df->sysfs_lock);
 	if (df->governor) {
 		ret = df->governor->event_handler(df, DEVFREQ_GOV_STOP, NULL);
 		if (ret) {
 			dev_warn(dev, "%s: Governor %s not stopped(%d)\n",
 				 __func__, df->governor->name, ret);
-			goto out;
+			goto gov_stop_out;
 		}
 	}
 	prev_gov = df->governor;
@@ -952,6 +955,9 @@ static ssize_t governor_store(struct device *dev, struct device_attribute *attr,
 		strncpy(df->governor_name, prev_gov->name, DEVFREQ_NAME_LEN);
 		df->governor->event_handler(df, DEVFREQ_GOV_START, NULL);
 	}
+
+gov_stop_out:
+	mutex_unlock(&df->sysfs_lock);
 out:
 	mutex_unlock(&devfreq_list_lock);
 
@@ -1026,19 +1032,79 @@ static ssize_t polling_interval_store(struct device *dev,
 	if (ret != 1)
 		return -EINVAL;
 
+	mutex_lock(&df->sysfs_lock);
 	df->governor->event_handler(df, DEVFREQ_GOV_INTERVAL, &value);
 	ret = count;
+	mutex_unlock(&df->sysfs_lock);
 
 	return ret;
 }
 static DEVICE_ATTR_RW(polling_interval);
+
+static ssize_t min_freq_store(struct device *dev, struct device_attribute *attr,
+			      const char *buf, size_t count)
+{
+	struct devfreq *df = to_devfreq(dev);
+	unsigned long value;
+	int ret;
+	unsigned long max;
+
+	ret = sscanf(buf, "%lu", &value);
+	if (ret != 1)
+		return -EINVAL;
+
+	mutex_lock(&df->sysfs_lock);
+	mutex_lock(&df->lock);
+	max = df->max_freq;
+	if (value && max && value > max) {
+		ret = -EINVAL;
+		goto unlock;
+	}
+
+	df->min_freq = value;
+	update_devfreq(df);
+	ret = count;
+unlock:
+	mutex_unlock(&df->lock);
+	mutex_unlock(&df->sysfs_lock);
+	return ret;
+}
 
 static ssize_t min_freq_show(struct device *dev, struct device_attribute *attr,
 			     char *buf)
 {
 	return sprintf(buf, "%lu\n", to_devfreq(dev)->min_freq);
 }
-static DEVICE_ATTR_RO(min_freq);
+
+static ssize_t max_freq_store(struct device *dev, struct device_attribute *attr,
+			      const char *buf, size_t count)
+{
+	struct devfreq *df = to_devfreq(dev);
+	unsigned long value;
+	int ret;
+	unsigned long min;
+
+	ret = sscanf(buf, "%lu", &value);
+	if (ret != 1)
+		return -EINVAL;
+
+	mutex_lock(&df->sysfs_lock);
+	mutex_lock(&df->lock);
+	min = df->min_freq;
+	if (value && min && value < min) {
+		ret = -EINVAL;
+		goto unlock;
+	}
+
+	df->max_freq = value;
+	update_devfreq(df);
+	ret = count;
+unlock:
+	mutex_unlock(&df->lock);
+	mutex_unlock(&df->sysfs_lock);
+	return ret;
+}
+static DEVICE_ATTR_RW(min_freq);
 
 static ssize_t max_freq_show(struct device *dev, struct device_attribute *attr,
 			     char *buf)
@@ -1166,7 +1232,8 @@ static int __init devfreq_init(void)
 		return PTR_ERR(devfreq_class);
 	}
 
-	devfreq_wq = create_freezable_workqueue("devfreq_wq");
+	devfreq_wq = alloc_workqueue("devfreq_wq", WQ_HIGHPRI | WQ_FREEZABLE
+			| WQ_UNBOUND | WQ_MEM_RECLAIM, 1);
 	if (!devfreq_wq) {
 		class_destroy(devfreq_class);
 		pr_err("%s: couldn't create workqueue\n", __FILE__);

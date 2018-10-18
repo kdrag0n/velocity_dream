@@ -69,10 +69,6 @@ MODULE_ALIAS("rcutree");
 
 /* Data structures. */
 
-static struct lock_class_key rcu_node_class[RCU_NUM_LVLS];
-static struct lock_class_key rcu_fqs_class[RCU_NUM_LVLS];
-static struct lock_class_key rcu_exp_class[RCU_NUM_LVLS];
-
 /*
  * In order to export the rcu_state name to the tracing tools, it
  * needs to be added in the __tracepoint_string section.
@@ -741,7 +737,7 @@ void rcu_user_enter(void)
  *
  * Exit from an interrupt handler, which might possibly result in entering
  * idle mode, in other words, leaving the mode in which read-side critical
- * sections can occur.
+ * sections can occur.  The caller must have disabled interrupts.
  *
  * This code assumes that the idle loop never does anything that might
  * result in unbalanced calls to irq_enter() and irq_exit().  If your
@@ -754,11 +750,10 @@ void rcu_user_enter(void)
  */
 void rcu_irq_exit(void)
 {
-	unsigned long flags;
 	long long oldval;
 	struct rcu_dynticks *rdtp;
 
-	local_irq_save(flags);
+	RCU_LOCKDEP_WARN(!irqs_disabled(), "rcu_irq_exit() invoked with irqs enabled!!!");
 	rdtp = this_cpu_ptr(&rcu_dynticks);
 
 	/* Page faults can happen in NMI handlers, so check... */
@@ -775,6 +770,17 @@ void rcu_irq_exit(void)
 	else
 		rcu_eqs_enter_common(oldval, true);
 	rcu_sysidle_enter(1);
+}
+
+/*
+ * Wrapper for rcu_irq_exit() where interrupts are enabled.
+ */
+void rcu_irq_exit_irqson(void)
+{
+	unsigned long flags;
+
+	local_irq_save(flags);
+	rcu_irq_exit();
 	local_irq_restore(flags);
 }
 
@@ -872,7 +878,7 @@ void rcu_user_exit(void)
  *
  * Enter an interrupt handler, which might possibly result in exiting
  * idle mode, in other words, entering the mode in which read-side critical
- * sections can occur.
+ * sections can occur.  The caller must have disabled interrupts.
  *
  * Note that the Linux kernel is fully capable of entering an interrupt
  * handler that it never exits, for example when doing upcalls to
@@ -888,11 +894,10 @@ void rcu_user_exit(void)
  */
 void rcu_irq_enter(void)
 {
-	unsigned long flags;
 	struct rcu_dynticks *rdtp;
 	long long oldval;
 
-	local_irq_save(flags);
+	RCU_LOCKDEP_WARN(!irqs_disabled(), "rcu_irq_enter() invoked with irqs enabled!!!");
 	rdtp = this_cpu_ptr(&rcu_dynticks);
 
 	/* Page faults can happen in NMI handlers, so check... */
@@ -909,6 +914,17 @@ void rcu_irq_enter(void)
 	else
 		rcu_eqs_exit_common(oldval, true);
 	rcu_sysidle_exit(1);
+}
+
+/*
+ * Wrapper for rcu_irq_enter() where interrupts are enabled.
+ */
+void rcu_irq_enter_irqson(void)
+{
+	unsigned long flags;
+
+	local_irq_save(flags);
+	rcu_irq_enter();
 	local_irq_restore(flags);
 }
 
@@ -2394,7 +2410,7 @@ rcu_report_qs_rdp(int cpu, struct rcu_state *rsp, struct rcu_data *rdp)
 	if ((rnp->qsmask & mask) == 0) {
 		raw_spin_unlock_irqrestore(&rnp->lock, flags);
 	} else {
-		rdp->core_needs_qs = 0;
+		rdp->core_needs_qs = false;
 
 		/*
 		 * This GP can't end until cpu checks in, so all of our
@@ -3382,7 +3398,6 @@ static unsigned long rcu_seq_snap(unsigned long *sp)
 {
 	unsigned long s;
 
-	smp_mb(); /* Caller's modifications seen first by other CPUs. */
 	s = (READ_ONCE(*sp) + 3) & ~0x1;
 	smp_mb(); /* Above access must not bleed into critical section. */
 	return s;
@@ -3409,6 +3424,7 @@ static void rcu_exp_gp_seq_end(struct rcu_state *rsp)
 }
 static unsigned long rcu_exp_gp_seq_snap(struct rcu_state *rsp)
 {
+	smp_mb(); /* Caller's modifications seen first by other CPUs. */
 	return rcu_seq_snap(&rsp->expedited_sequence);
 }
 static bool rcu_exp_gp_seq_done(struct rcu_state *rsp, unsigned long s)
@@ -3626,7 +3642,7 @@ static bool sync_exp_work_done(struct rcu_state *rsp, struct rcu_node *rnp,
  */
 static struct rcu_node *exp_funnel_lock(struct rcu_state *rsp, unsigned long s)
 {
-	struct rcu_data *rdp;
+	struct rcu_data *rdp = per_cpu_ptr(rsp->rda, raw_smp_processor_id());
 	struct rcu_node *rnp0;
 	struct rcu_node *rnp1 = NULL;
 
@@ -3640,7 +3656,7 @@ static struct rcu_node *exp_funnel_lock(struct rcu_state *rsp, unsigned long s)
 	if (!mutex_is_locked(&rnp0->exp_funnel_mutex)) {
 		if (mutex_trylock(&rnp0->exp_funnel_mutex)) {
 			if (sync_exp_work_done(rsp, rnp0, NULL,
-					       &rsp->expedited_workdone0, s))
+					       &rdp->expedited_workdone0, s))
 				return NULL;
 			return rnp0;
 		}
@@ -3654,14 +3670,13 @@ static struct rcu_node *exp_funnel_lock(struct rcu_state *rsp, unsigned long s)
 	 * can be inexact, as it is just promoting locality and is not
 	 * strictly needed for correctness.
 	 */
-	rdp = per_cpu_ptr(rsp->rda, raw_smp_processor_id());
-	if (sync_exp_work_done(rsp, NULL, NULL, &rsp->expedited_workdone1, s))
+	if (sync_exp_work_done(rsp, NULL, NULL, &rdp->expedited_workdone1, s))
 		return NULL;
 	mutex_lock(&rdp->exp_funnel_mutex);
 	rnp0 = rdp->mynode;
 	for (; rnp0 != NULL; rnp0 = rnp0->parent) {
 		if (sync_exp_work_done(rsp, rnp1, rdp,
-				       &rsp->expedited_workdone2, s))
+				       &rdp->expedited_workdone2, s))
 			return NULL;
 		mutex_lock(&rnp0->exp_funnel_mutex);
 		if (rnp1)
@@ -3671,7 +3686,7 @@ static struct rcu_node *exp_funnel_lock(struct rcu_state *rsp, unsigned long s)
 		rnp1 = rnp0;
 	}
 	if (sync_exp_work_done(rsp, rnp1, rdp,
-			       &rsp->expedited_workdone3, s))
+			       &rdp->expedited_workdone3, s))
 		return NULL;
 	return rnp1;
 }
@@ -3688,6 +3703,11 @@ static void sync_sched_exp_handler(void *data)
 	if (!(READ_ONCE(rnp->expmask) & rdp->grpmask) ||
 	    __this_cpu_read(rcu_sched_data.cpu_no_qs.b.exp))
 		return;
+	if (rcu_is_cpu_rrupt_from_idle()) {
+		rcu_report_exp_rdp(&rcu_sched_state,
+				   this_cpu_ptr(&rcu_sched_data), true);
+		return;
+	}
 	__this_cpu_write(rcu_sched_data.cpu_no_qs.b.exp, true);
 	resched_cpu(smp_processor_id());
 }
@@ -3863,6 +3883,10 @@ void synchronize_sched_expedited(void)
 	unsigned long s;
 	struct rcu_node *rnp;
 	struct rcu_state *rsp = &rcu_sched_state;
+
+	/* If only one CPU, this is automatically a grace period. */
+	if (rcu_blocking_is_gp())
+		return;
 
 	/* Take a snapshot of the sequence number.  */
 	s = rcu_exp_gp_seq_snap(rsp);
@@ -4350,8 +4374,8 @@ static int __init rcu_spawn_gp_kthread(void)
 			sp.sched_priority = kthread_prio;
 			sched_setscheduler_nocheck(t, SCHED_FIFO, &sp);
 		}
-		wake_up_process(t);
 		raw_spin_unlock_irqrestore(&rnp->lock, flags);
+		wake_up_process(t);
 	}
 	rcu_spawn_nocb_kthreads();
 	rcu_spawn_boost_kthreads();
@@ -4408,6 +4432,9 @@ static void __init rcu_init_one(struct rcu_state *rsp,
 	static const char * const buf[] = RCU_NODE_NAME_INIT;
 	static const char * const fqs[] = RCU_FQS_NAME_INIT;
 	static const char * const exp[] = RCU_EXP_NAME_INIT;
+	static struct lock_class_key rcu_node_class[RCU_NUM_LVLS];
+	static struct lock_class_key rcu_fqs_class[RCU_NUM_LVLS];
+	static struct lock_class_key rcu_exp_class[RCU_NUM_LVLS];
 	static u8 fl_mask = 0x1;
 
 	int levelcnt[RCU_NUM_LVLS];		/* # nodes in each level. */

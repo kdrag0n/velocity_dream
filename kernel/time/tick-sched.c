@@ -755,11 +755,11 @@ static void tick_nohz_stop_sched_tick(struct tick_sched *ts, int cpu)
 }
 #endif /* CONFIG_NO_HZ_FULL */
 
-static void tick_nohz_restart_sched_tick(struct tick_sched *ts, ktime_t now)
+static void tick_nohz_restart_sched_tick(struct tick_sched *ts, ktime_t now, int active)
 {
 	/* Update jiffies first */
 	tick_do_update_jiffies64(now);
-	update_cpu_load_nohz();
+	update_cpu_load_nohz(active);
 
 	calc_load_exit_idle();
 	touch_softlockup_watchdog();
@@ -786,7 +786,7 @@ static void tick_nohz_full_update_tick(struct tick_sched *ts)
 	if (can_stop_full_tick())
 		tick_nohz_stop_sched_tick(ts, cpu);
 	else if (ts->tick_stopped)
-		tick_nohz_restart_sched_tick(ts, ktime_get());
+		tick_nohz_restart_sched_tick(ts, ktime_get(), 1);
 #endif
 }
 
@@ -1014,9 +1014,9 @@ static void tick_nohz_account_idle_ticks(struct tick_sched *ts)
 #endif
 }
 
-static void __tick_nohz_idle_restart_tick(struct tick_sched *ts, ktime_t now)
+static void __tick_nohz_idle_restart_tick(struct tick_sched *ts, ktime_t now, int active)
 {
-	tick_nohz_restart_sched_tick(ts, now);
+	tick_nohz_restart_sched_tick(ts, now, active);
 	tick_nohz_account_idle_ticks(ts);
 }
 
@@ -1025,7 +1025,7 @@ void tick_nohz_idle_restart_tick(void)
 	struct tick_sched *ts = this_cpu_ptr(&tick_cpu_sched);
 
 	if (ts->tick_stopped)
-		__tick_nohz_idle_restart_tick(ts, ktime_get());
+		__tick_nohz_idle_restart_tick(ts, ktime_get(), 1);
 }
 
 /**
@@ -1057,7 +1057,7 @@ void tick_nohz_idle_exit(void)
 		tick_nohz_stop_idle(ts, now);
 
 	if (tick_stopped)
-		__tick_nohz_idle_restart_tick(ts, now);
+		__tick_nohz_idle_restart_tick(ts, now, 0);
 
 	local_irq_enable();
 }
@@ -1259,6 +1259,17 @@ void tick_setup_sched_timer(void)
 #endif /* HIGH_RES_TIMERS */
 
 #if defined CONFIG_NO_HZ_COMMON || defined CONFIG_HIGH_RES_TIMERS
+
+static inline void clear_tick_sched(struct tick_sched *ts)
+{
+	ktime_t idle_sleeptime = ts->idle_sleeptime;
+	ktime_t iowait_sleeptime = ts->iowait_sleeptime;
+
+	memset(ts, 0, sizeof(*ts));
+	ts->idle_sleeptime = idle_sleeptime;
+	ts->iowait_sleeptime = iowait_sleeptime;
+}
+
 void tick_cancel_sched_timer(int cpu)
 {
 	struct tick_sched *ts = &per_cpu(tick_cpu_sched, cpu);
@@ -1268,7 +1279,7 @@ void tick_cancel_sched_timer(int cpu)
 		hrtimer_cancel(&ts->sched_timer);
 # endif
 
-	memset(ts, 0, sizeof(*ts));
+	clear_tick_sched(ts);
 }
 #endif
 

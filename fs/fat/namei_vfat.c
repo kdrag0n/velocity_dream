@@ -19,6 +19,7 @@
 #include <linux/ctype.h>
 #include <linux/slab.h>
 #include <linux/namei.h>
+#include <linux/iversion.h>
 #include "fat.h"
 
 #define VFAT_DSTATE_LOCKED	(void *)(0xCAFE2016)
@@ -46,6 +47,17 @@ static inline int __check_dstate_locked(struct dentry *dentry)
 	return 0;
 }
 
+static inline unsigned long vfat_d_version(struct dentry *dentry)
+{
+	return (unsigned long) dentry->d_fsdata;
+}
+
+static inline void vfat_d_version_set(struct dentry *dentry,
+				      unsigned long version)
+{
+	dentry->d_fsdata = (void *) version;
+}
+
 /*
  * If new entry was created in the parent, it could create the 8.3
  * alias (the shortname of logname).  So, the parent may have the
@@ -58,10 +70,8 @@ static int vfat_revalidate_shortname(struct dentry *dentry)
 {
 	int ret = 1;
 	spin_lock(&dentry->d_lock);
-	if ((!dentry->d_inode) && (!__check_dstate_locked(dentry)) &&
-		(dentry->d_time != d_inode(dentry->d_parent)->i_version)) {
+	if (!inode_eq_iversion(d_inode(dentry->d_parent), vfat_d_version(dentry)))
 		ret = 0;
-	}
 	spin_unlock(&dentry->d_lock);
 	return ret;
 }
@@ -786,7 +796,7 @@ static struct dentry *vfat_lookup(struct inode *dir, struct dentry *dentry,
 out:
 	mutex_unlock(&MSDOS_SB(sb)->s_lock);
 	if (!inode)
-		dentry->d_time = dir->i_version;
+		vfat_d_version_set(dentry, inode_query_iversion(dir));
 	return d_splice_alias(inode, dentry);
 error:
 	mutex_unlock(&MSDOS_SB(sb)->s_lock);
@@ -810,7 +820,7 @@ static int vfat_create(struct inode *dir, struct dentry *dentry, umode_t mode,
 		goto out;
 
 	__lock_d_revalidate(dentry);
-	dir->i_version++;
+	inode_inc_iversion(dir);
 
 	inode = fat_build_inode(sb, sinfo.de, sinfo.i_pos);
 	brelse(sinfo.bh);
@@ -819,7 +829,7 @@ static int vfat_create(struct inode *dir, struct dentry *dentry, umode_t mode,
 		__unlock_d_revalidate(dentry);
 		goto out;
 	}
-	inode->i_version++;
+	inode_inc_iversion(inode);
 	inode->i_mtime = inode->i_atime = inode->i_ctime = ts;
 	/* timestamp is already written, so mark_inode_dirty() is unneeded. */
 
@@ -854,7 +864,7 @@ static int vfat_rmdir(struct inode *dir, struct dentry *dentry)
 	clear_nlink(inode);
 	inode->i_mtime = inode->i_atime = CURRENT_TIME_SEC;
 	fat_detach(inode);
-	dentry->d_time = dir->i_version;
+	vfat_d_version_set(dentry, inode_query_iversion(dir));
 out:
 	mutex_unlock(&MSDOS_SB(sb)->s_lock);
 
@@ -880,7 +890,7 @@ static int vfat_unlink(struct inode *dir, struct dentry *dentry)
 	clear_nlink(inode);
 	inode->i_mtime = inode->i_atime = CURRENT_TIME_SEC;
 	fat_detach(inode);
-	dentry->d_time = dir->i_version;
+	vfat_d_version_set(dentry, inode_query_iversion(dir));
 out:
 	mutex_unlock(&MSDOS_SB(sb)->s_lock);
 
@@ -907,7 +917,7 @@ static int vfat_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
 	if (err)
 		goto out_free;
 	__lock_d_revalidate(dentry);
-	dir->i_version++;
+	inode_inc_iversion(dir);
 	inc_nlink(dir);
 
 	inode = fat_build_inode(sb, sinfo.de, sinfo.i_pos);
@@ -918,7 +928,7 @@ static int vfat_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
 		__unlock_d_revalidate(dentry);
 		goto out;
 	}
-	inode->i_version++;
+	inode_inc_iversion(inode);
 	set_nlink(inode, 2);
 	inode->i_mtime = inode->i_atime = inode->i_ctime = ts;
 	/* timestamp is already written, so mark_inode_dirty() is unneeded. */
@@ -984,7 +994,7 @@ static int vfat_rename(struct inode *old_dir, struct dentry *old_dentry,
 
 	__lock_d_revalidate(old_dentry);
 	__lock_d_revalidate(new_dentry);
-	new_dir->i_version++;
+	inode_inc_iversion(new_dir);
 
 	fat_detach(old_inode);
 	fat_attach(old_inode, new_i_pos);
@@ -1012,7 +1022,7 @@ static int vfat_rename(struct inode *old_dir, struct dentry *old_dentry,
 	old_sinfo.bh = NULL;
 	if (err)
 		goto error_dotdot;
-	old_dir->i_version++;
+	inode_inc_iversion(old_dir);
 	old_dir->i_ctime = old_dir->i_mtime = ts;
 	if (IS_DIRSYNC(old_dir))
 		(void)fat_sync_inode(old_dir);
