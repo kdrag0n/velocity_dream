@@ -427,7 +427,6 @@ struct request_queue {
 
 	unsigned int		rq_timeout;
 	struct timer_list	timeout;
-	struct work_struct	timeout_work;
 	struct list_head	timeout_list;
 
 	struct list_head	icq_list;
@@ -1478,33 +1477,42 @@ int kblockd_schedule_delayed_work(struct delayed_work *dwork, unsigned long dela
 int kblockd_schedule_delayed_work_on(int cpu, struct delayed_work *dwork, unsigned long delay);
 
 #ifdef CONFIG_BLK_CGROUP
+/*
+ * This should not be using sched_clock(). A real patch is in progress
+ * to fix this up, until that is in place we need to disable preemption
+ * around sched_clock() in this function and set_io_start_time_ns().
+ */
 static inline void set_start_time_ns(struct request *req)
 {
-	req->start_time_ns = ktime_get_ns();
+	preempt_disable();
+	req->start_time_ns = sched_clock();
+	preempt_enable();
 }
 
 static inline void set_io_start_time_ns(struct request *req)
 {
-	req->io_start_time_ns = ktime_get_ns();
+	preempt_disable();
+	req->io_start_time_ns = sched_clock();
+	preempt_enable();
 }
 
-static inline u64 rq_start_time_ns(struct request *req)
+static inline uint64_t rq_start_time_ns(struct request *req)
 {
         return req->start_time_ns;
 }
 
-static inline u64 rq_io_start_time_ns(struct request *req)
+static inline uint64_t rq_io_start_time_ns(struct request *req)
 {
         return req->io_start_time_ns;
 }
 #else
 static inline void set_start_time_ns(struct request *req) {}
 static inline void set_io_start_time_ns(struct request *req) {}
-static inline u64 rq_start_time_ns(struct request *req)
+static inline uint64_t rq_start_time_ns(struct request *req)
 {
 	return 0;
 }
-static inline u64 rq_io_start_time_ns(struct request *req)
+static inline uint64_t rq_io_start_time_ns(struct request *req)
 {
 	return 0;
 }

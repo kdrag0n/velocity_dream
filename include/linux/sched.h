@@ -188,9 +188,9 @@ extern int register_hmp_task_migration_notifier(struct notifier_block *nb);
 extern void calc_global_load(unsigned long ticks);
 
 #if defined(CONFIG_SMP) && defined(CONFIG_NO_HZ_COMMON)
-extern void update_cpu_load_nohz(int active);
+extern void update_cpu_load_nohz(void);
 #else
-static inline void update_cpu_load_nohz(int active) { }
+static inline void update_cpu_load_nohz(void) { }
 #endif
 
 extern unsigned long get_parent_ip(unsigned long addr);
@@ -443,8 +443,6 @@ static inline void io_schedule(void)
 {
 	io_schedule_timeout(MAX_SCHEDULE_TIMEOUT);
 }
-
-void __noreturn do_task_dead(void);
 
 struct nsproxy;
 struct user_namespace;
@@ -947,19 +945,9 @@ enum cpu_idle_type {
 };
 
 /*
- * Integer metrics need fixed point arithmetic, e.g., sched/fair
- * has a few: load, load_avg, util_avg, freq, and capacity.
- *
- * We define a basic fixed point arithmetic range, and then formalize
- * all these metrics based on that basic range.
- */
-# define SCHED_FIXEDPOINT_SHIFT	10
-# define SCHED_FIXEDPOINT_SCALE	(1L << SCHED_FIXEDPOINT_SHIFT)
-
-/*
  * Increase resolution of cpu_capacity calculations
  */
-#define SCHED_CAPACITY_SHIFT	SCHED_FIXEDPOINT_SHIFT
+#define SCHED_CAPACITY_SHIFT	10
 #define SCHED_CAPACITY_SCALE	(1L << SCHED_CAPACITY_SHIFT)
 
 /*
@@ -1251,8 +1239,8 @@ struct load_weight {
  * 1) load_avg factors frequency scaling into the amount of time that a
  * sched_entity is runnable on a rq into its weight. For cfs_rq, it is the
  * aggregated such weights of all runnable and blocked sched_entities.
- * 2) util_avg factors frequency and cpu capacity scaling into the amount of time
- * that a sched_entity is running on a CPU, in the range [0..SCHED_CAPACITY_SCALE].
+ * 2) util_avg factors frequency and cpu scaling into the amount of time
+ * that a sched_entity is running on a CPU, in the range [0..SCHED_LOAD_SCALE].
  * For cfs_rq, it is the aggregated such times of all runnable and
  * blocked sched_entities.
  * The 64 bit load_sum can:
@@ -2750,11 +2738,7 @@ static inline void set_task_comm(struct task_struct *tsk, const char *from)
 {
 	__set_task_comm(tsk, from, false);
 }
-extern char *__get_task_comm(char *to, size_t len, struct task_struct *tsk);
-#define get_task_comm(buf, tsk) ({			\
-	BUILD_BUG_ON(sizeof(buf) != TASK_COMM_LEN);	\
-	__get_task_comm(buf, sizeof(buf), tsk);		\
-})
+extern char *get_task_comm(char *to, struct task_struct *tsk);
 
 #ifdef CONFIG_SMP
 void scheduler_ipi(void);
@@ -3044,11 +3028,7 @@ static inline int signal_pending_state(long state, struct task_struct *p)
  * cond_resched_lock() will drop the spinlock before scheduling,
  * cond_resched_softirq() will enable bhs before scheduling.
  */
-#ifndef CONFIG_PREEMPT
 extern int _cond_resched(void);
-#else
-static inline int _cond_resched(void) { return 0; }
-#endif
 
 #define cond_resched() ({			\
 	___might_sleep(__FILE__, __LINE__, 0);	\

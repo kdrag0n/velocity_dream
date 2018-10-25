@@ -127,10 +127,9 @@ static void blk_rq_check_expired(struct request *rq, unsigned long *next_timeout
 	}
 }
 
-void blk_timeout_work(struct work_struct *work)
+void blk_rq_timed_out_timer(unsigned long data)
 {
-	struct request_queue *q =
-		container_of(work, struct request_queue, timeout_work);
+	struct request_queue *q = (struct request_queue *) data;
 	unsigned long flags, next = 0;
 	struct request *rq, *tmp;
 	int next_set = 0;
@@ -192,6 +191,9 @@ void blk_add_timer(struct request *req)
 {
 	struct request_queue *q = req->q;
 	unsigned long expiry;
+
+	if (req->cmd_flags & REQ_NO_TIMEOUT)
+		return;
 
 	/* blk-mq has its own handler, so we don't need ->rq_timed_out_fn */
 	if (!q->mq_ops && !q->rq_timed_out_fn)

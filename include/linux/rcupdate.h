@@ -45,7 +45,6 @@
 #include <linux/bug.h>
 #include <linux/compiler.h>
 #include <linux/ktime.h>
-#include <linux/irqflags.h>
 
 #include <asm/barrier.h>
 
@@ -380,9 +379,9 @@ static inline void rcu_init_nohz(void)
  */
 #define RCU_NONIDLE(a) \
 	do { \
-		rcu_irq_enter_irqson(); \
+		rcu_irq_enter(); \
 		do { a; } while (0); \
-		rcu_irq_exit_irqson(); \
+		rcu_irq_exit(); \
 	} while (0)
 
 /*

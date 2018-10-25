@@ -816,21 +816,14 @@ static void tcp_tsq_handler(struct sock *sk)
 {
 	if ((1 << sk->sk_state) &
 	    (TCPF_ESTABLISHED | TCPF_FIN_WAIT1 | TCPF_CLOSING |
-	     TCPF_CLOSE_WAIT  | TCPF_LAST_ACK)) {
-		struct tcp_sock *tp = tcp_sk(sk);
-
-		if (tp->lost_out > tp->retrans_out &&
-		    tp->snd_cwnd > tcp_packets_in_flight(tp))
-			tcp_xmit_retransmit_queue(sk);
-
+	     TCPF_CLOSE_WAIT  | TCPF_LAST_ACK))
 #ifdef CONFIG_MPTCP
 		tcp_sk(sk)->ops->write_xmit(sk, tcp_current_mss(sk),
-					    tp->nonagle, 0, GFP_ATOMIC);
+					    tcp_sk(sk)->nonagle, 0, GFP_ATOMIC);
 #else
-		tcp_write_xmit(sk, tcp_current_mss(sk), tp->nonagle,
+		tcp_write_xmit(sk, tcp_current_mss(sk), tcp_sk(sk)->nonagle,
 			       0, GFP_ATOMIC);
 #endif
-	}
 }
 /*
  * One tasklet per cpu tries to send more skbs.
@@ -1711,7 +1704,7 @@ static u32 tcp_tso_autosize(const struct sock *sk, unsigned int mss_now)
 {
 	u32 bytes, segs;
 
-	bytes = min(sk->sk_pacing_rate >> sk->sk_pacing_shift,
+	bytes = min(sk->sk_pacing_rate >> 10,
 		    sk->sk_gso_max_size - 1 - MAX_TCP_HEADER);
 
 	/* Goal is to send at least one packet per ms,
@@ -2210,39 +2203,6 @@ static int tcp_mtu_probe(struct sock *sk)
 	return -1;
 }
 
-/* TCP Small Queues :
- * Control number of packets in qdisc/devices to two packets / or ~1 ms.
- * (These limits are doubled for retransmits)
- * This allows for :
- *  - better RTT estimation and ACK scheduling
- *  - faster recovery
- *  - high rates
- * Alas, some drivers / subsystems require a fair amount
- * of queued bytes to ensure line rate.
- * One example is wifi aggregation (802.11 AMPDU)
- */
-static bool tcp_small_queue_check(struct sock *sk, const struct sk_buff *skb,
-				  unsigned int factor)
-{
-	unsigned int limit;
-
-	limit = max(2 * skb->truesize, sk->sk_pacing_rate >> sk->sk_pacing_shift);
-	limit = min_t(u32, limit, sysctl_tcp_limit_output_bytes);
-	limit <<= factor;
-
-	if (atomic_read(&sk->sk_wmem_alloc) > limit) {
-		set_bit(TSQ_THROTTLED, &tcp_sk(sk)->tsq_flags);
-		/* It is possible TX completion already happened
-		 * before we set TSQ_THROTTLED, so we must
-		 * test again the condition.
-		 */
-		smp_mb__after_atomic();
-		if (atomic_read(&sk->sk_wmem_alloc) > limit)
-			return true;
-	}
-	return false;
-}
-
 /* This routine writes packets to the network.  It advances the
  * send_head.  This happens as incoming acks open up the remote
  * window for us.
@@ -2340,8 +2300,33 @@ bool tcp_write_xmit(struct sock *sk, unsigned int mss_now, int nonagle,
 		    unlikely(tso_fragment(sk, skb, limit, mss_now, gfp)))
 			break;
 
-		if (tcp_small_queue_check(sk, skb, 0))
-			break;
+		/* TCP Small Queues :
+		 * Control number of packets in qdisc/devices to two packets / or ~1 ms.
+		 * This allows for :
+		 *  - better RTT estimation and ACK scheduling
+		 *  - faster recovery
+		 *  - high rates
+		 * Alas, some drivers / subsystems require a fair amount
+		 * of queued bytes to ensure line rate.
+		 * One example is wifi aggregation (802.11 AMPDU)
+		 */
+		limit = max(2 * skb->truesize, sk->sk_pacing_rate >> 10);
+		/*
+		 FIXME: P170118-06256
+		 Disable TSQ to avoid TSQ full and UL TP degression in bad network condition
+		 */
+		limit = max_t(u32, limit, sysctl_tcp_limit_output_bytes);
+
+		if (atomic_read(&sk->sk_wmem_alloc) > limit) {
+			set_bit(TSQ_THROTTLED, &tp->tsq_flags);
+			/* It is possible TX completion already happened
+			 * before we set TSQ_THROTTLED, so we must
+			 * test again the condition.
+			 */
+			smp_mb__after_atomic();
+			if (atomic_read(&sk->sk_wmem_alloc) > limit)
+				break;
+		}
 
 		if (unlikely(tcp_transmit_skb(sk, skb, 1, gfp)))
 			break;
@@ -2507,7 +2492,7 @@ void tcp_send_loss_probe(struct sock *sk)
 	if (WARN_ON(!skb || !tcp_skb_pcount(skb)))
 		goto rearm_timer;
 
-	if (__tcp_retransmit_skb(sk, skb, 1))
+	if (__tcp_retransmit_skb(sk, skb))
 		goto rearm_timer;
 
 	/* Record snd_nxt for loss detection. */
@@ -2810,17 +2795,17 @@ static void tcp_retrans_try_collapse(struct sock *sk, struct sk_buff *to,
  * state updates are done by the caller.  Returns non-zero if an
  * error occurred which prevented the send.
  */
-int __tcp_retransmit_skb(struct sock *sk, struct sk_buff *skb, int segs)
+int __tcp_retransmit_skb(struct sock *sk, struct sk_buff *skb)
 {
-	struct inet_connection_sock *icsk = inet_csk(sk);
 	struct tcp_sock *tp = tcp_sk(sk);
+	struct inet_connection_sock *icsk = inet_csk(sk);
 	unsigned int cur_mss;
-	int diff, len, err;
+	int err;
 
-
-	/* Inconclusive MTU probe */
-	if (icsk->icsk_mtup.probe_size)
+	/* Inconslusive MTU probe */
+	if (icsk->icsk_mtup.probe_size) {
 		icsk->icsk_mtup.probe_size = 0;
+	}
 
 	/* Do not sent more than we queued. 1/4 is reserved for possible
 	 * copying overhead: fragmentation, tunneling, mangling etc.
@@ -2856,26 +2841,29 @@ int __tcp_retransmit_skb(struct sock *sk, struct sk_buff *skb, int segs)
 	    TCP_SKB_CB(skb)->seq != tp->snd_una)
 		return -EAGAIN;
 
-	len = cur_mss * segs;
-	if (skb->len > len) {
-		if (tcp_fragment(sk, skb, len, cur_mss, GFP_ATOMIC))
+	if (skb->len > cur_mss) {
+		if (tcp_fragment(sk, skb, cur_mss, cur_mss, GFP_ATOMIC))
 			return -ENOMEM; /* We'll try again later. */
 	} else {
-		if (skb_unclone(skb, GFP_ATOMIC))
-			return -ENOMEM;
+		int oldpcount = tcp_skb_pcount(skb);
 
-		diff = tcp_skb_pcount(skb);
-		tcp_set_skb_tso_segs(skb, cur_mss);
-		diff -= tcp_skb_pcount(skb);
-		if (diff)
-			tcp_adjust_pcount(sk, skb, diff);
-		if (skb->len < cur_mss)
-			tcp_retrans_try_collapse(sk, skb, cur_mss);
+		if (unlikely(oldpcount > 1)) {
+			if (skb_unclone(skb, GFP_ATOMIC))
+				return -ENOMEM;
+			tcp_init_tso_segs(skb, cur_mss);
+			tcp_adjust_pcount(sk, skb, oldpcount - tcp_skb_pcount(skb));
+		}
 	}
 
 	/* RFC3168, section 6.1.1.1. ECN fallback */
 	if ((TCP_SKB_CB(skb)->tcp_flags & TCPHDR_SYN_ECN) == TCPHDR_SYN_ECN)
 		tcp_ecn_clear_syn(sk, skb);
+
+	tcp_retrans_try_collapse(sk, skb, cur_mss);
+
+	/* Make a copy, if the first transmission SKB clone we made
+	 * is still in somebody's hands, else make a clone.
+	 */
 
 	/* make sure skb->data is aligned on arches that require it
 	 * and check if ack-trimming & collapsing extended the headroom
@@ -2894,22 +2882,20 @@ int __tcp_retransmit_skb(struct sock *sk, struct sk_buff *skb, int segs)
 	}
 
 	if (likely(!err)) {
-		segs = tcp_skb_pcount(skb);
-
 		TCP_SKB_CB(skb)->sacked |= TCPCB_EVER_RETRANS;
 		/* Update global TCP statistics. */
-		TCP_ADD_STATS(sock_net(sk), TCP_MIB_RETRANSSEGS, segs);
+		TCP_INC_STATS(sock_net(sk), TCP_MIB_RETRANSSEGS);
 		if (TCP_SKB_CB(skb)->tcp_flags & TCPHDR_SYN)
 			NET_INC_STATS_BH(sock_net(sk), LINUX_MIB_TCPSYNRETRANS);
-		tp->total_retrans += segs;
+		tp->total_retrans++;
 	}
 	return err;
 }
 
-int tcp_retransmit_skb(struct sock *sk, struct sk_buff *skb, int segs)
+int tcp_retransmit_skb(struct sock *sk, struct sk_buff *skb)
 {
 	struct tcp_sock *tp = tcp_sk(sk);
-	int err = __tcp_retransmit_skb(sk, skb, segs);
+	int err = __tcp_retransmit_skb(sk, skb);
 
 	if (err == 0) {
 #if FASTRETRANS_DEBUG > 0
@@ -3000,7 +2986,6 @@ void tcp_xmit_retransmit_queue(struct sock *sk)
 
 	tcp_for_write_queue_from(skb, sk) {
 		__u8 sacked = TCP_SKB_CB(skb)->sacked;
-		int segs;
 
 		if (skb == tcp_send_head(sk))
 			break;
@@ -3008,8 +2993,14 @@ void tcp_xmit_retransmit_queue(struct sock *sk)
 		if (!hole)
 			tp->retransmit_skb_hint = skb;
 
-		segs = tp->snd_cwnd - tcp_packets_in_flight(tp);
-		if (segs <= 0)
+		/* Assume this retransmit will generate
+		 * only one packet for congestion window
+		 * calculation purposes.  This works because
+		 * tcp_retransmit_skb() will chop up the
+		 * packet to be MSS sized and all the
+		 * packet counting works out.
+		 */
+		if (tcp_packets_in_flight(tp) >= tp->snd_cwnd)
 			return;
 
 		if (fwd_rexmitting) {
@@ -3046,10 +3037,7 @@ begin_fwd:
 		if (sacked & (TCPCB_SACKED_ACKED|TCPCB_SACKED_RETRANS))
 			continue;
 
-		if (tcp_small_queue_check(sk, skb, 1))
-			return;
-
-		if (tcp_retransmit_skb(sk, skb, segs))
+		if (tcp_retransmit_skb(sk, skb))
 			return;
 
 		NET_INC_STATS_BH(sock_net(sk), mib_idx);

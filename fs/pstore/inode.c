@@ -37,7 +37,6 @@
 #include <linux/spinlock.h>
 #include <linux/uaccess.h>
 #include <linux/syslog.h>
-#include <linux/vmalloc.h>
 
 #include "internal.h"
 
@@ -217,7 +216,7 @@ static void pstore_evict_inode(struct inode *inode)
 		spin_lock_irqsave(&allpstore_lock, flags);
 		list_del(&p->list);
 		spin_unlock_irqrestore(&allpstore_lock, flags);
-		vfree(p);
+		kfree(p);
 	}
 }
 
@@ -329,7 +328,7 @@ int pstore_mkfile(enum pstore_type_id type, char *psname, u64 id, int count,
 		goto fail;
 	inode->i_mode = S_IFREG | 0444;
 	inode->i_fop = &pstore_file_operations;
-	private = vmalloc(sizeof *private + size);
+	private = kmalloc(sizeof *private + size, GFP_KERNEL);
 	if (!private)
 		goto fail_alloc;
 	private->type = type;
@@ -402,8 +401,8 @@ int pstore_mkfile(enum pstore_type_id type, char *psname, u64 id, int count,
 	return 0;
 
 fail_lockedalloc:
-        mutex_unlock(&d_inode(root)->i_mutex);
-	vfree(private);
+	mutex_unlock(&d_inode(root)->i_mutex);
+	kfree(private);
 fail_alloc:
 	iput(inode);
 
