@@ -637,7 +637,7 @@ static int wl_cfg80211_wbtext_btm_delta(struct net_device *dev,
 /* wl_roam.c */
 extern int get_roamscan_mode(struct net_device *dev, int *mode);
 extern int set_roamscan_mode(struct net_device *dev, int mode);
-extern int get_roamscan_channel_list(struct net_device *dev, unsigned char channels[]);
+extern int get_roamscan_channel_list(struct net_device *dev, unsigned char channels[], int n_channels);
 extern int set_roamscan_channel_list(struct net_device *dev, unsigned char n,
 	unsigned char channels[], int ioctl_ver);
 #endif /* WES_SUPPORT */
@@ -1397,7 +1397,7 @@ int wl_android_get_roam_scan_channels(struct net_device *dev, char *command, int
 	int channel_info_len = 0;
 	int i = 0;
 
-	channel_cnt = get_roamscan_channel_list(dev, channels);
+	channel_cnt = get_roamscan_channel_list(dev, channels, MAX_ROAM_CHANNEL);
 
 	channel_info_len += snprintf(&channel_info[channel_info_len], sizeof(channel_info),
 	                             "%d ", channel_cnt);
