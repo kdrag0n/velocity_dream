@@ -4146,7 +4146,7 @@ _dhd_set_multicast_list(dhd_info_t *dhd, int ifidx)
 }
 
 int
-_dhd_set_mac_address(dhd_info_t *dhd, int ifidx, uint8 *addr)
+_dhd_set_mac_address(dhd_info_t *dhd, int ifidx, struct ether_addr *addr)
 {
 	int ret;
 
