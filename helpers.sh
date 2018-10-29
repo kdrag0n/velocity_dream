@@ -5,6 +5,8 @@ mkzip() {
     cp -f arch/arm64/boot/Image flasher/
     [ $_RELEASE -eq 0 ] && rm -f flasher/.rel
     [ $_RELEASE -eq 1 ] && touch flasher/.rel
+    [ $_RELEASE -eq 0 ] && rf=""
+    [ $_RELEASE -eq 1 ] && rf=".rel"
 
     fn="velocity_kernel.zip"
     [ "x$1" != "x" ] && fn="$1"
@@ -14,7 +16,7 @@ mkzip() {
     cp -fr flasher/META-INF /tmp/velozip
     echo "  XZ      arc.xz"
     pushd flasher
-    tar c --owner=0 --group=0 * | xz -zcT $(($(cat /proc/cpuinfo|grep processor|wc -l)-2)) > /tmp/velozip/arc.xz
+    tar c --owner=0 --group=0 $rf * | xz -zcT $(($(cat /proc/cpuinfo|grep processor|wc -l)-2)) > /tmp/velozip/arc.xz
     popd
     echo "  ZIP     $fn"
     prpath="$(pwd)"
