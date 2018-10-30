@@ -14,11 +14,7 @@ obj-vdso := $(addprefix $(obj)/, $(obj-vdso))
 ccflags-y := -shared -fno-common -fno-builtin
 ccflags-y += -nostdlib -Wl,-soname=linux-vdso.so.1 \
 		$(call cc-ldoption, -Wl$(comma)--hash-style=sysv)
-
-# Workaround for LLVM bug 32155
-ifeq ($(CONFIG_CC_OPTIMIZE_FOR_SIZE),y)
 ccflags-y += $(DISABLE_LTO)
-endif
 
 # Disable gcov profiling for VDSO code
 GCOV_PROFILE := n
