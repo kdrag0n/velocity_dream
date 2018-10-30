@@ -6,7 +6,7 @@ tc=/usr/bin/aarch64-linux-gnu-
 # Number of parallel jobs to run
 # This should be set to the number of CPU cores on your system.
 # Do not remove, set to 1 for no parallelism.
-jobs=8
+jobs=6
 
 # Do not edit below this point
 # -----------------------------
