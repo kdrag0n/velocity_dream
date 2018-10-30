@@ -30,7 +30,7 @@ enum {
 	PANEL_SPI_CTRL_DATA_TX = 1,
 };
 static struct spi_device *panel_spi;
-static DEFINE_RT_MUTEX(panel_spi_lock);
+static DEFINE_MUTEX(panel_spi_lock);
 int panel_spi_write_data(struct spi_device *spi, const u8 *cmd, int size)
 {
 	int i, status;

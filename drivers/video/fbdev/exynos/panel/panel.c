@@ -611,7 +611,7 @@ int panel_verify_tx_packet(struct panel_device *panel, u8 *table, u8 len)
 		return -ENOMEM;
 	}
 
-	rt_mutex_lock(&panel->op_lock);
+	mutex_lock(&panel->op_lock);
 	panel_rx_nbytes(panel, DSI_PKT_TYPE_RD, buf, addr, 0, len - 1);
 	for (i = 0; i < len - 1; i++) {
 		if (buf[i] != data[i]) {
@@ -623,7 +623,7 @@ int panel_verify_tx_packet(struct panel_device *panel, u8 *table, u8 len)
 					i, addr, data[i], buf[i]);
 		}
 	}
-	rt_mutex_unlock(&panel->op_lock);
+	mutex_unlock(&panel->op_lock);
 	kfree(buf);
 	return ret;
 }
@@ -904,7 +904,7 @@ int panel_do_seqtbl_by_index(struct panel_device *panel, int index)
 	tbl = panel_data->seqtbl;
 	ktime_get_ts(&cur_ts);
 
-	rt_mutex_lock(&panel->op_lock);
+	mutex_lock(&panel->op_lock);
 	ktime_get_ts(&last_ts);
 
 	if (unlikely(index < 0 || index >= MAX_PANEL_SEQ)) {
@@ -964,7 +964,7 @@ do_exit:
 		panel_data->props.key[CMD_LEVEL_3] = 0;
 	}
 
-	rt_mutex_unlock(&panel->op_lock);
+	mutex_unlock(&panel->op_lock);
 
 	ktime_get_ts(&last_ts);
 	delta_ts = timespec_sub(last_ts, cur_ts);
@@ -997,7 +997,7 @@ int panel_do_seqtbl_by_name(struct panel_device *panel, char *name)
 		return -EINVAL;
 	}
 
-	rt_mutex_lock(&panel->op_lock);
+	mutex_lock(&panel->op_lock);
 	tbl = panel_data->seqtbl;
 
 #ifdef DEBUG_PANEL
@@ -1024,7 +1024,7 @@ int panel_do_seqtbl_by_name(struct panel_device *panel, char *name)
 	}
 
 do_exit:
-	rt_mutex_unlock(&panel->op_lock);
+	mutex_unlock(&panel->op_lock);
 #ifdef DEBUG_PANEL
 	panel_dbg("%s, %s end\n", __func__, name);
 #endif
@@ -1197,7 +1197,7 @@ int read_panel_id(struct panel_device *panel, u8 *buf)
 		return -ENODEV;
 	}
 
-	rt_mutex_lock(&panel->op_lock);
+	mutex_lock(&panel->op_lock);
 	panel_set_key(panel, 3, true);
 	len = panel_rx_nbytes(panel, DSI_PKT_TYPE_RD, buf, PANEL_ID_REG, 0, 3);
 	if (len != 3) {
@@ -1208,7 +1208,7 @@ int read_panel_id(struct panel_device *panel, u8 *buf)
 
 read_err:
 	panel_set_key(panel, 3, false);
-	rt_mutex_unlock(&panel->op_lock);
+	mutex_unlock(&panel->op_lock);
 	return ret;
 }
 

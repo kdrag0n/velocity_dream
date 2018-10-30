@@ -18,45 +18,40 @@
 #include <linux/ktime.h>
 #include <linux/wait.h>
 
-enum
-{
+enum {
 	COPR_SET_SEQ,
 	COPR_GET_SEQ,
 	/* if necessary, add new seq */
 	MAX_COPR_SEQ,
 };
 
-enum
-{
+enum {
 	COPR_MAPTBL,
 	/* if necessary, add new maptbl */
 	MAX_COPR_MAPTBL,
 };
 
-enum COPR_STATE
-{
+enum COPR_STATE {
 	COPR_UNINITIALIZED,
 	COPR_REG_ON,
 	COPR_REG_OFF,
 	MAX_COPR_REG_STATE,
 };
 
-struct copr_reg
-{
-	u8 copr_en : 1;
-	u8 copr_gamma : 1; /* 0:GAMMA_1, 1:GAMMA_2.2 */
+struct copr_reg {
+	u8 copr_en:1;
+	u8 copr_gamma:1;		/* 0:GAMMA_1, 1:GAMMA_2.2 */
 	u8 copr_er;
 	u8 copr_eg;
 	u8 copr_eb;
-	u8 roi_on : 1;
-	u16 roi_xs : 12;
-	u16 roi_ys : 12;
-	u16 roi_xe : 12;
-	u16 roi_ye : 12;
-};
+	u8 roi_on:1;
+	u16 roi_xs:12;
+	u16 roi_ys:12;
+	u16 roi_xe:12;
+	u16 roi_ye:12;
+}; 
 
-struct copr_properties
-{
+struct copr_properties {
 	bool support;
 	u32 enable;
 	struct copr_reg reg;
@@ -79,18 +74,16 @@ struct copr_properties
 	u64 total_brt_avg;
 };
 
-struct copr_wq
-{
+struct copr_wq {
 	wait_queue_head_t wait;
 	atomic_t count;
 	struct task_struct *thread;
 };
 
-struct copr_info
-{
+struct copr_info {
 	struct device *dev;
 	struct class *class;
-	struct rt_mutex lock;
+	struct mutex lock;
 	struct copr_wq wq;
 	struct copr_properties props;
 	struct notifier_block fb_notif;
@@ -100,8 +93,7 @@ struct copr_info
 	u32 nr_seqtbl;
 };
 
-struct panel_copr_data
-{
+struct panel_copr_data {
 	struct copr_reg reg;
 	struct seqinfo *seqtbl;
 	u32 nr_seqtbl;
@@ -119,10 +111,7 @@ int copr_get_value(struct copr_info *);
 int copr_get_average(struct copr_info *, int *, int *);
 int copr_probe(struct panel_device *, struct panel_copr_data *);
 #else
-static inline bool copr_is_enabled(struct copr_info *copr)
-{
-	return 0;
-}
+static inline bool copr_is_enabled(struct copr_info *copr) { return 0; }
 static inline int copr_enable(struct copr_info *copr) { return 0; }
 static inline int copr_disable(struct copr_info *copr) { return 0; }
 static inline int copr_update_start(struct copr_info *copr, int count) { return 0; }

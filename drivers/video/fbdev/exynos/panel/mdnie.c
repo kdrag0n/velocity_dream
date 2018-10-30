@@ -34,7 +34,7 @@ int g_coord_x = MIN_WCRD_X;
 int g_coord_y = MIN_WCRD_Y;
 #endif
 
-static const char *const mdnie_maptbl_name[] = {
+static const char * const mdnie_maptbl_name[] = {
 	[MDNIE_UI_MAPTBL] = "ui",
 	[MDNIE_VIDEO_MAPTBL] = "video",
 	[MDNIE_CAMERA_MAPTBL] = "camera",
@@ -76,14 +76,14 @@ static const char *const mdnie_maptbl_name[] = {
 	[MDNIE_COLOR_LENS_MAPTBL] = "color_lens",
 };
 
-static const char *const scr_white_mode_name[] = {
+static const char * const scr_white_mode_name[] = {
 	[SCR_WHITE_MODE_NONE] = "none",
 	[SCR_WHITE_MODE_COLOR_COORDINATE] = "coordinate",
 	[SCR_WHITE_MODE_ADJUST_LDU] = "adjust-ldu",
 	[SCR_WHITE_MODE_SENSOR_RGB] = "sensor-rgb",
 };
 
-static const char *const mdnie_mode_name[] = {
+static const char * const mdnie_mode_name[] = {
 	[MDNIE_OFF_MODE] = "off",
 	[MDNIE_BYPASS_MODE] = "bypass",
 	[MDNIE_LIGHT_NOTIFICATION_MODE] = "light_notification",
@@ -97,7 +97,7 @@ static const char *const mdnie_mode_name[] = {
 	[MDNIE_SCENARIO_MODE] = "scenario",
 };
 
-static const char *const scenario_mode_name[] = {
+static const char * const scenario_mode_name[] = {
 	[DYNAMIC] = "dynamic",
 	[STANDARD] = "standard",
 	[NATURAL] = "natural",
@@ -105,7 +105,7 @@ static const char *const scenario_mode_name[] = {
 	[AUTO] = "auto",
 };
 
-static const char *const scenario_name[] = {
+static const char * const scenario_name[] = {
 	[UI_MODE] = "ui",
 	[VIDEO_NORMAL_MODE] = "video_normal",
 	[CAMERA_MODE] = "camera",
@@ -125,7 +125,7 @@ static const char *const scenario_name[] = {
 	[DMB_NORMAL_MODE] = "dmb_normal",
 };
 
-static const char *const accessibility_name[] = {
+static const char * const accessibility_name[] = {
 	[ACCESSIBILITY_OFF] = "off",
 	[NEGATIVE] = "negative",
 	[COLOR_BLIND] = "color_blind",
@@ -167,8 +167,7 @@ int mdnie_get_maptbl_index(struct mdnie_info *mdnie)
 	int index;
 	int mdnie_mode = mdnie_current_state(mdnie);
 
-	switch (mdnie_mode)
-	{
+	switch (mdnie_mode) {
 	case MDNIE_BYPASS_MODE:
 		index = MDNIE_BYPASS_MAPTBL;
 		break;
@@ -207,19 +206,16 @@ int mdnie_get_maptbl_index(struct mdnie_info *mdnie)
 		break;
 	}
 
-	if (index >= 0 && index < MAX_MDNIE_MAPTBL)
-	{
+	if (index >= 0 && index < MAX_MDNIE_MAPTBL) {
 #ifdef DEBUG_PANEL
 		panel_dbg("%s, mdnie %s(%d), maptbl %s(%d) found\n",
-				  __func__, mdnie_mode_name[mdnie_mode],
-				  mdnie_mode, mdnie_maptbl_name[index], index);
+				__func__, mdnie_mode_name[mdnie_mode],
+				mdnie_mode, mdnie_maptbl_name[index], index);
 #endif
-	}
-	else
-	{
+	} else {
 		panel_err("%s, mdnie %s(%d), maptbl not found!! (%d)\n",
-				  __func__, mdnie_mode_name[mdnie_mode],
-				  mdnie_mode, index);
+				__func__, mdnie_mode_name[mdnie_mode],
+				mdnie_mode, index);
 		index = MDNIE_UI_MAPTBL;
 	}
 
@@ -230,8 +226,7 @@ struct maptbl *mdnie_find_maptbl(struct mdnie_info *mdnie)
 {
 	int index = mdnie_get_maptbl_index(mdnie);
 
-	if (unlikely(index < 0 || index >= MAX_MDNIE_MAPTBL))
-	{
+	if (unlikely(index < 0 || index >= MAX_MDNIE_MAPTBL)) {
 		pr_err("%s, failed to find maptbl %d\n", __func__, index);
 		return NULL;
 	}
@@ -240,8 +235,7 @@ struct maptbl *mdnie_find_maptbl(struct mdnie_info *mdnie)
 
 struct maptbl *mdnie_find_etc_maptbl(struct mdnie_info *mdnie, int index)
 {
-	if (unlikely(index < 0 || index >= mdnie->nr_etc_maptbl))
-	{
+	if (unlikely(index < 0 || index >= mdnie->nr_etc_maptbl)) {
 		pr_err("%s, failed to find maptbl %d\n", __func__, index);
 		return NULL;
 	}
@@ -250,8 +244,7 @@ struct maptbl *mdnie_find_etc_maptbl(struct mdnie_info *mdnie, int index)
 
 struct maptbl *mdnie_find_scr_white_maptbl(struct mdnie_info *mdnie, int index)
 {
-	if (unlikely(index < 0 || index >= mdnie->nr_scr_white_maptbl))
-	{
+	if (unlikely(index < 0 || index >= mdnie->nr_scr_white_maptbl)) {
 		pr_err("%s, failed to find maptbl %d\n", __func__, index);
 		return NULL;
 	}
@@ -263,20 +256,16 @@ static int mdnie_get_coordinate(struct mdnie_info *mdnie, int *x, int *y)
 	struct panel_device *panel =
 		container_of(mdnie, struct panel_device, mdnie);
 	struct panel_info *panel_data = &panel->panel_data;
-	u8 coordinate[PANEL_COORD_LEN] = {
-		0,
-	};
+	u8 coordinate[PANEL_COORD_LEN] = { 0, };
 	int ret;
 
-	if (!mdnie || !x || !y)
-	{
+	if (!mdnie || !x || !y) {
 		pr_err("%s, invalid parameter\n", __func__);
 		return -EINVAL;
 	}
 
 	ret = resource_copy_by_name(panel_data, coordinate, "coordinate");
-	if (ret < 0)
-	{
+	if (ret < 0) {
 		pr_err("%s, failed to copy 'coordinate' resource\n", __func__);
 		return -EINVAL;
 	}
@@ -289,7 +278,7 @@ static int mdnie_get_coordinate(struct mdnie_info *mdnie, int *x, int *y)
 #endif
 
 	if (*x < MIN_WCRD_X || *x > MAX_WCRD_X ||
-		*y < MIN_WCRD_Y || *y > MAX_WCRD_Y)
+			*y < MIN_WCRD_Y || *y > MAX_WCRD_Y)
 		pr_warn("%s, need to check coord_x:%d coord_y:%d)\n", __func__, *x, *y);
 
 	return 0;
@@ -311,13 +300,13 @@ static int mdnie_coordinate_area(struct mdnie_info *mdnie, int x, int y)
 
 	for (i = 0; i < MAX_CAL_LINE; i++)
 		result[i] = COLOR_OFFSET_FUNC(x, y,
-									  mdnie->props.line[i].num,
-									  mdnie->props.line[i].den,
-									  mdnie->props.line[i].con);
+				mdnie->props.line[i].num,
+				mdnie->props.line[i].den,
+				mdnie->props.line[i].con);
 
 	area = RECOGNIZE_REGION(result[H_LINE], result[V_LINE]);
 	pr_debug("%s, coord %d %d area Q%d, result %lld %lld\n",
-			 __func__, x, y, area + 1, result[H_LINE], result[V_LINE]);
+			__func__, x, y, area + 1, result[H_LINE], result[V_LINE]);
 
 	return area;
 }
@@ -328,9 +317,8 @@ static int mdnie_coordinate_tune_x(struct mdnie_info *mdnie, int x, int y)
 
 	area = mdnie_coordinate_area(mdnie, x, y);
 	res = ((mdnie->props.coef[area].a * x) + (mdnie->props.coef[area].b * y) +
-		   (((mdnie->props.coef[area].c * x + (1L << 9)) >> 10) * y) +
-		   (mdnie->props.coef[area].d * 10000) + (1L << 9)) >>
-		  10;
+		(((mdnie->props.coef[area].c * x + (1L << 9)) >> 10) * y) +
+		(mdnie->props.coef[area].d * 10000) + (1L << 9)) >> 10;
 
 	return max(min(res, 1024), 0);
 }
@@ -341,9 +329,8 @@ static int mdnie_coordinate_tune_y(struct mdnie_info *mdnie, int x, int y)
 
 	area = mdnie_coordinate_area(mdnie, x, y);
 	res = ((mdnie->props.coef[area].e * x) + (mdnie->props.coef[area].f * y) +
-		   (((mdnie->props.coef[area].g * x + (1L << 9)) >> 10) * y) +
-		   (mdnie->props.coef[area].h * 10000) + (1L << 9)) >>
-		  10;
+		(((mdnie->props.coef[area].g * x + (1L << 9)) >> 10) * y) +
+		(mdnie->props.coef[area].h * 10000) + (1L << 9)) >> 10;
 
 	return max(min(res, 1024), 0);
 }
@@ -351,52 +338,46 @@ static int mdnie_coordinate_tune_y(struct mdnie_info *mdnie, int x, int y)
 static void mdnie_coordinate_tune_rgb(struct mdnie_info *mdnie, int x, int y, u8 (*tune_rgb)[MAX_COLOR])
 {
 	static int pt[MAX_QUAD][MAX_RGB_PT] = {
-		{CCRD_PT_5, CCRD_PT_2, CCRD_PT_6, CCRD_PT_3}, /* QUAD_1 */
-		{CCRD_PT_5, CCRD_PT_2, CCRD_PT_4, CCRD_PT_1}, /* QUAD_2 */
-		{CCRD_PT_5, CCRD_PT_8, CCRD_PT_4, CCRD_PT_7}, /* QUAD_3 */
-		{CCRD_PT_5, CCRD_PT_8, CCRD_PT_6, CCRD_PT_9}, /* QUAD_4 */
+		{ CCRD_PT_5, CCRD_PT_2, CCRD_PT_6, CCRD_PT_3 },	/* QUAD_1 */
+		{ CCRD_PT_5, CCRD_PT_2, CCRD_PT_4, CCRD_PT_1 },	/* QUAD_2 */
+		{ CCRD_PT_5, CCRD_PT_8, CCRD_PT_4, CCRD_PT_7 },	/* QUAD_3 */
+		{ CCRD_PT_5, CCRD_PT_8, CCRD_PT_6, CCRD_PT_9 },	/* QUAD_4 */
 	};
 	int i, c, type, area, tune_x, tune_y, res[MAX_COLOR][MAX_RGB_PT];
 	s64 result[MAX_CAL_LINE];
 
 	area = mdnie_coordinate_area(mdnie, x, y);
 
-	if (((x - mdnie->props.cal_x_center) * (x - mdnie->props.cal_x_center) + (y - mdnie->props.cal_y_center) * (y - mdnie->props.cal_y_center)) <= mdnie->props.cal_boundary_center)
-	{
+	if (((x - mdnie->props.cal_x_center) * (x - mdnie->props.cal_x_center) + (y - mdnie->props.cal_y_center) * (y - mdnie->props.cal_y_center)) <= mdnie->props.cal_boundary_center) {
 		tune_x = 0;
 		tune_y = 0;
-	}
-	else
-	{
+	} else {
 		tune_x = mdnie_coordinate_tune_x(mdnie, x, y);
 		tune_y = mdnie_coordinate_tune_y(mdnie, x, y);
 	}
 
 	for (i = 0; i < MAX_CAL_LINE; i++)
 		result[i] = COLOR_OFFSET_FUNC(x, y,
-									  mdnie->props.line[i].num,
-									  mdnie->props.line[i].den,
-									  mdnie->props.line[i].con);
+				mdnie->props.line[i].num,
+				mdnie->props.line[i].den,
+				mdnie->props.line[i].con);
 
-	for (type = 0; type < MAX_WCRD_TYPE; type++)
-	{
-		for (c = 0; c < MAX_COLOR; c++)
-		{
+	for (type = 0; type < MAX_WCRD_TYPE; type++) {
+		for (c = 0; c < MAX_COLOR; c++) {
 			for (i = 0; i < MAX_RGB_PT; i++)
 				res[c][i] = mdnie->props.vtx[type][pt[area][i]][c];
 			tune_rgb[type][c] =
 				((((res[c][RGB_00] * (1024 - tune_x) + (res[c][RGB_10] * tune_x)) * (1024 - tune_y)) +
-				  ((res[c][RGB_01] * (1024 - tune_x) + (res[c][RGB_11] * tune_x)) * tune_y)) +
-				 (1L << 19)) >>
-				20;
+				  ((res[c][RGB_01] * (1024 - tune_x) + (res[c][RGB_11] * tune_x)) * tune_y)) + (1L << 19)) >> 20;
 		}
 	}
 	panel_info("coord (x:%4d y:%4d Q%d compV:%8lld compH:%8lld) "
-			   "tune_coord (%4d %4d) tune_rgb[ADT] (%3d %3d %3d) tune_rgb[D65] (%3d %3d %3d)\n",
-			   x, y, area + 1, result[H_LINE], result[V_LINE], tune_x, tune_y,
-			   tune_rgb[WCRD_TYPE_ADAPTIVE][0], tune_rgb[WCRD_TYPE_ADAPTIVE][1],
-			   tune_rgb[WCRD_TYPE_ADAPTIVE][2], tune_rgb[WCRD_TYPE_D65][0],
-			   tune_rgb[WCRD_TYPE_D65][1], tune_rgb[WCRD_TYPE_D65][2]);
+			"tune_coord (%4d %4d) tune_rgb[ADT] (%3d %3d %3d) tune_rgb[D65] (%3d %3d %3d)\n",
+			x, y, area + 1, result[H_LINE], result[V_LINE], tune_x, tune_y,
+			tune_rgb[WCRD_TYPE_ADAPTIVE][0], tune_rgb[WCRD_TYPE_ADAPTIVE][1],
+			tune_rgb[WCRD_TYPE_ADAPTIVE][2], tune_rgb[WCRD_TYPE_D65][0],
+			tune_rgb[WCRD_TYPE_D65][1], tune_rgb[WCRD_TYPE_D65][2]);
+
 }
 
 static void mdnie_coordinate_tune(struct mdnie_info *mdnie)
@@ -414,8 +395,7 @@ static int panel_set_mdnie(struct panel_device *panel)
 	int ret;
 	struct mdnie_info *mdnie = &panel->mdnie;
 
-	if (panel == NULL)
-	{
+	if (panel == NULL) {
 		panel_err("PANEL:ERR:%s:panel is null\n", __func__);
 		return -EINVAL;
 	}
@@ -424,12 +404,12 @@ static int panel_set_mdnie(struct panel_device *panel)
 		return 0;
 
 	ret = 0;
-	rt_mutex_lock(&panel->op_lock);
+	mutex_lock(&panel->op_lock);
 	ret = panel_do_seqtbl(panel, &mdnie->seqtbl[MDNIE_SET_SEQ]);
 	if (unlikely(ret < 0))
 		pr_err("%s, failed to write seqtbl\n", __func__);
 
-	rt_mutex_unlock(&panel->op_lock);
+	mutex_unlock(&panel->op_lock);
 
 	return ret;
 }
@@ -438,8 +418,7 @@ static void mdnie_maptbl_init(struct mdnie_info *mdnie, int index)
 {
 	int i;
 
-	if (((index + 1) * mdnie->nr_reg) > mdnie->nr_maptbl)
-	{
+	if (((index + 1) * mdnie->nr_reg) > mdnie->nr_maptbl) {
 		pr_err("%s out of range index %d\n", __func__, index);
 		return;
 	}
@@ -450,8 +429,7 @@ static void mdnie_maptbl_init(struct mdnie_info *mdnie, int index)
 
 static void scr_white_maptbl_init(struct mdnie_info *mdnie, int index)
 {
-	if ((index + 1) > mdnie->nr_scr_white_maptbl)
-	{
+	if ((index + 1) > mdnie->nr_scr_white_maptbl) {
 		pr_err("%s out of range index %d\n", __func__, index);
 		return;
 	}
@@ -471,10 +449,8 @@ static void mdnie_update_scr_white_mode(struct mdnie_info *mdnie)
 {
 	int mdnie_mode = mdnie_current_state(mdnie);
 
-	if (stop_samsung)
-	{
-		if (mdnie->props.update_sensorRGB)
-		{
+	if (stop_samsung) {
+		if (mdnie->props.update_sensorRGB) {
 			mdnie->props.scr_white_mode = SCR_WHITE_MODE_SENSOR_RGB;
 			mdnie->props.update_sensorRGB = false;
 		}
@@ -482,39 +458,29 @@ static void mdnie_update_scr_white_mode(struct mdnie_info *mdnie)
 		return;
 	}
 
-	if (mdnie_mode == MDNIE_SCENARIO_MODE)
-	{
-		if ((IS_LDU_MODE(mdnie)) && (mdnie->props.scenario != EBOOK_MODE))
-		{
+	if (mdnie_mode == MDNIE_SCENARIO_MODE) {
+		if ((IS_LDU_MODE(mdnie)) && (mdnie->props.scenario != EBOOK_MODE)) {
 			mdnie->props.scr_white_mode = SCR_WHITE_MODE_ADJUST_LDU;
-		}
-		else if (mdnie->props.update_sensorRGB &&
-				 mdnie->props.mode == AUTO &&
-				 (mdnie->props.scenario == BROWSER_MODE ||
-				  mdnie->props.scenario == EBOOK_MODE))
-		{
+		} else if (mdnie->props.update_sensorRGB &&
+				mdnie->props.mode == AUTO &&
+				(mdnie->props.scenario == BROWSER_MODE ||
+				 mdnie->props.scenario == EBOOK_MODE)) {
 			mdnie->props.scr_white_mode = SCR_WHITE_MODE_SENSOR_RGB;
 			mdnie->props.update_sensorRGB = false;
-		}
-		else if (mdnie->props.scenario <= SCENARIO_MAX &&
-				 mdnie->props.scenario != EBOOK_MODE)
-		{
+		} else if (mdnie->props.scenario <= SCENARIO_MAX &&
+				mdnie->props.scenario != EBOOK_MODE) {
 			mdnie->props.scr_white_mode =
 				SCR_WHITE_MODE_COLOR_COORDINATE;
-		}
-		else
-		{
+		} else {
 			mdnie->props.scr_white_mode = SCR_WHITE_MODE_NONE;
 		}
-	}
-	else
-	{
+	} else {
 		mdnie->props.scr_white_mode = SCR_WHITE_MODE_NONE;
 	}
 
 #ifdef DEBUG_PANEL
 	panel_info("%s scr_white_mode %s\n", __func__,
-			   scr_white_mode_name[mdnie->props.scr_white_mode]);
+			scr_white_mode_name[mdnie->props.scr_white_mode]);
 #endif
 }
 
@@ -524,27 +490,24 @@ int mdnie_update(struct mdnie_info *mdnie)
 	struct panel_device *panel =
 		container_of(mdnie, struct panel_device, mdnie);
 
-	rt_mutex_lock(&mdnie->lock);
-	if (!IS_MDNIE_ENABLED(mdnie))
-	{
-		rt_mutex_unlock(&mdnie->lock);
+	mutex_lock(&mdnie->lock);
+	if (!IS_MDNIE_ENABLED(mdnie)) {
+		mutex_unlock(&mdnie->lock);
 		return -EINVAL;
 	}
 
-	if (mdnie_coordinate_changed(mdnie))
-	{
+	if (mdnie_coordinate_changed(mdnie)) {
 		mdnie_coordinate_tune(mdnie);
 		scr_white_maptbls_init(mdnie);
 	}
 	mdnie_update_scr_white_mode(mdnie);
 
 	ret = panel_set_mdnie(panel);
-	if (ret < 0)
-	{
-		rt_mutex_unlock(&mdnie->lock);
+	if (ret < 0) {
+		mutex_unlock(&mdnie->lock);
 		return ret;
 	}
-	rt_mutex_unlock(&mdnie->lock);
+	mutex_unlock(&mdnie->lock);
 
 #ifdef CONFIG_EXYNOS_DECON_LCD_COPR
 	copr_update_start(&panel->copr, 3);
@@ -559,89 +522,43 @@ static void mdnie_coordinate_tune_test(struct mdnie_info *mdnie)
 	int i, x, y;
 	u8 tune_rgb[MAX_WCRD_TYPE][MAX_COLOR];
 	int input[27][2] = {
-		{2936, 3144},
-		{2987, 3203},
-		{3032, 3265},
-		{2954, 3108},
-		{2991, 3158},
-		{3041, 3210},
-		{2967, 3058},
-		{3004, 3091},
-		{3063, 3156},
-		{2985, 3206},
-		{3032, 3238},
-		{2955, 3094},
-		{2997, 3151},
-		{3045, 3191},
-		{2971, 3047},
-		{3020, 3100},
-		{3066, 3144},
-		{2983, 3131},
-		{2987, 3170},
-		{2975, 3159},
-		{3021, 3112},
-		{2982, 3122},
-		{2987, 3130},
-		{2930, 3260},
-		{2930, 3050},
-		{3060, 3050},
-		{3060, 3260},
+		{ 2936, 3144 }, { 2987, 3203 }, { 3032, 3265 }, { 2954, 3108 }, { 2991, 3158 }, { 3041, 3210 }, { 2967, 3058 }, { 3004, 3091 },
+		{ 3063, 3156 }, { 2985, 3206 }, { 3032, 3238 }, { 2955, 3094 }, { 2997, 3151 }, { 3045, 3191 }, { 2971, 3047 }, { 3020, 3100 },
+		{ 3066, 3144 }, { 2983, 3131 }, { 2987, 3170 }, { 2975, 3159 }, { 3021, 3112 }, { 2982, 3122 }, { 2987, 3130 }, { 2930, 3260 },
+		{ 2930, 3050 }, { 3060, 3050 }, { 3060, 3260 },
 	};
 	u8 output[27][MAX_COLOR] = {
-		{0xFF, 0xFA, 0xF9},
-		{0xFE, 0xFA, 0xFE},
-		{0xF8, 0xF6, 0xFF},
-		{0xFF, 0xFD, 0xFB},
-		{0xFF, 0xFE, 0xFF},
-		{0xF9, 0xFA, 0xFF},
-		{0xFC, 0xFF, 0xF9},
-		{0xFB, 0xFF, 0xFB},
-		{0xF9, 0xFF, 0xFF},
-		{0xFE, 0xFA, 0xFE},
-		{0xF9, 0xF8, 0xFF},
-		{0xFE, 0xFE, 0xFA},
-		{0xFE, 0xFF, 0xFF},
-		{0xF8, 0xFC, 0xFF},
-		{0xFA, 0xFF, 0xF8},
-		{0xF9, 0xFF, 0xFC},
-		{0xF8, 0xFF, 0xFF},
-		{0xFE, 0xFF, 0xFD},
-		{0xFF, 0xFD, 0xFF},
-		{0xFF, 0xFD, 0xFD},
-		{0xF9, 0xFF, 0xFC},
-		{0xFE, 0xFF, 0xFD},
-		{0xFE, 0xFF, 0xFD},
-		{0xFF, 0xFF, 0xFF},
-		{0xFF, 0xFF, 0xFF},
-		{0xFF, 0xFF, 0xFF},
-		{0xFF, 0xFF, 0xFF},
+		{ 0xFF, 0xFA, 0xF9 }, { 0xFE, 0xFA, 0xFE }, { 0xF8, 0xF6, 0xFF }, { 0xFF, 0xFD, 0xFB },
+		{ 0xFF, 0xFE, 0xFF }, { 0xF9, 0xFA, 0xFF }, { 0xFC, 0xFF, 0xF9 }, { 0xFB, 0xFF, 0xFB },
+		{ 0xF9, 0xFF, 0xFF }, { 0xFE, 0xFA, 0xFE }, { 0xF9, 0xF8, 0xFF }, { 0xFE, 0xFE, 0xFA },
+		{ 0xFE, 0xFF, 0xFF }, { 0xF8, 0xFC, 0xFF }, { 0xFA, 0xFF, 0xF8 }, { 0xF9, 0xFF, 0xFC },
+		{ 0xF8, 0xFF, 0xFF }, { 0xFE, 0xFF, 0xFD }, { 0xFF, 0xFD, 0xFF }, { 0xFF, 0xFD, 0xFD },
+		{ 0xF9, 0xFF, 0xFC }, { 0xFE, 0xFF, 0xFD }, { 0xFE, 0xFF, 0xFD }, { 0xFF, 0xFF, 0xFF },
+		{ 0xFF, 0xFF, 0xFF }, { 0xFF, 0xFF, 0xFF }, { 0xFF, 0xFF, 0xFF },
 	};
 
 	for (x = MIN_WCRD_X; x <= MAX_WCRD_X; x += 10)
 		for (y = MIN_WCRD_Y; y <= MAX_WCRD_Y; y += 10)
 			mdnie_coordinate_tune_rgb(mdnie, x, y, tune_rgb);
 
-	for (i = 0; i < 27; i++)
-	{
+	for (i = 0; i < 27; i++) {
 		g_coord_x = input[i][0];
 		g_coord_y = input[i][1];
 		mdnie_update(mdnie);
 		panel_info("compare %02X %02X %02X : %02X %02X %02X (%s)\n",
-				   output[i][0], output[i][1], output[i][2],
-				   mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][0],
-				   mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][1],
-				   mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][2],
-				   output[i][0] == mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][0] &&
-						   output[i][1] == mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][1] &&
-						   output[i][2] == mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][2]
-					   ? "SUCCESS"
-					   : "FAILED");
+				output[i][0], output[i][1], output[i][2],
+				mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][0],
+				mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][1],
+				mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][2],
+				output[i][0] == mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][0] &&
+				output[i][1] == mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][1] &&
+				output[i][2] == mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][2] ?  "SUCCESS" : "FAILED");
 	}
 }
 #endif
 
 static ssize_t mode_show(struct device *dev,
-						 struct device_attribute *attr, char *buf)
+		struct device_attribute *attr, char *buf)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 
@@ -649,7 +566,7 @@ static ssize_t mode_show(struct device *dev,
 }
 
 static ssize_t mode_store(struct device *dev,
-						  struct device_attribute *attr, const char *buf, size_t count)
+		struct device_attribute *attr, const char *buf, size_t count)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 	unsigned int value = 0;
@@ -661,22 +578,21 @@ static ssize_t mode_store(struct device *dev,
 
 	dev_info(dev, "%s: value=%d\n", __func__, value);
 
-	if (value >= MODE_MAX)
-	{
+	if (value >= MODE_MAX) {
 		value = STANDARD;
 		return -EINVAL;
 	}
 
-	rt_mutex_lock(&mdnie->lock);
+	mutex_lock(&mdnie->lock);
 	mdnie->props.mode = value;
-	rt_mutex_unlock(&mdnie->lock);
+	mutex_unlock(&mdnie->lock);
 	mdnie_update(mdnie);
 
 	return count;
 }
 
 static ssize_t scenario_show(struct device *dev,
-							 struct device_attribute *attr, char *buf)
+		struct device_attribute *attr, char *buf)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 
@@ -684,7 +600,7 @@ static ssize_t scenario_show(struct device *dev,
 }
 
 static ssize_t scenario_store(struct device *dev,
-							  struct device_attribute *attr, const char *buf, size_t count)
+		struct device_attribute *attr, const char *buf, size_t count)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 	unsigned int value;
@@ -696,22 +612,21 @@ static ssize_t scenario_store(struct device *dev,
 
 	dev_info(dev, "%s: value=%d\n", __func__, value);
 
-	if (!SCENARIO_IS_VALID(value))
-	{
+	if (!SCENARIO_IS_VALID(value)) {
 		dev_err(dev, "%s, invalid scenario %d\n", __func__, value);
 		return -EINVAL;
 	}
 
-	rt_mutex_lock(&mdnie->lock);
+	mutex_lock(&mdnie->lock);
 	mdnie->props.scenario = value;
-	rt_mutex_unlock(&mdnie->lock);
+	mutex_unlock(&mdnie->lock);
 	mdnie_update(mdnie);
 
 	return count;
 }
 
 static ssize_t accessibility_show(struct device *dev,
-								  struct device_attribute *attr, char *buf)
+		struct device_attribute *attr, char *buf)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 
@@ -719,48 +634,42 @@ static ssize_t accessibility_show(struct device *dev,
 }
 
 static ssize_t accessibility_store(struct device *dev,
-								   struct device_attribute *attr, const char *buf, size_t count)
+		struct device_attribute *attr, const char *buf, size_t count)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
-	unsigned int s[12] = {
-		0,
-	};
+	unsigned int s[12] = {0, };
 	unsigned int value;
 	int i, ret;
 
 	ret = sscanf(buf, "%d %x %x %x %x %x %x %x %x %x %x %x %x",
-				 &value, &s[0], &s[1], &s[2], &s[3],
-				 &s[4], &s[5], &s[6], &s[7], &s[8], &s[9], &s[10], &s[11]);
+		&value, &s[0], &s[1], &s[2], &s[3],
+		&s[4], &s[5], &s[6], &s[7], &s[8], &s[9], &s[10], &s[11]);
 
 	dev_info(dev, "%s: value: %d, cnt: %d\n", __func__, value, ret);
 
 	if (ret <= 0 || ret > ARRAY_SIZE(s) + 1 ||
-		((ret - 1) > (MAX_MDNIE_SCR_LEN / 2)))
-	{
+			((ret - 1) > (MAX_MDNIE_SCR_LEN / 2))) {
 		pr_warn("%s, invalid size %d\n", __func__, ret);
 		return ret;
 	}
 
-	if (value >= ACCESSIBILITY_MAX)
-	{
+	if (value >= ACCESSIBILITY_MAX) {
 		pr_warn("%s, unknown accessibility %d\n", __func__, value);
 		return -EINVAL;
 	}
 
-	rt_mutex_lock(&mdnie->lock);
+	mutex_lock(&mdnie->lock);
 	mdnie->props.accessibility = value;
-	if (ret > 1 && (value == COLOR_BLIND || value == COLOR_BLIND_HBM))
-	{
-		for (i = 0; i < ret - 1; i++)
-		{
+	if (ret > 1 && (value == COLOR_BLIND || value == COLOR_BLIND_HBM)) {
+		for (i = 0; i < ret - 1; i++) {
 			mdnie->props.scr[i * 2 + 0] = GET_LSB_8BIT(s[i]);
 			mdnie->props.scr[i * 2 + 1] = GET_MSB_8BIT(s[i]);
 		}
 		mdnie->props.sz_scr = (ret - 1) * 2;
 		mdnie_maptbl_init(mdnie,
-						  MAPTBL_IDX_ACCESSIBILITY(mdnie->props.accessibility));
+			MAPTBL_IDX_ACCESSIBILITY(mdnie->props.accessibility));
 	}
-	rt_mutex_unlock(&mdnie->lock);
+	mutex_unlock(&mdnie->lock);
 
 	dev_info(dev, "%s: %s\n", __func__, buf);
 	mdnie_update(mdnie);
@@ -769,7 +678,7 @@ static ssize_t accessibility_store(struct device *dev,
 }
 
 static ssize_t bypass_show(struct device *dev,
-						   struct device_attribute *attr, char *buf)
+		struct device_attribute *attr, char *buf)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 
@@ -777,7 +686,7 @@ static ssize_t bypass_show(struct device *dev,
 }
 
 static ssize_t bypass_store(struct device *dev,
-							struct device_attribute *attr, const char *buf, size_t count)
+		struct device_attribute *attr, const char *buf, size_t count)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 	unsigned int value;
@@ -795,16 +704,16 @@ static ssize_t bypass_store(struct device *dev,
 
 	value = (value) ? BYPASS_ON : BYPASS_OFF;
 
-	rt_mutex_lock(&mdnie->lock);
+	mutex_lock(&mdnie->lock);
 	mdnie->props.bypass = value;
-	rt_mutex_unlock(&mdnie->lock);
+	mutex_unlock(&mdnie->lock);
 	mdnie_update(mdnie);
 
 	return count;
 }
 
 static ssize_t lux_show(struct device *dev,
-						struct device_attribute *attr, char *buf)
+		struct device_attribute *attr, char *buf)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 
@@ -812,7 +721,7 @@ static ssize_t lux_show(struct device *dev,
 }
 
 static ssize_t lux_store(struct device *dev,
-						 struct device_attribute *attr, const char *buf, size_t count)
+		struct device_attribute *attr, const char *buf, size_t count)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 	int ret, value;
@@ -823,10 +732,10 @@ static ssize_t lux_store(struct device *dev,
 
 	dev_info(dev, "%s: %d\n", __func__, value);
 
-	rt_mutex_lock(&mdnie->lock);
+	mutex_lock(&mdnie->lock);
 	/* TODO : IS HBM ON CONDITION ALWAYS 10000 LUX ? */
 	mdnie->props.hbm = (value < 40000) ? 0 : 1;
-	rt_mutex_unlock(&mdnie->lock);
+	mutex_unlock(&mdnie->lock);
 	mdnie_update(mdnie);
 
 	return count;
@@ -834,71 +743,69 @@ static ssize_t lux_store(struct device *dev,
 
 /* Temporary solution: Do not use this sysfs as official purpose */
 static ssize_t mdnie_show(struct device *dev,
-						  struct device_attribute *attr, char *buf)
+		struct device_attribute *attr, char *buf)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 	int maptbl_index = mdnie_get_maptbl_index(mdnie);
 	int i, mdnie_mode = mdnie_current_state(mdnie);
 	unsigned int len = 0;
 
-	if (!IS_MDNIE_ENABLED(mdnie))
-	{
+	if (!IS_MDNIE_ENABLED(mdnie)) {
 		dev_err(mdnie->dev, "mdnie state is off\n");
 		return -EINVAL;
 	}
 
 	len += scnprintf(buf + len, PAGE_SIZE - len, "mdnie %s-mode, maptbl %s(%d)\n",
-					 mdnie_mode_name[mdnie_mode], (maptbl_index < 0) ? "invalid" : mdnie_maptbl_name[maptbl_index], maptbl_index);
+			mdnie_mode_name[mdnie_mode], (maptbl_index < 0) ?
+			"invalid" : mdnie_maptbl_name[maptbl_index], maptbl_index);
 	len += scnprintf(buf + len, PAGE_SIZE - len, "accessibility %s(%d), hdr %d, hmd %d, hbm %d\n",
-					 accessibility_name[mdnie->props.accessibility],
-					 mdnie->props.accessibility, mdnie->props.hdr,
-					 mdnie->props.hmd, mdnie->props.hbm);
+			accessibility_name[mdnie->props.accessibility],
+			mdnie->props.accessibility, mdnie->props.hdr,
+			mdnie->props.hmd, mdnie->props.hbm);
 	len += scnprintf(buf + len, PAGE_SIZE - len, "scenario %s(%d), mode %s(%d)\n",
-					 scenario_name[mdnie->props.scenario], mdnie->props.scenario,
-					 scenario_mode_name[mdnie->props.mode], mdnie->props.mode);
+			scenario_name[mdnie->props.scenario], mdnie->props.scenario,
+			scenario_mode_name[mdnie->props.mode], mdnie->props.mode);
 	len += scnprintf(buf + len, PAGE_SIZE - len, "scr_white_mode %s\n",
-					 scr_white_mode_name[mdnie->props.scr_white_mode]);
+			scr_white_mode_name[mdnie->props.scr_white_mode]);
 	len += scnprintf(buf + len, PAGE_SIZE - len, "mdnie_ldu %d, coord x %d, y %d area Q%d\n",
-					 mdnie->props.ldu, mdnie->props.wcrd_x, mdnie->props.wcrd_y,
-					 mdnie_coordinate_area(mdnie, mdnie->props.wcrd_x, mdnie->props.wcrd_y) + 1);
+			mdnie->props.ldu, mdnie->props.wcrd_x, mdnie->props.wcrd_y,
+			mdnie_coordinate_area(mdnie, mdnie->props.wcrd_x, mdnie->props.wcrd_y) + 1);
 	len += scnprintf(buf + len, PAGE_SIZE - len, "coord_wrgb[adpt] r:%d(%02X) g:%d(%02X) b:%d(%02X)\n",
-					 mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][0], mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][0],
-					 mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][1], mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][1],
-					 mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][2], mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][2]);
+			mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][0], mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][0],
+			mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][1], mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][1],
+			mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][2], mdnie->props.coord_wrgb[WCRD_TYPE_ADAPTIVE][2]);
 	len += scnprintf(buf + len, PAGE_SIZE - len, "coord_wrgb[d65] r:%d(%02X) g:%d(%02X) b:%d(%02X)\n",
-					 mdnie->props.coord_wrgb[WCRD_TYPE_D65][0], mdnie->props.coord_wrgb[WCRD_TYPE_D65][0],
-					 mdnie->props.coord_wrgb[WCRD_TYPE_D65][1], mdnie->props.coord_wrgb[WCRD_TYPE_D65][1],
-					 mdnie->props.coord_wrgb[WCRD_TYPE_D65][2], mdnie->props.coord_wrgb[WCRD_TYPE_D65][2]);
+			mdnie->props.coord_wrgb[WCRD_TYPE_D65][0], mdnie->props.coord_wrgb[WCRD_TYPE_D65][0],
+			mdnie->props.coord_wrgb[WCRD_TYPE_D65][1], mdnie->props.coord_wrgb[WCRD_TYPE_D65][1],
+			mdnie->props.coord_wrgb[WCRD_TYPE_D65][2], mdnie->props.coord_wrgb[WCRD_TYPE_D65][2]);
 	len += scnprintf(buf + len, PAGE_SIZE - len, "cur_wrgb r:%d(%02X) g:%d(%02X) b:%d(%02X)\n",
-					 mdnie->props.cur_wrgb[0], mdnie->props.cur_wrgb[0],
-					 mdnie->props.cur_wrgb[1], mdnie->props.cur_wrgb[1],
-					 mdnie->props.cur_wrgb[2], mdnie->props.cur_wrgb[2]);
+			mdnie->props.cur_wrgb[0], mdnie->props.cur_wrgb[0],
+			mdnie->props.cur_wrgb[1], mdnie->props.cur_wrgb[1],
+			mdnie->props.cur_wrgb[2], mdnie->props.cur_wrgb[2]);
 	len += scnprintf(buf + len, PAGE_SIZE - len, "ssr_wrgb r:%d(%02X) g:%d(%02X) b:%d(%02X)\n",
-					 mdnie->props.ssr_wrgb[0], mdnie->props.ssr_wrgb[0],
-					 mdnie->props.ssr_wrgb[1], mdnie->props.ssr_wrgb[1],
-					 mdnie->props.ssr_wrgb[2], mdnie->props.ssr_wrgb[2]);
+			mdnie->props.ssr_wrgb[0], mdnie->props.ssr_wrgb[0],
+			mdnie->props.ssr_wrgb[1], mdnie->props.ssr_wrgb[1],
+			mdnie->props.ssr_wrgb[2], mdnie->props.ssr_wrgb[2]);
 	len += scnprintf(buf + len, PAGE_SIZE - len, "def_wrgb r:%d(%02X) g:%d(%02X) b:%d(%02X), offset r:%d g:%d b:%d\n",
-					 mdnie->props.def_wrgb[0], mdnie->props.def_wrgb[0],
-					 mdnie->props.def_wrgb[1], mdnie->props.def_wrgb[1],
-					 mdnie->props.def_wrgb[2], mdnie->props.def_wrgb[2],
-					 mdnie->props.def_wrgb_ofs[0], mdnie->props.def_wrgb_ofs[1],
-					 mdnie->props.def_wrgb_ofs[2]);
+			mdnie->props.def_wrgb[0], mdnie->props.def_wrgb[0],
+			mdnie->props.def_wrgb[1], mdnie->props.def_wrgb[1],
+			mdnie->props.def_wrgb[2], mdnie->props.def_wrgb[2],
+			mdnie->props.def_wrgb_ofs[0], mdnie->props.def_wrgb_ofs[1],
+			mdnie->props.def_wrgb_ofs[2]);
 
 	len += scnprintf(buf + len, PAGE_SIZE - len, "scr : ");
-	if (mdnie->props.sz_scr)
-	{
+	if (mdnie->props.sz_scr) {
 		for (i = 0; i < mdnie->props.sz_scr; i++)
 			len += scnprintf(buf + len, PAGE_SIZE - len, "%02x ", mdnie->props.scr[i]);
-	}
-	else
-	{
+	} else {
 		len += scnprintf(buf + len, PAGE_SIZE - len, "none");
 	}
 	len += scnprintf(buf + len, PAGE_SIZE - len, "\n");
 
+
 	len += scnprintf(buf + len, PAGE_SIZE - len, "night_mode %s, level %d\n",
-					 mdnie->props.night ? "on" : "off",
-					 mdnie->props.night_level);
+			mdnie->props.night ? "on" : "off",
+			mdnie->props.night_level);
 
 #ifdef MDNIE_SELF_TEST
 	mdnie_coordinate_tune_test(mdnie);
@@ -908,41 +815,40 @@ static ssize_t mdnie_show(struct device *dev,
 }
 
 static ssize_t sensorRGB_show(struct device *dev,
-							  struct device_attribute *attr, char *buf)
+		struct device_attribute *attr, char *buf)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 
 	return sprintf(buf, "%d %d %d\n", mdnie->props.cur_wrgb[0],
-				   mdnie->props.cur_wrgb[1], mdnie->props.cur_wrgb[2]);
+			mdnie->props.cur_wrgb[1], mdnie->props.cur_wrgb[2]);
 }
 
 static ssize_t sensorRGB_store(struct device *dev,
-							   struct device_attribute *attr, const char *buf, size_t count)
+		struct device_attribute *attr, const char *buf, size_t count)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 	unsigned int white_red, white_green, white_blue;
 	int mdnie_mode = mdnie_current_state(mdnie), ret;
 
 	ret = sscanf(buf, "%d %d %d",
-				 &white_red, &white_green, &white_blue);
+		&white_red, &white_green, &white_blue);
 	if (ret < 0)
 		return ret;
 
-	dev_info(dev, "%s, white_r %d, white_g %d, white_b %d\n",
+	 dev_info(dev, "%s, white_r %d, white_g %d, white_b %d\n",
 			 __func__, white_red, white_green, white_blue);
 
 	if (mdnie_mode == MDNIE_SCENARIO_MODE &&
-		mdnie->props.mode == AUTO &&
+			mdnie->props.mode == AUTO &&
 		(mdnie->props.scenario == BROWSER_MODE ||
-		 mdnie->props.scenario == EBOOK_MODE))
-	{
-		rt_mutex_lock(&mdnie->lock);
+		 mdnie->props.scenario == EBOOK_MODE)) {
+		mutex_lock(&mdnie->lock);
 		mdnie->props.ssr_wrgb[0] = white_red;
 		mdnie->props.ssr_wrgb[1] = white_green;
 		mdnie->props.ssr_wrgb[2] = white_blue;
 		mdnie->props.update_sensorRGB = true;
 		scr_white_maptbl_init(mdnie, MDNIE_SENSOR_RGB_MAPTBL);
-		rt_mutex_unlock(&mdnie->lock);
+		mutex_unlock(&mdnie->lock);
 		mdnie_update(mdnie);
 	}
 
@@ -950,50 +856,49 @@ static ssize_t sensorRGB_store(struct device *dev,
 }
 
 static ssize_t whiteRGB_show(struct device *dev,
-							 struct device_attribute *attr, char *buf)
+		struct device_attribute *attr, char *buf)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 
 	return sprintf(buf, "%d %d %d\n", mdnie->props.def_wrgb_ofs[0],
-				   mdnie->props.def_wrgb_ofs[1], mdnie->props.def_wrgb_ofs[2]);
+			mdnie->props.def_wrgb_ofs[1], mdnie->props.def_wrgb_ofs[2]);
 }
 
 static ssize_t whiteRGB_store(struct device *dev,
-							  struct device_attribute *attr, const char *buf, size_t count)
+		struct device_attribute *attr, const char *buf, size_t count)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 	int wr_offset, wg_offset, wb_offset;
 	int ret;
 
 	ret = sscanf(buf, "%d %d %d",
-				 &wr_offset, &wg_offset, &wb_offset);
+		&wr_offset, &wg_offset, &wb_offset);
 	if (ret < 0)
 		return ret;
 
 	if (!IS_VALID_WRGB_OFS(wr_offset) ||
-		!IS_VALID_WRGB_OFS(wg_offset) ||
-		!IS_VALID_WRGB_OFS(wb_offset))
-	{
-		panel_err("%s, invalid offset %d %d %d\n",
-				  __func__, wr_offset, wg_offset, wb_offset);
-		return -EINVAL;
-	}
+			!IS_VALID_WRGB_OFS(wg_offset) ||
+			!IS_VALID_WRGB_OFS(wb_offset)) {
+		 panel_err("%s, invalid offset %d %d %d\n",
+				 __func__, wr_offset, wg_offset, wb_offset);
+		 return -EINVAL;
+	 }
 
-	dev_info(dev, "%s, wr_offset %d, wg_offset %d, wb_offset %d\n",
+	 dev_info(dev, "%s, wr_offset %d, wg_offset %d, wb_offset %d\n",
 			 __func__, wr_offset, wg_offset, wb_offset);
 
-	rt_mutex_lock(&mdnie->lock);
-	mdnie->props.def_wrgb_ofs[0] = wr_offset;
-	mdnie->props.def_wrgb_ofs[1] = wg_offset;
-	mdnie->props.def_wrgb_ofs[2] = wb_offset;
-	rt_mutex_unlock(&mdnie->lock);
-	mdnie_update(mdnie);
+	 mutex_lock(&mdnie->lock);
+	 mdnie->props.def_wrgb_ofs[0] = wr_offset;
+	 mdnie->props.def_wrgb_ofs[1] = wg_offset;
+	 mdnie->props.def_wrgb_ofs[2] = wb_offset;
+	 mutex_unlock(&mdnie->lock);
+	 mdnie_update(mdnie);
 
 	return count;
 }
 
 static ssize_t night_mode_show(struct device *dev,
-							   struct device_attribute *attr, char *buf)
+		struct device_attribute *attr, char *buf)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 
@@ -1001,7 +906,7 @@ static ssize_t night_mode_show(struct device *dev,
 }
 
 static ssize_t night_mode_store(struct device *dev,
-								struct device_attribute *attr, const char *buf, size_t count)
+		struct device_attribute *attr, const char *buf, size_t count)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 	int enable, level, ret;
@@ -1014,22 +919,21 @@ static ssize_t night_mode_store(struct device *dev,
 	if (level < 0 || level >= MAX_NIGHT_LEVEL)
 		return -EINVAL;
 
-	rt_mutex_lock(&mdnie->lock);
+	mutex_lock(&mdnie->lock);
 	mdnie->props.night = !!enable;
 	mdnie->props.night_level = level;
-	if (enable)
-	{
+	if (enable) {
 		/* MDNIE_NIGHT_MAPTBL update using MDNIE_ETC_NIGHT_MAPTBL */
 		mdnie_maptbl_init(mdnie, MDNIE_NIGHT_MAPTBL);
 	}
-	rt_mutex_unlock(&mdnie->lock);
+	mutex_unlock(&mdnie->lock);
 	mdnie_update(mdnie);
 
 	return count;
 }
 
 static ssize_t color_lens_show(struct device *dev,
-							   struct device_attribute *attr, char *buf)
+		struct device_attribute *attr, char *buf)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 
@@ -1037,7 +941,7 @@ static ssize_t color_lens_show(struct device *dev,
 }
 
 static ssize_t color_lens_store(struct device *dev,
-								struct device_attribute *attr, const char *buf, size_t count)
+		struct device_attribute *attr, const char *buf, size_t count)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 	int enable, level, color, ret;
@@ -1045,7 +949,7 @@ static ssize_t color_lens_store(struct device *dev,
 	ret = sscanf(buf, "%d %d %d", &enable, &color, &level);
 
 	dev_info(dev, "%s: color_lens_mode %s color %d level %d\n",
-			 __func__, enable ? "on" : "off", color, level);
+			__func__, enable ? "on" : "off", color, level);
 
 	if (ret < 0)
 		return ret;
@@ -1056,23 +960,23 @@ static ssize_t color_lens_store(struct device *dev,
 	if (level < 0 || level >= COLOR_LENS_LEVEL_MAX)
 		return -EINVAL;
 
-	rt_mutex_lock(&mdnie->lock);
+	mutex_lock(&mdnie->lock);
 	mdnie->props.color_lens = !!enable;
 	mdnie->props.color_lens_color = color;
 	mdnie->props.color_lens_level = level;
-	if (enable)
-	{
+	if (enable) {
 		/* MDNIE_COLOR_LENS_MAPTBL update using MDNIE_ETC_COLOR_LENS_MAPTBL */
 		mdnie_maptbl_init(mdnie, MDNIE_COLOR_LENS_MAPTBL);
 	}
-	rt_mutex_unlock(&mdnie->lock);
+	mutex_unlock(&mdnie->lock);
 	mdnie_update(mdnie);
 
 	return count;
 }
 
+
 static ssize_t hdr_show(struct device *dev,
-						struct device_attribute *attr, char *buf)
+		struct device_attribute *attr, char *buf)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 
@@ -1080,7 +984,7 @@ static ssize_t hdr_show(struct device *dev,
 }
 
 static ssize_t hdr_store(struct device *dev,
-						 struct device_attribute *attr, const char *buf, size_t count)
+		struct device_attribute *attr, const char *buf, size_t count)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 	unsigned int value;
@@ -1096,16 +1000,16 @@ static ssize_t hdr_store(struct device *dev,
 	if (value >= HDR_MAX)
 		return -EINVAL;
 
-	rt_mutex_lock(&mdnie->lock);
+	mutex_lock(&mdnie->lock);
 	mdnie->props.hdr = value;
-	rt_mutex_unlock(&mdnie->lock);
+	mutex_unlock(&mdnie->lock);
 	mdnie_update(mdnie);
 
 	return count;
 }
 
 static ssize_t light_notification_show(struct device *dev,
-									   struct device_attribute *attr, char *buf)
+		struct device_attribute *attr, char *buf)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 
@@ -1113,7 +1017,7 @@ static ssize_t light_notification_show(struct device *dev,
 }
 
 static ssize_t light_notification_store(struct device *dev,
-										struct device_attribute *attr, const char *buf, size_t count)
+		struct device_attribute *attr, const char *buf, size_t count)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 	unsigned int value;
@@ -1129,25 +1033,25 @@ static ssize_t light_notification_store(struct device *dev,
 	if (value >= LIGHT_NOTIFICATION_MAX)
 		return -EINVAL;
 
-	rt_mutex_lock(&mdnie->lock);
+	mutex_lock(&mdnie->lock);
 	mdnie->props.light_notification = value;
-	rt_mutex_unlock(&mdnie->lock);
+	mutex_unlock(&mdnie->lock);
 	mdnie_update(mdnie);
 
 	return count;
 }
 
 static ssize_t mdnie_ldu_show(struct device *dev,
-							  struct device_attribute *attr, char *buf)
+		struct device_attribute *attr, char *buf)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 
 	return sprintf(buf, "%d %d %d\n", mdnie->props.cur_wrgb[0],
-				   mdnie->props.cur_wrgb[1], mdnie->props.cur_wrgb[2]);
+			mdnie->props.cur_wrgb[1], mdnie->props.cur_wrgb[2]);
 }
 
 static ssize_t mdnie_ldu_store(struct device *dev,
-							   struct device_attribute *attr, const char *buf, size_t count)
+		struct device_attribute *attr, const char *buf, size_t count)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 	int value, ret;
@@ -1159,15 +1063,14 @@ static ssize_t mdnie_ldu_store(struct device *dev,
 	if (ret < 0)
 		return ret;
 
-	if (value < 0 || value >= MAX_LDU_MODE)
-	{
+	if (value < 0 || value >= MAX_LDU_MODE) {
 		pr_err("%s, out of range %d\n", __func__, value);
 		return -EINVAL;
 	}
 
-	rt_mutex_lock(&mdnie->lock);
+	mutex_lock(&mdnie->lock);
 	mdnie->props.ldu = value;
-	rt_mutex_unlock(&mdnie->lock);
+	mutex_unlock(&mdnie->lock);
 	mdnie_update(mdnie);
 
 	return count;
@@ -1175,7 +1078,7 @@ static ssize_t mdnie_ldu_store(struct device *dev,
 
 #ifdef CONFIG_SUPPORT_HMD
 static ssize_t hmt_color_temperature_show(struct device *dev,
-										  struct device_attribute *attr, char *buf)
+		struct device_attribute *attr, char *buf)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 
@@ -1183,7 +1086,7 @@ static ssize_t hmt_color_temperature_show(struct device *dev,
 }
 
 static ssize_t hmt_color_temperature_store(struct device *dev,
-										   struct device_attribute *attr, const char *buf, size_t count)
+		struct device_attribute *attr, const char *buf, size_t count)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 	unsigned int value;
@@ -1199,9 +1102,9 @@ static ssize_t hmt_color_temperature_store(struct device *dev,
 	if (value == mdnie->props.hmd)
 		return count;
 
-	rt_mutex_lock(&mdnie->lock);
+	mutex_lock(&mdnie->lock);
 	mdnie->props.hmd = value;
-	rt_mutex_unlock(&mdnie->lock);
+	mutex_unlock(&mdnie->lock);
 	mdnie_update(mdnie);
 
 	return count;
@@ -1209,38 +1112,38 @@ static ssize_t hmt_color_temperature_store(struct device *dev,
 #endif
 
 static ssize_t rgb_show(struct device *dev,
-						struct device_attribute *attr, char *buf)
+		struct device_attribute *attr, char *buf)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 
 	return snprintf(buf, PAGE_SIZE, "%d %d %d\n", mdnie->props.cur_wrgb[0],
-					mdnie->props.cur_wrgb[1], mdnie->props.cur_wrgb[2]);
+			mdnie->props.cur_wrgb[1], mdnie->props.cur_wrgb[2]);
 }
 
 static ssize_t rgb_store(struct device *dev,
-						 struct device_attribute *attr, const char *buf, size_t count)
+		struct device_attribute *attr, const char *buf, size_t count)
 {
 	struct mdnie_info *mdnie = dev_get_drvdata(dev);
 	unsigned int white_red, white_green, white_blue;
 	int ret;
 
 	ret = sscanf(buf, "%d %d %d",
-				 &white_red, &white_green, &white_blue);
+		&white_red, &white_green, &white_blue);
 	if (ret < 0)
 		return ret;
 
-	dev_info(dev, "%s, white_r %d, white_g %d, white_b %d\n",
+	 dev_info(dev, "%s, white_r %d, white_g %d, white_b %d\n",
 			 __func__, white_red, white_green, white_blue);
 
 	stop_samsung = !(white_red == 255 && white_green == 255 && white_blue == 255);
 
-	rt_mutex_lock(&mdnie->lock);
+	mutex_lock(&mdnie->lock);
 	mdnie->props.ssr_wrgb[0] = white_red;
 	mdnie->props.ssr_wrgb[1] = white_green;
 	mdnie->props.ssr_wrgb[2] = white_blue;
 	mdnie->props.update_sensorRGB = true;
 	scr_white_maptbl_init(mdnie, MDNIE_SENSOR_RGB_MAPTBL);
-	rt_mutex_unlock(&mdnie->lock);
+	mutex_unlock(&mdnie->lock);
 	mdnie_update(mdnie);
 
 	return count;
@@ -1268,48 +1171,45 @@ struct device_attribute mdnie_dev_attrs[] = {
 
 int mdnie_enable(struct mdnie_info *mdnie)
 {
-	if (IS_MDNIE_ENABLED(mdnie))
-	{
+	if (IS_MDNIE_ENABLED(mdnie)) {
 		return 0;
 	}
 
-	rt_mutex_lock(&mdnie->lock);
+	mutex_lock(&mdnie->lock);
 	mdnie->props.enable = 1;
 	mdnie->props.light_notification = LIGHT_NOTIFICATION_OFF;
-	rt_mutex_unlock(&mdnie->lock);
+	mutex_unlock(&mdnie->lock);
 	mdnie_update(mdnie);
-	rt_mutex_lock(&mdnie->lock);
+	mutex_lock(&mdnie->lock);
 	mdnie->props.trans_mode = TRANS_ON;
-	rt_mutex_unlock(&mdnie->lock);
+	mutex_unlock(&mdnie->lock);
 
 	return 0;
 }
 
 int mdnie_disable(struct mdnie_info *mdnie)
 {
-	if (!IS_MDNIE_ENABLED(mdnie))
-	{
+	if (!IS_MDNIE_ENABLED(mdnie)) {
 		return 0;
 	}
 
-	rt_mutex_lock(&mdnie->lock);
+	mutex_lock(&mdnie->lock);
 	mdnie->props.enable = 0;
 	mdnie->props.trans_mode = TRANS_OFF;
 	mdnie->props.update_sensorRGB = false;
-	rt_mutex_unlock(&mdnie->lock);
+	mutex_unlock(&mdnie->lock);
 
 	return 0;
 }
 
 static int fb_notifier_callback(struct notifier_block *self,
-								unsigned long event, void *data)
+				 unsigned long event, void *data)
 {
 	struct mdnie_info *mdnie;
 	struct fb_event *evdata = data;
 	int fb_blank;
 
-	switch (event)
-	{
+	switch (event) {
 	case FB_EVENT_BLANK:
 		break;
 	default:
@@ -1325,8 +1225,7 @@ static int fb_notifier_callback(struct notifier_block *self,
 	if (evdata->info->node != 0)
 		return 0;
 
-	if (fb_blank == FB_BLANK_UNBLANK)
-	{
+	if (fb_blank == FB_BLANK_UNBLANK) {
 		mdnie->props.light_notification = LIGHT_NOTIFICATION_OFF;
 		mdnie_update(mdnie);
 	}
@@ -1350,8 +1249,7 @@ static int mdnie_get_efs(char *filename, int *value)
 	int fsize = 0, nread, rc, ret = 0;
 	u8 buf[128];
 
-	if (!filename || !value)
-	{
+	if (!filename || !value) {
 		pr_err("%s invalid parameter\n", __func__);
 		return -EINVAL;
 	}
@@ -1360,8 +1258,7 @@ static int mdnie_get_efs(char *filename, int *value)
 	set_fs(KERNEL_DS);
 
 	filp = filp_open(filename, O_RDONLY, 0440);
-	if (IS_ERR(filp))
-	{
+	if (IS_ERR(filp)) {
 		ret = PTR_ERR(filp);
 		if (ret == -ENOENT)
 			pr_err("%s file(%s) not exist\n", __func__, filename);
@@ -1375,26 +1272,23 @@ static int mdnie_get_efs(char *filename, int *value)
 	if (filp->f_path.dentry && filp->f_path.dentry->d_inode)
 		fsize = filp->f_path.dentry->d_inode->i_size;
 
-	if (fsize == 0 || fsize > ARRAY_SIZE(buf))
-	{
+	if (fsize == 0 || fsize > ARRAY_SIZE(buf)) {
 		pr_err("%s invalid file(%s) size %d\n",
-			   __func__, filename, fsize);
+				__func__, filename, fsize);
 		ret = -EEXIST;
 		goto exit;
 	}
 
 	memset(buf, 0, sizeof(buf));
 	nread = vfs_read(filp, (char __user *)buf, fsize, &filp->f_pos);
-	if (nread != fsize)
-	{
+	if (nread != fsize) {
 		pr_err("%s failed to read (ret %d)\n", __func__, nread);
 		ret = -EIO;
 		goto exit;
 	}
 
 	rc = sscanf(buf, "%d %d %d", &value[0], &value[1], &value[2]);
-	if (rc != 3)
-	{
+	if (rc != 3) {
 		pr_err("%s failed to kstrtoint %d\n", __func__, rc);
 		ret = -EINVAL;
 		goto exit;
@@ -1411,42 +1305,38 @@ exit:
 }
 
 static int dpui_notifier_callback(struct notifier_block *self,
-								  unsigned long event, void *data)
+				 unsigned long event, void *data)
 {
 	struct mdnie_info *mdnie;
 	struct panel_device *panel;
 	struct panel_info *panel_data;
 	char tbuf[MAX_DPUI_VAL_LEN];
-	u8 coordinate[PANEL_COORD_LEN] = {
-		0,
-	};
-	int def_wrgb_ofs_org[3] = {
-		0,
-	};
+	u8 coordinate[PANEL_COORD_LEN] = { 0, };
+	int def_wrgb_ofs_org[3] = { 0, };
 	int size;
 
 	mdnie = container_of(self, struct mdnie_info, dpui_notif);
 	panel = container_of(mdnie, struct panel_device, mdnie);
 	panel_data = &panel->panel_data;
 
-	rt_mutex_lock(&mdnie->lock);
+	mutex_lock(&mdnie->lock);
 
 	resource_copy_by_name(panel_data, coordinate, "coordinate");
 	size = snprintf(tbuf, MAX_DPUI_VAL_LEN, "%d",
-					(coordinate[0] << 8) | coordinate[1]);
+			(coordinate[0] << 8) | coordinate[1]);
 	set_dpui_field(DPUI_KEY_WCRD_X, tbuf, size);
 	size = snprintf(tbuf, MAX_DPUI_VAL_LEN, "%d",
-					(coordinate[2] << 8) | coordinate[3]);
+			(coordinate[2] << 8) | coordinate[3]);
 	set_dpui_field(DPUI_KEY_WCRD_Y, tbuf, size);
 
 	size = snprintf(tbuf, MAX_DPUI_VAL_LEN, "%d",
-					mdnie->props.def_wrgb_ofs[0]);
+			mdnie->props.def_wrgb_ofs[0]);
 	set_dpui_field(DPUI_KEY_WOFS_R, tbuf, size);
 	size = snprintf(tbuf, MAX_DPUI_VAL_LEN, "%d",
-					mdnie->props.def_wrgb_ofs[1]);
+			mdnie->props.def_wrgb_ofs[1]);
 	set_dpui_field(DPUI_KEY_WOFS_G, tbuf, size);
 	size = snprintf(tbuf, MAX_DPUI_VAL_LEN, "%d",
-					mdnie->props.def_wrgb_ofs[2]);
+			mdnie->props.def_wrgb_ofs[2]);
 	set_dpui_field(DPUI_KEY_WOFS_B, tbuf, size);
 
 	mdnie_get_efs(MDNIE_WOFS_ORG_PATH, def_wrgb_ofs_org);
@@ -1458,7 +1348,7 @@ static int dpui_notifier_callback(struct notifier_block *self,
 	size = snprintf(tbuf, MAX_DPUI_VAL_LEN, "%d", def_wrgb_ofs_org[2]);
 	set_dpui_field(DPUI_KEY_WOFS_B_ORG, tbuf, size);
 
-	rt_mutex_unlock(&mdnie->lock);
+	mutex_unlock(&mdnie->lock);
 
 	return 0;
 }
@@ -1476,24 +1366,21 @@ int mdnie_probe(struct panel_device *panel, struct mdnie_tune *mdnie_tune)
 	struct mdnie_info *mdnie = &panel->mdnie;
 	int i, ret = 0;
 
-	if (unlikely(!mdnie_tune))
-	{
+	if (unlikely(!mdnie_tune)) {
 		pr_err("%s, mdnie_tune not exist\n", __func__);
 		return -ENODEV;
 	}
 
 	mdnie->class = class_create(THIS_MODULE, "mdnie");
-	if (IS_ERR_OR_NULL(mdnie->class))
-	{
+	if (IS_ERR_OR_NULL(mdnie->class)) {
 		pr_err("failed to create mdnie class\n");
 		ret = -EINVAL;
 		goto error0;
 	}
 
 	mdnie->dev = device_create(mdnie->class,
-							   &panel->lcd->dev, 0, &mdnie, "mdnie");
-	if (IS_ERR_OR_NULL(mdnie->dev))
-	{
+			&panel->lcd->dev, 0, &mdnie, "mdnie");
+	if (IS_ERR_OR_NULL(mdnie->dev)) {
 		pr_err("failed to create mdnie device\n");
 		ret = -EINVAL;
 		goto error1;
@@ -1501,7 +1388,7 @@ int mdnie_probe(struct panel_device *panel, struct mdnie_tune *mdnie_tune)
 
 	dev_set_drvdata(mdnie->dev, mdnie);
 
-	rt_mutex_lock(&mdnie->lock);
+	mutex_lock(&mdnie->lock);
 	mdnie->props.enable = 0;
 	mdnie->props.scenario = UI_MODE;
 	mdnie->props.mode = AUTO;
@@ -1543,10 +1430,9 @@ int mdnie_probe(struct panel_device *panel, struct mdnie_tune *mdnie_tune)
 	mdnie->scr_white_maptbl = mdnie_tune->scr_white_maptbl;
 	mdnie->nr_scr_white_maptbl = mdnie_tune->nr_scr_white_maptbl;
 
-	if (mdnie->nr_maptbl % MAX_MDNIE_MAPTBL)
-	{
+	if (mdnie->nr_maptbl % MAX_MDNIE_MAPTBL) {
 		pr_err("%s invalid size of maptbl %d\n",
-			   __func__, mdnie->nr_maptbl);
+				__func__, mdnie->nr_maptbl);
 		ret = -EINVAL;
 		goto error2;
 	}
@@ -1554,29 +1440,24 @@ int mdnie_probe(struct panel_device *panel, struct mdnie_tune *mdnie_tune)
 	mdnie->nr_reg = mdnie->nr_maptbl / MAX_MDNIE_MAPTBL;
 	mdnie_coordinate_tune(mdnie);
 
-	for (i = 0; i < mdnie->nr_etc_maptbl; i++)
-	{
+	for (i = 0; i < mdnie->nr_etc_maptbl; i++) {
 		mdnie->etc_maptbl[i].pdata = mdnie;
 		maptbl_init(&mdnie->etc_maptbl[i]);
 	}
 
-	for (i = 0; i < mdnie->nr_maptbl; i++)
-	{
+	for (i = 0; i < mdnie->nr_maptbl; i++) {
 		mdnie->maptbl[i].pdata = mdnie;
 		maptbl_init(&mdnie->maptbl[i]);
 	}
 
-	for (i = 0; i < mdnie->nr_scr_white_maptbl; i++)
-	{
+	for (i = 0; i < mdnie->nr_scr_white_maptbl; i++) {
 		mdnie->scr_white_maptbl[i].pdata = mdnie;
 		maptbl_init(&mdnie->scr_white_maptbl[i]);
 	}
 
-	for (i = 0; i < ARRAY_SIZE(mdnie_dev_attrs); i++)
-	{
+	for (i = 0; i < ARRAY_SIZE(mdnie_dev_attrs); i++) {
 		ret = device_create_file(mdnie->dev, &mdnie_dev_attrs[i]);
-		if (ret < 0)
-		{
+		if (ret < 0) {
 			dev_err(mdnie->dev, "%s, failed to add %s sysfs entries, %d\n",
 					__func__, mdnie_dev_attrs[i].attr.name, ret);
 			goto error2;
@@ -1587,14 +1468,14 @@ int mdnie_probe(struct panel_device *panel, struct mdnie_tune *mdnie_tune)
 #ifdef CONFIG_DISPLAY_USE_INFO
 	mdnie_register_dpui(mdnie);
 #endif
-	rt_mutex_unlock(&mdnie->lock);
+	mutex_unlock(&mdnie->lock);
 	mdnie_enable(mdnie);
 	dev_info(mdnie->dev, "registered successfully\n");
 
 	return 0;
 
 error2:
-	rt_mutex_unlock(&mdnie->lock);
+	mutex_unlock(&mdnie->lock);
 error1:
 	class_destroy(mdnie->class);
 error0:
@@ -1603,15 +1484,14 @@ error0:
 }
 
 static int attr_find_and_store(struct device *dev,
-							   const char *name, const char *buf, size_t size)
+	const char *name, const char *buf, size_t size)
 {
 	struct device_attribute *dev_attr;
 	struct kernfs_node *kn;
 	struct attribute *attr;
 
 	kn = kernfs_find_and_get(dev->kobj.sd, name);
-	if (!kn)
-	{
+	if (!kn) {
 		pr_info("%s: not found: %s\n", __func__, name);
 		return 0;
 	}
@@ -1628,7 +1508,7 @@ static int attr_find_and_store(struct device *dev,
 }
 
 ssize_t attr_store_for_each(struct class *cls,
-							const char *name, const char *buf, size_t size)
+	const char *name, const char *buf, size_t size)
 {
 	struct class_dev_iter iter;
 	struct device *dev;
@@ -1637,16 +1517,14 @@ ssize_t attr_store_for_each(struct class *cls,
 
 	if (!class)
 		return -EINVAL;
-	if (!class->p)
-	{
+	if (!class->p) {
 		WARN(1, "%s called for class '%s' before it was initialized",
-			 __func__, class->name);
+				__func__, class->name);
 		return -EINVAL;
 	}
 
 	class_dev_iter_init(&iter, class, NULL, NULL);
-	while ((dev = class_dev_iter_next(&iter)))
-	{
+	while ((dev = class_dev_iter_next(&iter))) {
 		error = attr_find_and_store(dev, name, buf, size);
 		if (error)
 			break;

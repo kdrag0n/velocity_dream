@@ -19,59 +19,58 @@
 
 typedef u8 mdnie_t;
 
-#define MDNIE_SYSFS_PREFIX "/sdcard/mdnie/"
+#define MDNIE_SYSFS_PREFIX      "/sdcard/mdnie/"
 
-#define IS_MDNIE_ENABLED(_mdnie_) (!!(_mdnie_)->props.enable)
-#define IS_DMB(idx) (idx == DMB_NORMAL_MODE)
-#define IS_SCENARIO(idx) (idx < SCENARIO_MAX && !(idx > VIDEO_NORMAL_MODE && idx < CAMERA_MODE))
-#define IS_ACCESSIBILITY(idx) (idx && idx < ACCESSIBILITY_MAX)
-#define IS_HBM(idx) (idx && idx < HBM_MAX)
-#define IS_HMD(idx) (idx && idx < HMD_MDNIE_MAX)
+#define IS_MDNIE_ENABLED(_mdnie_)	(!!(_mdnie_)->props.enable)
+#define IS_DMB(idx)			(idx == DMB_NORMAL_MODE)
+#define IS_SCENARIO(idx)		(idx < SCENARIO_MAX && !(idx > VIDEO_NORMAL_MODE && idx < CAMERA_MODE))
+#define IS_ACCESSIBILITY(idx)		(idx && idx < ACCESSIBILITY_MAX)
+#define IS_HBM(idx)			(idx && idx < HBM_MAX)
+#define IS_HMD(idx)			(idx && idx < HMD_MDNIE_MAX)
 
-#define SCENARIO_IS_VALID(idx) (IS_DMB(idx) || IS_SCENARIO(idx))
-#define IS_NIGHT_MODE_ON(idx) (idx == NIGHT_MODE_ON)
-#define IS_COLOR_LENS_ON(idx) (idx == COLOR_LENS_ON)
-#define IS_HDR(idx) (idx >= HDR_ON && idx < HDR_MAX)
-#define IS_LIGHT_NOTIFICATION(idx) (idx >= LIGHT_NOTIFICATION_ON && idx < LIGHT_NOTIFICATION_MAX)
+#define SCENARIO_IS_VALID(idx)		(IS_DMB(idx) || IS_SCENARIO(idx))
+#define IS_NIGHT_MODE_ON(idx)		(idx == NIGHT_MODE_ON)
+#define IS_COLOR_LENS_ON(idx)		(idx == COLOR_LENS_ON)
+#define IS_HDR(idx)			(idx >= HDR_ON && idx < HDR_MAX)
+#define IS_LIGHT_NOTIFICATION(idx)			(idx >= LIGHT_NOTIFICATION_ON && idx < LIGHT_NOTIFICATION_MAX)
 
-#define COLOR_OFFSET_FUNC(x, y, num, den, con) \
-	(((s64)y * 1024LL) + ((((s64)x * 1024LL) * ((s64)num)) / ((s64)den)) + ((s64)con * 1024LL))
-#define RECOGNIZE_REGION(compV, compH) \
-	((((compV) > 0) ? (0 + (((compH) > 0) ? 0 : 1)) : (2 + (((compH) < 0) ? 0 : 1))))
+#define COLOR_OFFSET_FUNC(x, y, num, den, con)  \
+	    (((s64)y * 1024LL) + ((((s64)x * 1024LL) * ((s64)num)) / ((s64)den)) + ((s64)con * 1024LL))
+#define RECOGNIZE_REGION(compV, compH)	\
+		((((compV) > 0) ? (0 + (((compH) > 0) ? 0 : 1)) : (2 + (((compH) < 0) ? 0 : 1))))
 
-#define MAPTBL_IDX_SCENARIO(_idx_) (MDNIE_SCENARIO_MAPTBL_START + (_idx_))
-#define MAPTBL_IDX_ACCESSIBILITY(_idx_) (MDNIE_ACCESSIBILITY_MAPTBL_START + (_idx_)-1)
+#define MAPTBL_IDX_SCENARIO(_idx_)	(MDNIE_SCENARIO_MAPTBL_START + (_idx_))
+#define MAPTBL_IDX_ACCESSIBILITY(_idx_)	(MDNIE_ACCESSIBILITY_MAPTBL_START + (_idx_) - 1)
 
-#define IS_BYPASS_MODE(_mdnie_) (((_mdnie_)->props.bypass >= BYPASS_ON) && ((_mdnie_)->props.bypass < BYPASS_MAX))
-#define IS_ACCESSIBILITY_MODE(_mdnie_) (((_mdnie_)->props.accessibility > ACCESSIBILITY_OFF) && ((_mdnie_)->props.accessibility < ACCESSIBILITY_MAX))
-#define IS_LIGHT_NOTIFICATION_MODE(_mdnie_) (((_mdnie_)->props.light_notification >= LIGHT_NOTIFICATION_ON) && ((_mdnie_)->props.light_notification < LIGHT_NOTIFICATION_MAX))
-#define IS_HDR_MODE(_mdnie_) (((_mdnie_)->props.hdr >= HDR_ON) && ((_mdnie_)->props.hdr < HDR_MAX))
-#define IS_HMD_MODE(_mdnie_) (((_mdnie_)->props.hmd >= HMD_MDNIE_ON) && ((_mdnie_)->props.hmd < HMD_MDNIE_MAX))
-#define IS_NIGHT_MODE(_mdnie_) (((_mdnie_)->props.night >= NIGHT_MODE_ON) && ((_mdnie_)->props.night < NIGHT_MODE_MAX))
-#define IS_COLOR_LENS_MODE(_mdnie_) (((_mdnie_)->props.color_lens >= COLOR_LENS_ON) && ((_mdnie_)->props.color_lens < COLOR_LENS_MAX))
-#define IS_HBM_MODE(_mdnie_) (((_mdnie_)->props.hbm >= HBM_ON) && ((_mdnie_)->props.hbm < HBM_MAX))
-#define IS_DMB_MODE(_mdnie_) ((_mdnie_)->props.scenario == DMB_NORMAL_MODE)
-#define IS_SCENARIO_MODE(_mdnie_) (((_mdnie_)->props.scenario >= UI_MODE && (_mdnie_)->props.scenario <= VIDEO_NORMAL_MODE) || \
-								   ((_mdnie_)->props.scenario >= CAMERA_MODE && (_mdnie_)->props.scenario < SCENARIO_MAX))
-#define IS_LDU_MODE(_mdnie_) (((_mdnie_)->props.ldu > LDU_MODE_OFF) && ((_mdnie_)->props.ldu < MAX_LDU_MODE))
+#define IS_BYPASS_MODE(_mdnie_)	(((_mdnie_)->props.bypass >= BYPASS_ON) && ((_mdnie_)->props.bypass < BYPASS_MAX))
+#define IS_ACCESSIBILITY_MODE(_mdnie_)	(((_mdnie_)->props.accessibility > ACCESSIBILITY_OFF) && ((_mdnie_)->props.accessibility < ACCESSIBILITY_MAX))
+#define IS_LIGHT_NOTIFICATION_MODE(_mdnie_)			(((_mdnie_)->props.light_notification >= LIGHT_NOTIFICATION_ON) && ((_mdnie_)->props.light_notification < LIGHT_NOTIFICATION_MAX))
+#define IS_HDR_MODE(_mdnie_)			(((_mdnie_)->props.hdr >= HDR_ON) && ((_mdnie_)->props.hdr < HDR_MAX))
+#define IS_HMD_MODE(_mdnie_)			(((_mdnie_)->props.hmd >= HMD_MDNIE_ON) && ((_mdnie_)->props.hmd < HMD_MDNIE_MAX))
+#define IS_NIGHT_MODE(_mdnie_)			(((_mdnie_)->props.night >= NIGHT_MODE_ON) && ((_mdnie_)->props.night < NIGHT_MODE_MAX))
+#define IS_COLOR_LENS_MODE(_mdnie_)		(((_mdnie_)->props.color_lens >= COLOR_LENS_ON) && ((_mdnie_)->props.color_lens < COLOR_LENS_MAX))
+#define IS_HBM_MODE(_mdnie_)			(((_mdnie_)->props.hbm >= HBM_ON) && ((_mdnie_)->props.hbm < HBM_MAX))
+#define IS_DMB_MODE(_mdnie_)			((_mdnie_)->props.scenario == DMB_NORMAL_MODE)
+#define IS_SCENARIO_MODE(_mdnie_)		(((_mdnie_)->props.scenario >= UI_MODE && (_mdnie_)->props.scenario <= VIDEO_NORMAL_MODE) || \
+		((_mdnie_)->props.scenario >= CAMERA_MODE && (_mdnie_)->props.scenario < SCENARIO_MAX))
+#define IS_LDU_MODE(_mdnie_)			(((_mdnie_)->props.ldu > LDU_MODE_OFF) && ((_mdnie_)->props.ldu < MAX_LDU_MODE))
 
-#define MAX_MDNIE_SCR_LEN (24)
+#define MAX_MDNIE_SCR_LEN	(24)
 #define MAX_COLOR (3)
 
-#define GET_MSB_8BIT(x) ((x >> 8) & (BIT(8) - 1))
-#define GET_LSB_8BIT(x) ((x >> 0) & (BIT(8) - 1))
+#define GET_MSB_8BIT(x)		((x >> 8) & (BIT(8) - 1))
+#define GET_LSB_8BIT(x)		((x >> 0) & (BIT(8) - 1))
 
-#define MIN_WRGB_OFS (-40)
-#define MAX_WRGB_OFS (0)
-#define IS_VALID_WRGB_OFS(_ofs_) (((int)(_ofs_) <= MAX_WRGB_OFS) && ((int)(_ofs_) >= (MIN_WRGB_OFS)))
+#define MIN_WRGB_OFS	(-40)
+#define MAX_WRGB_OFS	(0)
+#define IS_VALID_WRGB_OFS(_ofs_)	(((int)(_ofs_) <= MAX_WRGB_OFS) && ((int)(_ofs_) >= (MIN_WRGB_OFS)))
 
-#define MIN_WCRD_X (2930)
-#define MAX_WCRD_X (3060)
-#define MIN_WCRD_Y (3050)
-#define MAX_WCRD_Y (3260)
+#define MIN_WCRD_X	(2930)
+#define MAX_WCRD_X	(3060)
+#define MIN_WCRD_Y	(3050)
+#define MAX_WCRD_Y	(3260)
 
-enum
-{
+enum {
 	MDNIE_OFF_MODE,
 	MDNIE_BYPASS_MODE,
 	MDNIE_ACCESSIBILITY_MODE,
@@ -86,8 +85,7 @@ enum
 	MAX_MDNIE_MODE,
 };
 
-enum SCENARIO_MODE
-{
+enum SCENARIO_MODE {
 	DYNAMIC,
 	STANDARD,
 	NATURAL,
@@ -96,8 +94,7 @@ enum SCENARIO_MODE
 	MODE_MAX
 };
 
-enum SCENARIO
-{
+enum SCENARIO {
 	UI_MODE,
 	VIDEO_NORMAL_MODE,
 	CAMERA_MODE = 4,
@@ -119,15 +116,13 @@ enum SCENARIO
 	DMB_MODE_MAX
 };
 
-enum BYPASS
-{
+enum BYPASS {
 	BYPASS_OFF = 0,
 	BYPASS_ON,
 	BYPASS_MAX
 };
 
-enum ACCESSIBILITY
-{
+enum ACCESSIBILITY {
 	ACCESSIBILITY_OFF,
 	NEGATIVE,
 	COLOR_BLIND,
@@ -138,15 +133,13 @@ enum ACCESSIBILITY
 	ACCESSIBILITY_MAX
 };
 
-enum HBM
-{
+enum HBM {
 	HBM_OFF,
 	HBM_ON,
 	HBM_MAX
 };
 
-enum HMD_MODE
-{
+enum HMD_MODE {
 	HMD_MDNIE_OFF,
 	HMD_MDNIE_ON,
 	HMD_3000K = HMD_MDNIE_ON,
@@ -157,15 +150,13 @@ enum HMD_MODE
 	HMD_MDNIE_MAX
 };
 
-enum NIGHT_MODE
-{
+enum NIGHT_MODE {
 	NIGHT_MODE_OFF,
 	NIGHT_MODE_ON,
 	NIGHT_MODE_MAX
 };
 
-enum NIGHT_LEVEL
-{
+enum NIGHT_LEVEL {
 	NIGHT_LEVEL_6500K,
 	NIGHT_LEVEL_6100K,
 	NIGHT_LEVEL_5700K,
@@ -180,15 +171,13 @@ enum NIGHT_LEVEL
 	MAX_NIGHT_LEVEL,
 };
 
-enum COLOR_LENS
-{
+enum COLOR_LENS {
 	COLOR_LENS_OFF,
 	COLOR_LENS_ON,
 	COLOR_LENS_MAX
 };
 
-enum COLOR_LENS_COLOR
-{
+enum COLOR_LENS_COLOR {
 	COLOR_LENS_COLOR_BLUE,
 	COLOR_LENS_COLOR_AZURE,
 	COLOR_LENS_COLOR_CYAN,
@@ -204,8 +193,7 @@ enum COLOR_LENS_COLOR
 	COLOR_LENS_COLOR_MAX
 };
 
-enum COLOR_LENS_LEVEL
-{
+enum COLOR_LENS_LEVEL {
 	COLOR_LENS_LEVEL_20P,
 	COLOR_LENS_LEVEL_25P,
 	COLOR_LENS_LEVEL_30P,
@@ -218,8 +206,7 @@ enum COLOR_LENS_LEVEL
 	COLOR_LENS_LEVEL_MAX,
 };
 
-enum HDR
-{
+enum HDR {
 	HDR_OFF,
 	HDR_ON,
 	HDR_1 = HDR_ON,
@@ -230,15 +217,13 @@ enum HDR
 	HDR_MAX
 };
 
-enum LIGHT_NOTIFICATION
-{
+enum LIGHT_NOTIFICATION {
 	LIGHT_NOTIFICATION_OFF = 0,
 	LIGHT_NOTIFICATION_ON,
 	LIGHT_NOTIFICATION_MAX
 };
 
-enum
-{
+enum {
 	CCRD_PT_NONE,
 	CCRD_PT_1,
 	CCRD_PT_2,
@@ -252,8 +237,7 @@ enum
 	MAX_CCRD_PT,
 };
 
-enum LDU_MODE
-{
+enum LDU_MODE {
 	LDU_MODE_OFF,
 	LDU_MODE_1,
 	LDU_MODE_2,
@@ -263,8 +247,7 @@ enum LDU_MODE
 	MAX_LDU_MODE,
 };
 
-enum SCR_WHITE_MODE
-{
+enum SCR_WHITE_MODE {
 	SCR_WHITE_MODE_NONE,
 	SCR_WHITE_MODE_COLOR_COORDINATE,
 	SCR_WHITE_MODE_ADJUST_LDU,
@@ -272,15 +255,13 @@ enum SCR_WHITE_MODE
 	MAX_SCR_WHITE_MODE,
 };
 
-enum TRANS_MODE
-{
+enum TRANS_MODE {
 	TRANS_OFF,
 	TRANS_ON,
 	MAX_TRANS_MODE,
 };
 
-enum MDNIE_MAPTBL
-{
+enum MDNIE_MAPTBL {
 	/* SCENARIO */
 	MDNIE_SCENARIO_MAPTBL_START,
 	MDNIE_UI_MAPTBL = MDNIE_SCENARIO_MAPTBL_START,
@@ -331,15 +312,13 @@ enum MDNIE_MAPTBL
 	MAX_MDNIE_MAPTBL,
 };
 
-enum MDNIE_SEQ
-{
+enum MDNIE_SEQ {
 	MDNIE_SET_SEQ,
 	/* if necessary, add new seq */
 	MAX_MDNIE_SEQ,
 };
 
-enum
-{
+enum {
 	MDNIE_SCR_WHITE_NONE_MAPTBL,
 	MDNIE_COLOR_COORDINATE_MAPTBL,
 	MDNIE_ADJUST_LDU_MAPTBL,
@@ -347,8 +326,7 @@ enum
 	MAX_SCR_WHITE_MAPTBL,
 };
 
-enum
-{
+enum {
 	MDNIE_ETC_NONE_MAPTBL,
 	MDNIE_ETC_TRANS_MAPTBL,
 	MDNIE_ETC_NIGHT_MAPTBL,
@@ -356,22 +334,19 @@ enum
 	MAX_MDNIE_ETC_MAPTBL,
 };
 
-enum
-{
+enum {
 	WCRD_TYPE_ADAPTIVE,
 	WCRD_TYPE_D65,
 	MAX_WCRD_TYPE,
 };
 
-enum
-{
+enum {
 	H_LINE,
 	V_LINE,
 	MAX_CAL_LINE,
 };
 
-enum
-{
+enum {
 	RGB_00,
 	RGB_01,
 	RGB_10,
@@ -379,8 +354,7 @@ enum
 	MAX_RGB_PT,
 };
 
-enum
-{
+enum {
 	QUAD_1,
 	QUAD_2,
 	QUAD_3,
@@ -388,28 +362,24 @@ enum
 	MAX_QUAD,
 };
 
-struct cal_center
-{
+struct cal_center {
 	int x;
 	int y;
 	int thres;
 };
 
-struct cal_line
-{
+struct cal_line {
 	int num;
 	int den;
 	int con;
 };
 
-struct cal_coef
-{
+struct cal_coef {
 	int a, b, c, d;
 	int e, f, g, h;
 };
 
-struct mdnie_tune
-{
+struct mdnie_tune {
 	struct seqinfo *seqtbl;
 	u32 nr_seqtbl;
 	struct maptbl *maptbl;
@@ -431,8 +401,7 @@ struct mdnie_tune
 	u32 num_color_lens_level;
 };
 
-struct mdnie_properties
-{
+struct mdnie_properties {
 	u32 enable;
 	enum SCENARIO scenario;
 	enum SCENARIO_MODE mode;
@@ -479,28 +448,27 @@ struct mdnie_properties
 	u8 vtx[MAX_WCRD_TYPE][MAX_CCRD_PT][MAX_COLOR];
 
 	/* support */
-	unsigned support_ldu : 1;
-	unsigned support_trans : 1;
+	unsigned support_ldu:1;
+	unsigned support_trans:1;
 
 	/* dirty flag */
-	unsigned tuning : 1;			 /* tuning file loaded */
-	unsigned update_color_adj : 1;   /* color adjustement updated */
-	unsigned update_scenario : 1;	/* scenario updated */
-	unsigned update_color_coord : 1; /* color coordinate updated */
-	unsigned update_ldu : 1;		 /* adjust ldu updated */
-	unsigned update_sensorRGB : 1;   /* sensorRGB scr white updated */
+	unsigned tuning:1;				/* tuning file loaded */
+	unsigned update_color_adj:1;	/* color adjustement updated */
+	unsigned update_scenario:1;		/* scenario updated */
+	unsigned update_color_coord:1;	/* color coordinate updated */
+	unsigned update_ldu:1;			/* adjust ldu updated */
+	unsigned update_sensorRGB:1;	/* sensorRGB scr white updated */
 
 	/* mdnie tuning */
 #ifdef CONFIG_EXYNOS_DECON_LCD_TUNING
-	char tfilepath[128]; /* tuning file path */
+	char tfilepath[128];			/* tuning file path */
 #endif
 };
 
-struct mdnie_info
-{
+struct mdnie_info {
 	struct device *dev;
 	struct class *class;
-	struct rt_mutex lock;
+	struct mutex lock;
 	struct mdnie_properties props;
 	struct notifier_block fb_notif;
 #ifdef CONFIG_DISPLAY_USE_INFO
@@ -523,10 +491,7 @@ extern int mdnie_enable(struct mdnie_info *mdnie);
 extern int mdnie_disable(struct mdnie_info *mdnie);
 extern int mdnie_update(struct mdnie_info *mdnie);
 #else
-static inline int mdnie_probe(struct panel_device *panel, struct mdnie_tune *mdnie_tune)
-{
-	return 0;
-}
+static inline int mdnie_probe(struct panel_device *panel, struct mdnie_tune *mdnie_tune) { return 0; }
 static inline int mdnie_enable(struct mdnie_info *mdnie) { return 0; }
 static inline int mdnie_disable(struct mdnie_info *mdnie) { return 0; }
 static inline int mdnie_update(struct mdnie_info *mdnie) { return 0; }

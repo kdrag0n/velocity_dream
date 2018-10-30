@@ -34,161 +34,154 @@
 
 extern int dpp_log_level;
 
-#define DPP_MODULE_NAME "exynos-dpp"
+#define DPP_MODULE_NAME		"exynos-dpp"
 #if defined(CONFIG_SOC_EXYNOS8895)
-#define MAX_DPP_CNT 7
+#define MAX_DPP_CNT		7
 #else
-#define MAX_DPP_CNT 9
+#define MAX_DPP_CNT		9
 #endif
 
 /* about 1msec @ ACLK=630MHz */
-#define INIT_RCV_NUM 630000
+#define INIT_RCV_NUM		630000
 
-#define SRC_SIZE_MULTIPLE 1
-#define SRC_WIDTH_MIN 16
-#define SRC_WIDTH_MAX 65534
-#define SRC_HEIGHT_MIN 16
-#define SRC_HEIGHT_MAX 8190
-#define IMG_SIZE_MULTIPLE 1
-#define IMG_WIDTH_MIN 16
-#define IMG_WIDTH_MAX 4096
-#define IMG_HEIGHT_MIN 16
-#define IMG_HEIGHT_MAX 4096
-#define SRC_OFFSET_MULTIPLE 1
+#define SRC_SIZE_MULTIPLE	1
+#define SRC_WIDTH_MIN		16
+#define SRC_WIDTH_MAX		65534
+#define SRC_HEIGHT_MIN		16
+#define SRC_HEIGHT_MAX		8190
+#define IMG_SIZE_MULTIPLE	1
+#define IMG_WIDTH_MIN		16
+#define IMG_WIDTH_MAX		4096
+#define IMG_HEIGHT_MIN		16
+#define IMG_HEIGHT_MAX		4096
+#define SRC_OFFSET_MULTIPLE	1
 
-#define SCALED_WIDTH_MIN 16
-#define SCALED_WIDTH_MAX 4096
-#define SCALED_HEIGHT_MIN 16
-#define SCALED_HEIGHT_MAX 4096
-#define SCALED_SIZE_MULTIPLE 1
-#define SCALED_SIZE_MULTIPLE 1
+#define SCALED_WIDTH_MIN	16
+#define SCALED_WIDTH_MAX	4096
+#define SCALED_HEIGHT_MIN	16
+#define SCALED_HEIGHT_MAX	4096
+#define SCALED_SIZE_MULTIPLE	1
+#define SCALED_SIZE_MULTIPLE	1
 
-#define BLK_WIDTH_MIN 4
-#define BLK_WIDTH_MAX 4096
-#define BLK_HEIGHT_MIN 1
-#define BLK_HEIGHT_MAX 4096
-#define BLK_SIZE_MULTIPLE 1
-#define BLK_SIZE_MULTIPLE 1
+#define BLK_WIDTH_MIN		4
+#define BLK_WIDTH_MAX		4096
+#define BLK_HEIGHT_MIN		1
+#define BLK_HEIGHT_MAX		4096
+#define BLK_SIZE_MULTIPLE	1
+#define BLK_SIZE_MULTIPLE	1
 
-#define DST_SIZE_MULTIPLE 1
-#define DST_SIZE_WIDTH_MIN 16
-#define DST_SIZE_WIDTH_MAX 8190
-#define DST_SIZE_HEIGHT_MIN 16
-#define DST_SIZE_HEIGHT_MAX 8190
-#define DST_OFFSET_MULTIPLE 1
-#define DST_IMG_MULTIPLE 1
-#define DST_IMG_WIDTH_MIN 16
-#define DST_IMG_WIDTH_MAX 4096
-#define DST_IMG_HEIGHT_MIN 16
-#define DST_IMG_HEIGHT_MAX 4096
+#define DST_SIZE_MULTIPLE	1
+#define DST_SIZE_WIDTH_MIN	16
+#define DST_SIZE_WIDTH_MAX	8190
+#define DST_SIZE_HEIGHT_MIN	16
+#define DST_SIZE_HEIGHT_MAX	8190
+#define DST_OFFSET_MULTIPLE	1
+#define DST_IMG_MULTIPLE	1
+#define DST_IMG_WIDTH_MIN	16
+#define DST_IMG_WIDTH_MAX	4096
+#define DST_IMG_HEIGHT_MIN	16
+#define DST_IMG_HEIGHT_MAX	4096
 
-#define check_align(width, height, align_w, align_h) \
+#define check_align(width, height, align_w, align_h)\
 	(IS_ALIGNED(width, align_w) && IS_ALIGNED(height, align_h))
 #define is_normal(config) (DPP_FLIP_NONE)
-#define is_yuv(config) ((config->format >= DECON_PIXEL_FORMAT_NV16) && (config->format < DECON_PIXEL_FORMAT_MAX))
-#define is_yuv422(config) ((config->format >= DECON_PIXEL_FORMAT_NV16) && (config->format <= DECON_PIXEL_FORMAT_YVU422_3P))
-#define is_yuv420(config) ((config->format >= DECON_PIXEL_FORMAT_NV12) && (config->format <= DECON_PIXEL_FORMAT_YVU420M))
+#define is_yuv(config) ((config->format >= DECON_PIXEL_FORMAT_NV16) \
+			&& (config->format < DECON_PIXEL_FORMAT_MAX))
+#define is_yuv422(config) ((config->format >= DECON_PIXEL_FORMAT_NV16) \
+			&& (config->format <= DECON_PIXEL_FORMAT_YVU422_3P))
+#define is_yuv420(config) ((config->format >= DECON_PIXEL_FORMAT_NV12) \
+			&& (config->format <= DECON_PIXEL_FORMAT_YVU420M))
 #define is_vgr(dpp) ((dpp->id == IDMA_VGF0) || (dpp->id == IDMA_VGF1))
 #define is_wb(dpp) (dpp->id == ODMA_WB)
 
-#define dpp_err(fmt, ...)                         \
-	do                                            \
-	{                                             \
-		if (dpp_log_level >= 3)                   \
-		{                                         \
-			pr_err(pr_fmt(fmt), ##__VA_ARGS__);   \
-			exynos_ss_printk(fmt, ##__VA_ARGS__); \
-		}                                         \
+#define dpp_err(fmt, ...)							\
+	do {									\
+		if (dpp_log_level >= 3) {					\
+			pr_err(pr_fmt(fmt), ##__VA_ARGS__);			\
+			exynos_ss_printk(fmt, ##__VA_ARGS__);			\
+		}								\
 	} while (0)
 
-#define dpp_warn(fmt, ...)                        \
-	do                                            \
-	{                                             \
-		if (dpp_log_level >= 4)                   \
-		{                                         \
-			pr_warn(pr_fmt(fmt), ##__VA_ARGS__);  \
-			exynos_ss_printk(fmt, ##__VA_ARGS__); \
-		}                                         \
+#define dpp_warn(fmt, ...)							\
+	do {									\
+		if (dpp_log_level >= 4) {					\
+			pr_warn(pr_fmt(fmt), ##__VA_ARGS__);			\
+			exynos_ss_printk(fmt, ##__VA_ARGS__);			\
+		}								\
 	} while (0)
 
-#define dpp_info(fmt, ...)                       \
-	do                                           \
-	{                                            \
-		if (dpp_log_level >= 6)                  \
-			pr_info(pr_fmt(fmt), ##__VA_ARGS__); \
+#define dpp_info(fmt, ...)							\
+	do {									\
+		if (dpp_log_level >= 6)					\
+			pr_info(pr_fmt(fmt), ##__VA_ARGS__);			\
 	} while (0)
 
-#define dpp_dbg(fmt, ...)                        \
-	do                                           \
-	{                                            \
-		if (dpp_log_level >= 7)                  \
-			pr_info(pr_fmt(fmt), ##__VA_ARGS__); \
+#define dpp_dbg(fmt, ...)							\
+	do {									\
+		if (dpp_log_level >= 7)					\
+			pr_info(pr_fmt(fmt), ##__VA_ARGS__);			\
 	} while (0)
 
 /* TODO: This will be removed */
-struct dpp_size_constraints
-{
-	u32 src_mul_w;
-	u32 src_mul_h;
-	u32 src_w_min;
-	u32 src_w_max;
-	u32 src_h_min;
-	u32 src_h_max;
-	u32 img_mul_w;
-	u32 img_mul_h;
-	u32 img_w_min;
-	u32 img_w_max;
-	u32 img_h_min;
-	u32 img_h_max;
-	u32 blk_w_min;
-	u32 blk_w_max;
-	u32 blk_h_min;
-	u32 blk_h_max;
-	u32 blk_mul_w;
-	u32 blk_mul_h;
-	u32 src_mul_x;
-	u32 src_mul_y;
-	u32 sca_w_min;
-	u32 sca_w_max;
-	u32 sca_h_min;
-	u32 sca_h_max;
-	u32 sca_mul_w;
-	u32 sca_mul_h;
-	u32 dst_mul_w;
-	u32 dst_mul_h;
-	u32 dst_w_min;
-	u32 dst_w_max;
-	u32 dst_h_min;
-	u32 dst_h_max;
-	u32 dst_mul_x;
-	u32 dst_mul_y;
+struct dpp_size_constraints {
+	u32		src_mul_w;
+	u32		src_mul_h;
+	u32		src_w_min;
+	u32		src_w_max;
+	u32		src_h_min;
+	u32		src_h_max;
+	u32		img_mul_w;
+	u32		img_mul_h;
+	u32		img_w_min;
+	u32		img_w_max;
+	u32		img_h_min;
+	u32		img_h_max;
+	u32		blk_w_min;
+	u32		blk_w_max;
+	u32		blk_h_min;
+	u32		blk_h_max;
+	u32		blk_mul_w;
+	u32		blk_mul_h;
+	u32		src_mul_x;
+	u32		src_mul_y;
+	u32		sca_w_min;
+	u32		sca_w_max;
+	u32		sca_h_min;
+	u32		sca_h_max;
+	u32		sca_mul_w;
+	u32		sca_mul_h;
+	u32		dst_mul_w;
+	u32		dst_mul_h;
+	u32		dst_w_min;
+	u32		dst_w_max;
+	u32		dst_h_min;
+	u32		dst_h_max;
+	u32		dst_mul_x;
+	u32		dst_mul_y;
 };
 
-struct dpp_img_format
-{
-	u32 vgr;
-	u32 normal;
-	u32 flip;
-	u32 scale;
-	u32 format;
-	u32 afbc_en;
-	u32 yuv;
-	u32 yuv422;
-	u32 yuv420;
-	u32 wb;
+struct dpp_img_format {
+	u32		vgr;
+	u32		normal;
+	u32		flip;
+	u32		scale;
+	u32		format;
+	u32		afbc_en;
+	u32		yuv;
+	u32		yuv422;
+	u32		yuv420;
+	u32		wb;
 };
 
-enum dpp_cfg_err
-{
-	DPP_CFG_ERR_SCL_POS = (1 << 4),
-	DPP_CFG_ERR_SCALE_RATIO = (1 << 3),
-	DPP_CFG_ERR_ODD_SIZE = (1 << 2),
-	DPP_CFG_ERR_MAX_SIZE = (1 << 1),
-	DPP_CFG_ERR_MIN_SIZE = (1 << 0),
+enum dpp_cfg_err {
+	DPP_CFG_ERR_SCL_POS		= (1 << 4),
+	DPP_CFG_ERR_SCALE_RATIO	= (1 << 3),
+	DPP_CFG_ERR_ODD_SIZE		= (1 << 2),
+	DPP_CFG_ERR_MAX_SIZE		= (1 << 1),
+	DPP_CFG_ERR_MIN_SIZE		= (1 << 0),
 };
 
-enum dpp_csc_defs
-{
+enum dpp_csc_defs {
 	/* csc_type */
 	DPP_CSC_BT_601 = 0,
 	DPP_CSC_BT_709 = 1,
@@ -203,14 +196,12 @@ enum dpp_csc_defs
 	DPP_CSC_ID_DCI_P3 = 2,
 };
 
-enum dpp_state
-{
+enum dpp_state {
 	DPP_STATE_ON,
 	DPP_STATE_OFF,
 };
 
-struct dpp_resources
-{
+struct dpp_resources {
 	struct clk *gate;
 	void __iomem *regs;
 	void __iomem *dma_regs;
@@ -219,14 +210,12 @@ struct dpp_resources
 	int dma_irq;
 };
 
-struct dpp_debug
-{
+struct dpp_debug {
 	struct timer_list op_timer;
 	u32 done_count;
 };
 
-struct dpp_device
-{
+struct dpp_device {
 	int id;
 	enum dpp_state state;
 	struct device *dev;
@@ -237,11 +226,10 @@ struct dpp_device
 	struct decon_win_config *config;
 	spinlock_t slock;
 	spinlock_t dma_slock;
-	struct rt_mutex lock;
+	struct mutex lock;
 };
 
-struct dpp_params_info
-{
+struct dpp_params_info {
 	struct decon_frame src;
 	struct decon_frame dst;
 	struct decon_win_rect block;
@@ -358,7 +346,7 @@ static inline void dma_write_mask(u32 id, u32 reg_id, u32 val, u32 mask)
 #endif
 
 static inline void dpp_select_format(struct dpp_device *dpp,
-									 struct dpp_img_format *vi, struct dpp_params_info *p)
+			struct dpp_img_format *vi, struct dpp_params_info *p)
 {
 	struct decon_win_config *config = dpp->config;
 
@@ -391,7 +379,7 @@ u32 dpp_reg_get_irq_status(u32 id);
 void dpp_reg_clear_irq(u32 id, u32 irq);
 void dpp_reg_set_irq_clear_all(u32 id);
 void dpp_constraints_params(struct dpp_size_constraints *vc,
-							struct dpp_img_format *vi);
+					struct dpp_img_format *vi);
 int dpp_reg_wait_idle_status(int id, unsigned long timeout);
 void dma_reg_set_recovery_num(u32 id, u32 rcv_num);
 void dma_reg_set_afbc_sw_recovery(u32 id, u32 en);
@@ -400,14 +388,14 @@ void dma_reg_set_afbc_sw_recovery(u32 id, u32 en);
 void dma_reg_set_debug(u32 id);
 void dma_reg_set_common_debug(u32 id);
 
-#define DPP_WIN_CONFIG _IOW('P', 0, struct decon_win_config)
-#define DPP_STOP _IOW('P', 1, unsigned long)
-#define DPP_DUMP _IOW('P', 2, u32)
-#define DPP_WB_WAIT_FOR_FRAMEDONE _IOR('P', 3, u32)
-#define DPP_WAIT_IDLE _IOR('P', 4, unsigned long)
-#define DPP_SET_RECOVERY_NUM _IOW('P', 5, unsigned long)
-#define DPP_SET_SW_RECOVERY _IOW('P', 8, u32)
-#define DPP_GLOBAL_DMA_DUMP _IOW('P', 10, u32)
-#define DPP_CLEAR_IRQ _IOW('P', 11, u32)
+#define DPP_WIN_CONFIG			_IOW('P', 0, struct decon_win_config)
+#define DPP_STOP			_IOW('P', 1, unsigned long)
+#define DPP_DUMP			_IOW('P', 2, u32)
+#define DPP_WB_WAIT_FOR_FRAMEDONE	_IOR('P', 3, u32)
+#define DPP_WAIT_IDLE			_IOR('P', 4, unsigned long)
+#define DPP_SET_RECOVERY_NUM		_IOW('P', 5, unsigned long)
+#define DPP_SET_SW_RECOVERY		_IOW('P', 8, u32)
+#define DPP_GLOBAL_DMA_DUMP		_IOW('P', 10, u32)
+#define DPP_CLEAR_IRQ			_IOW('P', 11, u32)
 
 #endif /* __SAMSUNG_DPP_H__ */
