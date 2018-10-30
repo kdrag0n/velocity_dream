@@ -468,7 +468,7 @@ int fts_write_reg(struct fts_ts_info *info,
 	}
 #endif
 
-	rt_mutex_lock(&info->i2c_mutex);
+	mutex_lock(&info->i2c_mutex);
 
 	xfer_msg[0].addr = info->client->addr;
 	xfer_msg[0].len = num_com;
@@ -488,7 +488,7 @@ int fts_write_reg(struct fts_ts_info *info,
 		}
 	} while (--retry > 0);
 
-	rt_mutex_unlock(&info->i2c_mutex);
+	mutex_unlock(&info->i2c_mutex);
 
 	if (retry == 0) {
 		input_err(true, &info->client->dev, "%s: I2C read over retry limit\n", __func__);
@@ -531,7 +531,7 @@ int fts_read_reg(struct fts_ts_info *info, unsigned char *reg, int cnum,
 	}
 #endif
 
-	rt_mutex_lock(&info->i2c_mutex);
+	mutex_lock(&info->i2c_mutex);
 
 	xfer_msg[0].addr = info->client->addr;
 	xfer_msg[0].len = cnum;
@@ -556,7 +556,7 @@ int fts_read_reg(struct fts_ts_info *info, unsigned char *reg, int cnum,
 		}
 	} while (--retry > 0);
 
-	rt_mutex_unlock(&info->i2c_mutex);
+	mutex_unlock(&info->i2c_mutex);
 
 	if (retry == 0) {
 		input_err(true, &info->client->dev, "%s: I2C read over retry limit\n", __func__);
@@ -663,9 +663,9 @@ static int fts_write_to_string(struct fts_ts_info *info,
 		return -ENOMEM;
 	}
 
-	rt_mutex_lock(&info->i2c_mutex);
+	mutex_lock(&info->i2c_mutex);
 
-	/* msg[0], length 3*/
+/* msg[0], length 3*/
 	regAdd[0] = 0xB3;
 	regAdd[1] = 0x20;
 	regAdd[2] = 0x01;
@@ -709,7 +709,7 @@ static int fts_write_to_string(struct fts_ts_info *info,
 				"%s: string command is failed. ret: %d\n", __func__, ret);
 	}
 
-	rt_mutex_unlock(&info->i2c_mutex);
+	mutex_unlock(&info->i2c_mutex);
 	kfree(regAdd);
 
 	return ret;
@@ -2784,7 +2784,7 @@ static int fts_probe(struct i2c_client *client, const struct i2c_device_id *idp)
 	}
 
 	mutex_init(&info->device_mutex);
-	rt_mutex_init(&info->i2c_mutex);
+	mutex_init(&info->i2c_mutex);
 
 	retval = fts_init(info);
 	if (retval) {
@@ -2989,7 +2989,7 @@ err_register_input:
 #endif
 err_fts_init:
 	mutex_destroy(&info->device_mutex);
-	rt_mutex_destroy(&info->i2c_mutex);
+	mutex_destroy(&info->i2c_mutex);
 	if (info->board->support_dex) {
 		if (info->input_dev_pad)
 			input_free_device(info->input_dev_pad);
