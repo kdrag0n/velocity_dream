@@ -262,7 +262,6 @@ cmd_record_mcount =						\
 	fi;
 endif
 endif
-endif
 
 define rule_cc_o_c
 	$(call echo-cmd,checksrc) $(cmd_checksrc)			  \
