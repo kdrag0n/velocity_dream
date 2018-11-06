@@ -478,7 +478,7 @@ int fts_write_reg(struct fts_ts_info *info,
 
 	do {
 		ret = i2c_transfer(info->client->adapter, xfer_msg, 1);
-		if (ret < 0) {
+		if (unlikely(ret < 0)) {
 			info->comm_err_count++;
 			input_err(true, &info->client->dev,
 				"%s failed(%d). ret:%d, addr:%x, cnt:%d\n",
@@ -546,7 +546,7 @@ int fts_read_reg(struct fts_ts_info *info, unsigned char *reg, int cnum,
 
 	do {
 		ret = i2c_transfer(info->client->adapter, xfer_msg, 2);
-		if (ret < 0) {
+		if (unlikely(ret < 0)) {
 			info->comm_err_count++;
 			input_err(true, &info->client->dev,
 				"%s failed(%d). ret:%d, addr:%x, cnt:%d\n",
@@ -725,7 +725,7 @@ int fts_check_custom_library(struct fts_ts_info *info)
 
 	regAdd[2] = 0x7A;
 	ret = fts_read_reg(info, regAdd, 3, data, 15);
-	if (ret < 0) {
+	if (unlikely(ret < 0)) {
 		input_err(true, &info->client->dev, "%s: failed. ret: %d\n", __func__, ret);
 		goto out;
 	}
@@ -733,7 +733,7 @@ int fts_check_custom_library(struct fts_ts_info *info)
 	regAdd[1] = data[2];
 	regAdd[2] = data[1];
 	ret = fts_read_reg(info, regAdd, 3, data, 5);
-	if (ret < 0) {
+	if (unlikely(ret < 0)) {
 		input_err(true, &info->client->dev, "%s: failed. ret: %d\n", __func__, ret);
 		goto out;
 	}
@@ -753,7 +753,7 @@ int fts_check_custom_library(struct fts_ts_info *info)
 
 	if (info->use_sponge) {
 		ret = fts_write_to_string(info, &addr, &info->lowpower_flag, sizeof(info->lowpower_flag));
-		if (ret < 0)
+		if (unlikely(ret < 0))
 			input_err(true, &info->client->dev, "%s: failed. ret: %d\n", __func__, ret);
 	}
 
@@ -875,7 +875,7 @@ static void fts_wirelesscharger_mode(struct fts_ts_info *info)
 		regAdd[0] = 0xC1;
 
 	ret = fts_write_reg(info, regAdd, 2);
-	if (ret < 0)
+	if (unlikely(ret < 0))
 		input_err(true, &info->client->dev, "%s: failed. ret: %d\n", __func__, ret);
 }
 
@@ -907,7 +907,7 @@ int fts_systemreset(struct fts_ts_info *info, unsigned int delay)
 
 #ifdef FTS_SUPPORT_STRINGLIB
 	ret = info->fts_write_to_string(info, &addr, &info->lowpower_flag, sizeof(info->lowpower_flag));
-	if (ret < 0)
+	if (unlikely(ret < 0))
 		input_err(true, &info->client->dev, "%s: failed. ret: %d\n", __func__, ret);
 #endif
 	/* do not consider about sponge read/write fail after syste reset routine. */
@@ -935,7 +935,7 @@ static int fts_read_chip_id(struct fts_ts_info *info)
 	int ret;
 
 	ret = fts_read_reg(info, regAdd, 3, (unsigned char *)val, 7);
-	if (ret < 0) {
+	if (unlikely(ret < 0)) {
 		input_err(true, &info->client->dev, "%s: failed. ret: %d\n",
 			__func__, ret);
 		return ret;
@@ -961,7 +961,7 @@ int fts_read_analog_chip_id(struct fts_ts_info *info, unsigned char id)
 	switch(id) {
 	case ANALOG_ID_FTS8:
 		ret = fts_write_reg(info, &regAdd[0], 3);
-		if (ret < 0) {
+		if (unlikely(ret < 0)) {
 			input_err(true, &info->client->dev, "%s: failed. ret: %d\n",
 				__func__, ret);
 			return ret;
@@ -971,7 +971,7 @@ int fts_read_analog_chip_id(struct fts_ts_info *info, unsigned char id)
 		regAdd[1] = 0x00;
 		regAdd[2] = 0x84;
 		ret = fts_write_reg(info, &regAdd[0], 6);
-		if (ret < 0) {
+		if (unlikely(ret < 0)) {
 			input_err(true, &info->client->dev, "%s: failed. ret: %d\n",
 				__func__, ret);
 			return ret;
@@ -981,7 +981,7 @@ int fts_read_analog_chip_id(struct fts_ts_info *info, unsigned char id)
 		regAdd[1] = 0x00;
 		regAdd[2] = 0x04;
 		ret = fts_read_reg(info, regAdd, 3, (unsigned char *)val, 4);
-		if (ret < 0) {
+		if (unlikely(ret < 0)) {
 			input_err(true, &info->client->dev, "%s: failed. ret: %d\n",
 				__func__, ret);
 			return ret;
@@ -1001,7 +1001,7 @@ int fts_read_analog_chip_id(struct fts_ts_info *info, unsigned char id)
 		regAdd[2] = 0x89;
 		regAdd[3] = 0x14;
 		ret = fts_write_reg(info, &regAdd[0], 4);
-		if (ret < 0) {
+		if (unlikely(ret < 0)) {
 			input_err(true, &info->client->dev, "%s: failed. ret: %d\n",
 				__func__, ret);
 			return ret;
@@ -1011,7 +1011,7 @@ int fts_read_analog_chip_id(struct fts_ts_info *info, unsigned char id)
 		regAdd[1] = 0x20;
 		regAdd[2] = 0x03;
 		ret = fts_write_reg(info, &regAdd[0], 3);
-		if (ret < 0) {
+		if (unlikely(ret < 0)) {
 			input_err(true, &info->client->dev, "%s: failed. ret: %d\n",
 				__func__, ret);
 			return ret;
@@ -1021,7 +1021,7 @@ int fts_read_analog_chip_id(struct fts_ts_info *info, unsigned char id)
 		regAdd[1] = 0xF8;
 		regAdd[2] = 0x00;
 		ret = fts_read_reg(info, regAdd, 3, (unsigned char *)val, 4);
-		if (ret < 0) {
+		if (unlikely(ret < 0)) {
 			input_err(true, &info->client->dev, "%s: failed. ret: %d\n",
 				__func__, ret);
 			return ret;
@@ -1739,7 +1739,7 @@ static unsigned char fts_event_handler_type_b(struct fts_ts_info *info,
 				data[0] = data[1] = 0;
 
 				ret = info->fts_read_from_string(info, &addr, data, sizeof(data));
-				if (ret < 0)
+				if (unlikely(ret < 0))
 					input_err(true, &info->client->dev, "%s: i2c read sponge event failed\n", __func__);
 
 				temp = (data[1] << 8 | data[0]);
@@ -2178,7 +2178,7 @@ static irqreturn_t fts_interrupt_handler(int irq, void *handle)
 			return IRQ_NONE;
 		}
 
-		if (ret < 0) {
+		if (unlikely(ret < 0)) {
 			input_err(true, &info->client->dev, "%s: LPM: -ERESTARTSYS if interrupted, %d\n", __func__, ret);
 			return IRQ_NONE;
 		}
@@ -3475,7 +3475,7 @@ static void fts_reset_work(struct work_struct *work)
 #ifdef FTS_SUPPORT_STRINGLIB
 			ret = info->fts_write_to_string(info, &addr, data, sizeof(data));
 #endif
-			if (ret < 0)
+			if (unlikely(ret < 0))
 				input_err(true, &info->client->dev, "%s: failed. ret: %d\n", __func__, ret);
 			enable_irq(info->client->irq);
 		}
@@ -3507,7 +3507,7 @@ static void fts_read_info_work(struct work_struct *work)
 	}
 
 	ret = fts_get_tsp_test_result(info);
-	if (ret < 0)
+	if (unlikely(ret < 0))
 		input_err(true, &info->client->dev, "%s: failed to get result\n",
 			__func__);
 
@@ -3614,7 +3614,7 @@ static int fts_stop_device(struct fts_ts_info *info, bool lpmode)
 			int ret;
 
 			ret = info->fts_write_to_string(info, &addr, &info->lowpower_flag, sizeof(info->lowpower_flag));
-			if (ret < 0)
+			if (unlikely(ret < 0))
 				input_err(true, &info->client->dev, "%s: failed. ret: %d\n", __func__, ret);
 		}
 #endif
@@ -3708,7 +3708,7 @@ static int fts_start_device(struct fts_ts_info *info)
 		int ret;
 
 		ret = info->fts_write_to_string(info, &addr, &info->lowpower_flag, sizeof(info->lowpower_flag));
-		if (ret < 0)
+		if (unlikely(ret < 0))
 			input_err(true, &info->client->dev, "%s: failed. ret: %d\n", __func__, ret);
 	}
 #endif
