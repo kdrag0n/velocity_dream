@@ -3,6 +3,7 @@
 
 #include <linux/device.h>
 #include <linux/input/sec_cmd.h>
+#include <linux/pm_qos.h>
 #include <linux/wakelock.h>
 
 #define IRQ_FLAGS IRQF_TRIGGER_LOW | IRQF_ONESHOT | IRQF_PERF_CRITICAL
@@ -696,6 +697,8 @@ struct fts_ts_info {
 	int (*fts_read_from_string)(struct fts_ts_info *info, unsigned short *reg, unsigned char *data, int length);
 	int (*fts_write_to_string)(struct fts_ts_info *info, unsigned short *reg, unsigned char *data, int length);
 #endif
+
+	struct pm_qos_request pm_qos_req;
 };
 
 int fts_fw_update_on_probe(struct fts_ts_info *info);

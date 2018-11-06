@@ -41,6 +41,7 @@
 #include <linux/serio.h>
 #include <linux/init.h>
 #include <linux/pm.h>
+#include <linux/pm_qos.h>
 #include <linux/delay.h>
 #include <linux/ctype.h>
 #include <linux/gpio.h>
@@ -2183,6 +2184,9 @@ static irqreturn_t fts_interrupt_handler(int irq, void *handle)
 		}
 	}
 
+	/* prevent CPU from entering deep sleep */
+	pm_qos_update_request(&info->pm_qos_req, 100);
+
 	evtcount = 0;
 	fts_read_reg(info, &regAdd[0], 3, (unsigned char *)&evtcount, 2);
 
@@ -2199,6 +2203,7 @@ static irqreturn_t fts_interrupt_handler(int irq, void *handle)
 		fts_event_handler_type_b(info, info->data, evtcount);
 	}
 
+	pm_qos_update_request(&info->pm_qos_req, PM_QOS_DEFAULT_VALUE);
 	return IRQ_HANDLED;
 }
 
@@ -2958,6 +2963,9 @@ static int fts_probe(struct i2c_client *client, const struct i2c_device_id *idp)
 	}
 #endif
 
+	pm_qos_add_request(&info->pm_qos_req, PM_QOS_CPU_DMA_LATENCY,
+		PM_QOS_DEFAULT_VALUE);
+
 	return 0;
 
 #ifdef SEC_TSP_FACTORY_TEST
@@ -3086,6 +3094,8 @@ static int fts_remove(struct i2c_client *client)
 		info->board->led_power(info, false);
 #endif
 	info->shutdown_is_on_going = false;
+
+	pm_qos_remove_request(&info->pm_qos_req);
 	kfree(info);
 
 	return 0;
