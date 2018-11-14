@@ -1,15 +1,17 @@
 _RELEASE=0
 
 mkzip() {
+    [ $_RELEASE -eq 0 ] && vprefix=test
+    [ $_RELEASE -eq 1 ] && vprefix=v
+
     cp -f arch/arm64/boot/dtb{,2}.img flasher/
     cp -f arch/arm64/boot/Image flasher/
-    [ $_RELEASE -eq 0 ] && rm -f flasher/.rel
-    [ $_RELEASE -eq 1 ] && touch flasher/.rel
-    [ $_RELEASE -eq 0 ] && rf=""
-    [ $_RELEASE -eq 1 ] && rf=".rel"
 
-    fn="velocity_kernel.zip"
-    [ "x$1" != "x" ] && fn="$1"
+    [ $_RELEASE -eq 0 ] && echo "  • Installing test build $(cat out/.version)" >| flasher/version
+    [ $_RELEASE -eq 1 ] && echo "  • Installing version v$(cat out/.version)" >| flasher/version
+    echo "  • Built on $(date "+%a %b '%y at %H:%M")" >> flasher/version
+
+    fn="${1:-velocity_kernel.zip}"
     rm -f "$fn"
     rm -fr /tmp/velozip
     mkdir /tmp/velozip
@@ -136,5 +138,5 @@ upsfinish() {
 
 # Get a sorted list of the side of various objects in the kernel
 osize() {
-    find out -type f -name '*.o' ! -name 'built-in.o' ! -name 'vmlinux.o' -exec du -h --apparent-size {} + | sort -r -h | head -n 75
+    find out -type f -name '*.o' ! -name 'built-in.o' ! -name 'vmlinux.o' -exec du -h --apparent-size {} + | sort -r -h | head -n "${1:-75}"
 }
