@@ -136,5 +136,5 @@ upsfinish() {
 
 # Get a sorted list of the side of various objects in the kernel
 osize() {
-    find out -type f -name '*.o' ! -name 'built-in.o' ! -name 'vmlinux.o' -exec du -h --apparent-size {} + | sort -r -h | head -n 50
+    find out -type f -name '*.o' ! -name 'built-in.o' ! -name 'vmlinux.o' -exec du -h --apparent-size {} + | sort -r -h | head -n 75
 }
