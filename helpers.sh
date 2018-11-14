@@ -133,3 +133,8 @@ upsfinish() {
     git commit -sm "treewide: update to Linux 4.4.$(cat .upstream_ver)"
     rm -f .upstream_ver
 }
+
+# Get a sorted list of the side of various objects in the kernel
+osize() {
+    find out -type f -name '*.o' ! -name 'built-in.o' ! -name 'vmlinux.o' -exec du -h --apparent-size {} + | sort -r -h | head -n 50
+}
