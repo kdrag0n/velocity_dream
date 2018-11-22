@@ -563,13 +563,8 @@ static int sugov_init(struct cpufreq_policy *policy)
 		goto free_sg_policy;
 	}
 
-	tunables->up_rate_limit_us = DEFAULT_LATENCY_MULTIPLIER;
-	tunables->down_rate_limit_us = DEFAULT_LATENCY_MULTIPLIER;
-	lat = policy->cpuinfo.transition_latency / NSEC_PER_USEC;
-	if (lat) {
-		tunables->up_rate_limit_us *= lat;
-		tunables->down_rate_limit_us *= lat;
-	}
+	tunables->up_rate_limit_us = 500;
+	tunables->down_rate_limit_us = 20000;
 
 	/* init freqvar_boost */
 	schedtune_freqvar_boost_init(policy, &tunables->freqvar_boost);
