@@ -13,6 +13,9 @@ on init
 	# USB mass storage
 	mkdir /sys/kernel/config/usb_gadget/g1/functions/mass_storage.0
 
+	# ODM CSC support
+	symlink /system/odm /odm
+
 on boot
 	# ZRAM
 	write /sys/block/zram0/reset 1
