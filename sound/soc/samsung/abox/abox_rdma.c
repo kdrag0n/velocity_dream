@@ -380,8 +380,8 @@ static int abox_rdma_compr_set_param(struct platform_device *pdev,
 	int id = platform_data->id;
 	int ret;
 
-	dev_info(dev, "%s[%d] buffer: %p(%llu)\n", __func__, id,
-			runtime->buffer, runtime->buffer_size);
+	dev_info(dev, "%s[%d] buffer: %llu\n", __func__, id,
+			runtime->buffer_size);
 
 #ifdef COMPR_USE_FIXED_MEMORY
 	/* free memory allocated by ALSA */
