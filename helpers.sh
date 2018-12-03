@@ -129,5 +129,7 @@ upsfinish() {
 
 # Get a sorted list of the side of various objects in the kernel
 osize() {
-    find out -type f -name '*.o' ! -name 'built-in.o' ! -name 'vmlinux.o' -exec du -h --apparent-size {} + | sort -r -h | head -n "${1:-75}"
+    find "$kroot/out" -type f -name '*.o' ! -name 'built-in.o' ! -name 'vmlinux.o' \
+    	-exec du -h --apparent-size {} + | sort -r -h | head -n "${1:-75}" | \
+	perl -pe 's/([\d.]+[A-Z]?).+\/out\/(.+)\.o/$1\t$2.c/g'
 }
