@@ -40,8 +40,8 @@ rel() {
     mv .devversion .version
 
     # Pack release zip
-    mkdir -p releases
-    mkzip "releases/velocity_kernel-dream-r$(cat .relversion)-$(date +%Y%m%d).zip"
+    mkdir -p builds
+    mkzip "releases/VelocityKernel-s8-r$(cat .relversion).zip"
 
     _RELEASE=0
 }
@@ -63,7 +63,8 @@ dbuild() {
 }
 
 dzip() {
-    mkzip "betas/velocity_kernel-dream-b$(cat .version)-$(date +%Y%m%d).zip"
+    mkdir -p builds
+    mkzip "builds/VelocityKernel-s8-test$(cat .version).zip"
 }
 
 ktest() {
@@ -73,8 +74,7 @@ ktest() {
         adb reboot recovery
     fi
 
-    fn="velocity_kernel.zip"
-    [ "x$1" != "x" ] && fn="$1"
+    fn="${1:-velocity_kernel.zip}"
     adb wait-for-usb-recovery
     while [ ! -f $fn ]; do
         sleep 0.05
