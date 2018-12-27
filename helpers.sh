@@ -7,8 +7,8 @@ mkzip() {
     cp -f arch/arm64/boot/dtb{,2}.img flasher/
     cp -f arch/arm64/boot/Image flasher/
 
-    [ $_RELEASE -eq 0 ] && echo "  • Installing test build $(cat out/.version)" >| flasher/version
-    [ $_RELEASE -eq 1 ] && echo "  • Installing version v$(cat out/.version)" >| flasher/version
+    [ $_RELEASE -eq 0 ] && echo "  • Installing test build $(cat .version)" >| flasher/version
+    [ $_RELEASE -eq 1 ] && echo "  • Installing version v$(cat .version)" >| flasher/version
     echo "  • Built on $(date "+%a %b '%y at %H:%M")" >> flasher/version
 
     fn="${1:-velocity_kernel.zip}"
