@@ -383,8 +383,7 @@ static void update_c2_state(bool down, unsigned int cpu)
 
 static s64 get_next_event_time_us(unsigned int cpu)
 {
-	ktime_t sleep_length;
-	return ktime_to_us(tick_nohz_get_sleep_length(&sleep_length));
+	return ktime_to_us(tick_nohz_get_sleep_length());
 }
 
 static int is_cpus_busy(unsigned int target_residency,

@@ -99,42 +99,25 @@ static inline void tick_broadcast_exit(void)
 
 #ifdef CONFIG_NO_HZ_COMMON
 extern int tick_nohz_tick_stopped(void);
-extern void tick_nohz_idle_stop_tick(void);
-extern void tick_nohz_idle_retain_tick(void);
-extern void tick_nohz_idle_restart_tick(void);
 extern void tick_nohz_idle_enter(void);
 extern void tick_nohz_idle_exit(void);
 extern void tick_nohz_irq_exit(void);
-extern bool tick_nohz_idle_got_tick(void);
-extern ktime_t tick_nohz_get_sleep_length(ktime_t *delta_next);
+extern ktime_t tick_nohz_get_sleep_length(void);
 extern u64 get_cpu_idle_time_us(int cpu, u64 *last_update_time);
 extern u64 get_cpu_iowait_time_us(int cpu, u64 *last_update_time);
-
-static inline void tick_nohz_idle_stop_tick_protected(void)
-{
-	local_irq_disable();
-	tick_nohz_idle_stop_tick();
-	local_irq_enable();
-}
-
 #else /* !CONFIG_NO_HZ_COMMON */
 static inline int tick_nohz_tick_stopped(void) { return 0; }
-static inline void tick_nohz_idle_stop_tick(void) { }
-static inline void tick_nohz_idle_retain_tick(void) { }
-static inline void tick_nohz_idle_restart_tick(void) { }
 static inline void tick_nohz_idle_enter(void) { }
 static inline void tick_nohz_idle_exit(void) { }
-static inline bool tick_nohz_idle_got_tick(void) { return false; }
 
-static inline ktime_t tick_nohz_get_sleep_length(ktime_t *delta_next)
+static inline ktime_t tick_nohz_get_sleep_length(void)
 {
-	delta_next->tv64 = TICK_NSEC;
-	return *delta_next;
+	ktime_t len = { .tv64 = NSEC_PER_SEC/HZ };
+
+	return len;
 }
 static inline u64 get_cpu_idle_time_us(int cpu, u64 *unused) { return -1; }
 static inline u64 get_cpu_iowait_time_us(int cpu, u64 *unused) { return -1; }
-
-static inline void tick_nohz_idle_stop_tick_protected(void) { }
 #endif /* !CONFIG_NO_HZ_COMMON */
 
 #ifdef CONFIG_NO_HZ_FULL
