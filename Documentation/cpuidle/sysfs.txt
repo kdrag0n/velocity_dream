@@ -40,7 +40,6 @@ total 0
 -r--r--r-- 1 root root 4096 Feb  8 10:42 latency
 -r--r--r-- 1 root root 4096 Feb  8 10:42 name
 -r--r--r-- 1 root root 4096 Feb  8 10:42 power
--r--r--r-- 1 root root 4096 Feb  8 10:42 residency
 -r--r--r-- 1 root root 4096 Feb  8 10:42 time
 -r--r--r-- 1 root root 4096 Feb  8 10:42 usage
 
@@ -51,7 +50,6 @@ total 0
 -r--r--r-- 1 root root 4096 Feb  8 10:42 latency
 -r--r--r-- 1 root root 4096 Feb  8 10:42 name
 -r--r--r-- 1 root root 4096 Feb  8 10:42 power
--r--r--r-- 1 root root 4096 Feb  8 10:42 residency
 -r--r--r-- 1 root root 4096 Feb  8 10:42 time
 -r--r--r-- 1 root root 4096 Feb  8 10:42 usage
 
@@ -62,7 +60,6 @@ total 0
 -r--r--r-- 1 root root 4096 Feb  8 10:42 latency
 -r--r--r-- 1 root root 4096 Feb  8 10:42 name
 -r--r--r-- 1 root root 4096 Feb  8 10:42 power
--r--r--r-- 1 root root 4096 Feb  8 10:42 residency
 -r--r--r-- 1 root root 4096 Feb  8 10:42 time
 -r--r--r-- 1 root root 4096 Feb  8 10:42 usage
 
@@ -73,7 +70,6 @@ total 0
 -r--r--r-- 1 root root 4096 Feb  8 10:42 latency
 -r--r--r-- 1 root root 4096 Feb  8 10:42 name
 -r--r--r-- 1 root root 4096 Feb  8 10:42 power
--r--r--r-- 1 root root 4096 Feb  8 10:42 residency
 -r--r--r-- 1 root root 4096 Feb  8 10:42 time
 -r--r--r-- 1 root root 4096 Feb  8 10:42 usage
 --------------------------------------------------------------------------------
@@ -82,8 +78,6 @@ total 0
 * desc : Small description about the idle state (string)
 * disable : Option to disable this idle state (bool) -> see note below
 * latency : Latency to exit out of this idle state (in microseconds)
-* residency : Time after which a state becomes more effecient than any
-  shallower state (in microseconds)
 * name : Name of the idle state (string)
 * power : Power consumed while in this idle state (in milliwatts)
 * time : Total time spent in this idle state (in microseconds)
