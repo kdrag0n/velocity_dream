@@ -79,7 +79,7 @@ ui_print ​
 ui_print
 ui_print Galaxy S8/S8+ Exynos (SM-G95xF/FD/N)
 ui_print
-ui_print       Unified Kernel by kdragon
+ui_print       Unified Kernel by kdrag0n
 ui_print
 ui_print -------------------------------------
 ui_print
@@ -87,7 +87,6 @@ EOF
 
 # Unpack the installer
 [ "$zip" ] && {
-	print "Unpacking installer"
 	extract "$zip" "$tmp"
 }
 cd "$tmp"
@@ -112,17 +111,11 @@ cd "$tmp"
 	[ $match != 1 ] && abort "Unsupported device"
 }
 
-verstr="$(strings Image|grep ' SMP PREEMPT '|sed -E '/.+\#([0-9]+).+/d')"
-ver="$(echo $verstr|awk '{print $1}'|tr -d '#')"
-build="$(echo $verstr|awk '{print $4 " " $5 " " $6 ", " $9}')"
-
-if [ -f .rel ]; then
-	print "Installing version r$ver"
-	print "Built on $build"
-else
-	print "Installing development build $ver"
-	print "Built on $build at $(echo $verstr|awk '{print $7 " " $8}')"
-fi
+if [ -f version ]; then
+	while IFS='' read -r line || [[ -n "$line" ]]; do
+		print "$line";
+	done < version;
+fi;
 
 mount /system
 # mount /data
