@@ -72,14 +72,7 @@
  */
 #define L1_ENTRIES_MAX	512
 
-#if KERNEL_VERSION(4, 6, 0) > LINUX_VERSION_CODE
-static inline long gup_local(struct mm_struct *mm, uintptr_t start,
-			     unsigned long nr_pages, int write,
-			     struct page **pages)
-{
-	return get_user_pages(NULL, mm, start, nr_pages, write, 0, pages, NULL);
-}
-#elif KERNEL_VERSION(4, 9, 0) > LINUX_VERSION_CODE
+#if KERNEL_VERSION(4, 10, 0) > LINUX_VERSION_CODE
 static inline long gup_local(struct mm_struct *mm, uintptr_t start,
 			     unsigned long nr_pages, int write,
 			     struct page **pages)
@@ -92,23 +85,7 @@ static inline long gup_local(struct mm_struct *mm, uintptr_t start,
 	/* ExySp */
 	flags |= FOLL_CMA;
 
-	return get_user_pages_remote(NULL, mm, start, nr_pages, write, 0, pages,
-				     NULL);
-}
-#elif KERNEL_VERSION(4, 10, 0) > LINUX_VERSION_CODE
-static inline long gup_local(struct mm_struct *mm, uintptr_t start,
-			     unsigned long nr_pages, int write,
-			     struct page **pages)
-{
-	unsigned int flags = 0;
-
-	if (write)
-		flags |= FOLL_WRITE;
-
-	/* ExySp */
-	flags |= FOLL_CMA;
-
-	return get_user_pages_remote(NULL, mm, start, nr_pages, flags, pages,
+	return get_user_pages(NULL, mm, start, nr_pages, flags, pages,
 				     NULL);
 }
 #else
