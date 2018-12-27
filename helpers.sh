@@ -12,20 +12,11 @@ mkzip() {
     echo "  • Built on $(date "+%a %b '%y at %H:%M")" >> flasher/version
 
     fn="${1:-velocity_kernel.zip}"
-    rm -f "$fn"
-    rm -fr /tmp/velozip
-    mkdir /tmp/velozip
-    cp -fr flasher/META-INF /tmp/velozip
-    echo "  XZ      arc.xz"
     pushd flasher
-    tar c --owner=0 --group=0 $rf * | xz -zcT $(($(cat /proc/cpuinfo|grep processor|wc -l)-2)) > /tmp/velozip/arc.xz
-    popd
+    rm -f "../$fn"
     echo "  ZIP     $fn"
-    prpath="$(pwd)"
-    pushd /tmp/velozip
-    zip -0qr "$prpath/$fn" .
+    zip -r9 "../$fn" . > /dev/null
     popd
-    unset prpath
 }
 
 build_dtb() {
