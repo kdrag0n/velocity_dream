@@ -102,7 +102,7 @@ case $? in
     cp -af ramdisk.cpio ramdisk.cpio.orig
     ;;
   1 )  # Magisk patched
-    ui_print ui_print " • Magisk patched image detected"
+    ui_print ui_print "  • Magisk patched image detected"
     # Find SHA1 of stock boot image
     [ -z $SHA1 ] && SHA1=`./magiskboot --cpio ramdisk.cpio sha1 2>/dev/null`
     ./magiskboot --cpio ramdisk.cpio restore
@@ -118,7 +118,7 @@ esac
 # Ramdisk patches
 ##########################################################################################
 
-ui_print " • Patching ramdisk"
+ui_print "  • Patching ramdisk"
 
 ./magiskboot --cpio ramdisk.cpio \
 "add 750 init magiskinit" \

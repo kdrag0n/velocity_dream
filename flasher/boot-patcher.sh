@@ -15,7 +15,7 @@ mkdir "$ramdisk"
 
 print() {
 	if [ "$1" ]; then
-		echo -e "ui_print  • $1\nui_print" > "$console"
+		echo -e "ui_print   • $1\nui_print" > "$console"
 	else
 		echo -e "ui_print  \nui_print" > "$console"
 	fi

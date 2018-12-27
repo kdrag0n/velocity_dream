@@ -34,7 +34,7 @@ setup_flashable
 # Detection
 ##########################################################################################
 
-ui_print " • Magisk v$MAGISK_VER Installer"
+ui_print "  • Magisk v$MAGISK_VER Installer"
 
 is_mounted /data || mount /data || is_mounted /cache || mount /cache || abort " ! Unable to mount partitions"
 mount_partitions
@@ -62,7 +62,7 @@ remove_system_su
 # Environment
 ##########################################################################################
 
-ui_print " • Preparing to install"
+ui_print "  • Preparing to install"
 
 check_data
 
@@ -92,7 +92,7 @@ cd $MAGISKBIN
 # Source the boot patcher
 . ./boot_patch.sh "$BOOTIMAGE"
 
-ui_print " • Flashing new boot image"
+ui_print "  • Flashing new boot image"
 flash_image new-boot.img "$BOOTIMAGE" || abort "! Insufficient partition size"
 rm -f new-boot.img
 
@@ -113,5 +113,5 @@ cd /
 $BOOTMODE || recovery_cleanup
 rm -rf $TMPDIR
 
-ui_print " • Done"
+ui_print "  • Done"
 exit 0
