@@ -77,6 +77,7 @@
 #include <linux/compiler.h>
 #include <linux/sysctl.h>
 #include <linux/cpu_input_boost.h>
+#include <linux/state_notifier.h>
 
 #include <asm/pgtable.h>
 #include <asm/pgalloc.h>
@@ -1786,9 +1787,16 @@ long _do_fork(unsigned long clone_flags,
 	int trace = 0;
 	long nr;
 
+#ifdef CONFIG_CPU_INPUT_BOOST
 	/* Boost CPU to the max for 1250 ms when userspace launches an app */
-	if (is_zygote_pid(current->pid))
+	if (is_zygote_pid(current->pid) && !state_suspended &&
+		time_before(jiffies, last_input_time + msecs_to_jiffies(150))) {
 		cpu_input_boost_kick_max(1250);
+#if defined(CONFIG_CPU_INPUT_BOOST_DEBUG) || defined(CONFIG_DEVFREQ_BOOST_DEBUG)
+		pr_info("fork: kicked max cpu boost for 1250 ms for app launch\n");
+#endif
+	}
+#endif
 
 	/*
 	 * Determine whether and which event to report to ptracer.  When
