@@ -7,8 +7,8 @@
 #
 ##########################################################################################
 
-MAGISK_VER="17.2"
-MAGISK_VER_CODE=17200
+MAGISK_VER="18.0"
+MAGISK_VER_CODE=18000
 
 # Detect whether in boot mode
 [ -z $BOOTMODE ] && BOOTMODE=false
@@ -16,10 +16,10 @@ $BOOTMODE || ps | grep zygote | grep -qv grep && BOOTMODE=true
 $BOOTMODE || ps -A | grep zygote | grep -qv grep && BOOTMODE=true
 
 # Presets
+MAGISKTMP=/sbin/.magisk
 [ -z $NVBASE ] && NVBASE=/data/adb
 [ -z $MAGISKBIN ] && MAGISKBIN=$NVBASE/magisk
 [ -z $IMG ] && IMG=$NVBASE/magisk.img
-[ -z $MOUNTPATH ] && MOUNTPATH=/sbin/.core/img
 
 # Bootsigner related stuff
 BOOTSIGNERCLASS=a.a
@@ -88,13 +88,14 @@ mount_partitions() {
   fi
   [ -z $SLOT ] || ui_print "- Current boot slot: $SLOT"
 
+  ui_print "- Mounting /system, /vendor"
   [ -f /system/build.prop ] || is_mounted /system || mount -o ro /system 2>/dev/null
   if ! is_mounted /system && ! [ -f /system/build.prop ]; then
     SYSTEMBLOCK=`find_block system$SLOT`
     mount -t ext4 -o ro $SYSTEMBLOCK /system
   fi
-  [ -f /system/build.prop ] || is_mounted /system || abort " ! Cannot mount /system"
-  cat /proc/mounts | grep -E '/dev/root|/system_root' >/dev/null && SYSTEM_ROOT=true || SYSTEM_ROOT=false
+  [ -f /system/build.prop ] || is_mounted /system || abort "! Cannot mount /system"
+  grep -qE '/dev/root|/system_root' /proc/mounts && SYSTEM_ROOT=true || SYSTEM_ROOT=false
   if [ -f /system/init ]; then
     SYSTEM_ROOT=true
     mkdir /system_root 2>/dev/null
@@ -108,7 +109,7 @@ mount_partitions() {
       VENDORBLOCK=`find_block vendor$SLOT`
       mount -t ext4 -o ro $VENDORBLOCK /vendor
     fi
-    is_mounted /vendor || abort " ! Cannot mount /vendor"
+    is_mounted /vendor || abort "! Cannot mount /vendor"
   fi
 }
 
@@ -125,7 +126,10 @@ get_flags() {
     fi
   fi
   if [ -z $KEEPFORCEENCRYPT ]; then
-    if [ "`getprop ro.crypto.state`" = "encrypted" ]; then
+    grep ' /data ' /proc/mounts | grep -q 'dm-' && FDE=true || FDE=false
+    [ -d /data/unencrypted ] && FBE=true || FBE=false
+    # No data access means unable to decrypt in recovery
+    if $FDE || $FBE || ! $DATA; then
       KEEPFORCEENCRYPT=true
       ui_print "- Encrypted data detected, keep forceencrypt"
     else
@@ -136,7 +140,7 @@ get_flags() {
 
 grep_cmdline() {
   local REGEX="s/^$1=//p"
-  sed -E 's/ +/\n/g' /proc/cmdline | sed -n "$REGEX" 2>/dev/null
+  cat /proc/cmdline | tr '[:space:]' '\n' | sed -n "$REGEX" 2>/dev/null
 }
 
 grep_prop() {
@@ -150,7 +154,7 @@ grep_prop() {
 getvar() {
   local VARNAME=$1
   local VALUE=
-  VALUE=`grep_prop $VARNAME /.backup/.magisk /data/.magisk /cache/.magisk /system/.magisk`
+  VALUE=`grep_prop $VARNAME /sbin/.magisk/config /.backup/.magisk /data/.magisk /cache/.magisk`
   [ ! -z $VALUE ] && eval $VARNAME=\$VALUE
 }
 
@@ -234,6 +238,18 @@ patch_dtbo_image() {
   return 1
 }
 
+sign_chromeos() {
+  ui_print "- Signing ChromeOS boot image"
+
+  echo > empty
+  ./chromeos/futility vbutil_kernel --pack new-boot.img.signed \
+  --keyblock ./chromeos/kernel.keyblock --signprivate ./chromeos/kernel_data_key.vbprivk \
+  --version 1 --vmlinuz new-boot.img --config empty --arch arm --bootloader empty --flags 0x1
+
+  rm -f empty new-boot.img
+  mv new-boot.img.signed new-boot.img
+}
+
 is_mounted() {
   cat /proc/mounts | grep -q " `readlink -f $1` " 2>/dev/null
   return $?
@@ -241,7 +257,7 @@ is_mounted() {
 
 remove_system_su() {
   if [ -f /system/bin/su -o -f /system/xbin/su ] && [ ! -f /su/bin/su ]; then
-    ui_print "  • Removing system installed root"
+    ui_print "- Removing system installed root"
     mount -o rw,remount /system
     # SuperSU
     if [ -e /system/bin/.ext/.su ]; then
@@ -291,9 +307,9 @@ check_data() {
 }
 
 setup_bb() {
-  if [ -x /sbin/.core/busybox/busybox ]; then
+  if [ -x $MAGISKTMP/busybox/busybox ]; then
     # Make sure this path is in the front
-    echo $PATH | grep -q '^/sbin/.core/busybox' || export PATH=/sbin/.core/busybox:$PATH
+    echo $PATH | grep -q "^$MAGISKTMP/busybox" || export PATH=$MAGISKTMP/busybox:$PATH
   elif [ -x $TMPDIR/bin/busybox ]; then
     # Make sure this path is in the front
     echo $PATH | grep -q "^$TMPDIR/bin" || export PATH=$TMPDIR/bin:$PATH
@@ -307,11 +323,11 @@ setup_bb() {
 }
 
 boot_actions() {
-  if [ ! -d /sbin/.core/mirror/bin ]; then
-    mkdir -p /sbin/.core/mirror/bin
-    mount -o bind $MAGISKBIN /sbin/.core/mirror/bin
+  if [ ! -d $MAGISKTMP/mirror/bin ]; then
+    mkdir -p $MAGISKTMP/mirror/bin
+    mount -o bind $MAGISKBIN $MAGISKTMP/mirror/bin
   fi
-  MAGISKBIN=/sbin/.core/mirror/bin
+  MAGISKBIN=$MAGISKTMP/mirror/bin
   setup_bb
 }
 
@@ -332,7 +348,7 @@ recovery_cleanup() {
   [ -z $OLD_PATH ] || export PATH=$OLD_PATH
   [ -z $OLD_LD_LIB ] || export LD_LIBRARY_PATH=$OLD_LD_LIB
   [ -z $OLD_LD_PRE ] || export LD_PRELOAD=$OLD_LD_PRE
-  ui_print "  • Cleaning up"
+  ui_print "- Unmounting partitions"
   umount -l /system_root 2>/dev/null
   umount -l /system 2>/dev/null
   umount -l /vendor 2>/dev/null
@@ -377,14 +393,14 @@ request_zip_size_check() {
 check_filesystem() {
   curSizeM=`wc -c < $1`
   curSizeM=$((curSizeM / 1048576))
-  local DF=`df -P $2 | grep $2`
+  local DF=`df -Pk $2 | grep $2`
   curUsedM=`echo $DF | awk '{ print int($3 / 1024) }'`
   curFreeM=`echo $DF | awk '{ print int($4 / 1024) }'`
 }
 
 mount_snippet() {
   MAGISKLOOP=`$MAGISKBIN/magisk imgtool mount $IMG $MOUNTPATH`
-  is_mounted $MOUNTPATH || abort " ! $IMG mount failed..."
+  is_mounted $MOUNTPATH || abort "! $IMG mount failed..."
 }
 
 mount_magisk_img() {
@@ -417,5 +433,15 @@ unmount_magisk_img() {
   if [ $curSizeM -gt $newSizeM ]; then
     ui_print "- Shrinking $IMG to ${newSizeM}M"
     $MAGISKBIN/magisk imgtool resize $IMG $newSizeM >&2
+  fi
+}
+
+find_manager_apk() {
+  APK=/data/adb/magisk.apk
+  [ -f $APK ] || APK=/data/magisk/magisk.apk
+  [ -f $APK ] || APK=/data/app/com.topjohnwu.magisk*/*.apk
+  if [ ! -f $APK ]; then
+    DBAPK=`magisk --sqlite "SELECT value FROM strings WHERE key='requester'" | cut -d= -f2`
+    [ -z "$DBAPK" ] || APK=/data/app/$DBAPK*/*.apk
   fi
 }
