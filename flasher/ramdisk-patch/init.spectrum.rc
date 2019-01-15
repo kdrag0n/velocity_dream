@@ -26,7 +26,7 @@ on property:persist.spectrum.profile=0
 	write /sys/power/cpuhotplug/enabled 1
 
 	# CPU: cores/cluster utilization
-	write /dev/cpuset/foreground/cpus 0-2,4-7
+	write /dev/cpuset/foreground/cpus 0-3,7
 	write /dev/cpuset/foreground/boost/cpus 4-7
 	write /dev/cpuset/top-app/cpus 0-7
 
@@ -50,7 +50,7 @@ on property:persist.spectrum.profile=1
 	write /sys/power/cpuhotplug/enabled 0
 
 	# CPU: cores/cluster utilization
-	write /dev/cpuset/foreground/cpus 0-2,4-7
+	write /dev/cpuset/foreground/cpus 0-3,7
 	write /dev/cpuset/foreground/boost/cpus 4-7
 	write /dev/cpuset/top-app/cpus 0-7
 
@@ -78,9 +78,9 @@ on property:persist.spectrum.profile=2
 	write /sys/power/cpuhotplug/enabled 1
 
 	# CPU: cores/cluster utilization
-	write /dev/cpuset/foreground/cpus 0-2,4-5
+	write /dev/cpuset/foreground/cpus 0-3
 	write /dev/cpuset/foreground/boost/cpus 4-5
-	write /dev/cpuset/top-app/cpus 0-5
+	write /dev/cpuset/top-app/cpus 0-6
 
 # Gaming
 on property:persist.spectrum.profile=3
